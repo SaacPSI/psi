@@ -109,11 +109,13 @@ namespace Microsoft.Psi.Serialization
 
         internal static SerializationHandler<T> Create<T>(ISerializer<T> serializer, string name, int id)
         {
-            if (typeof(T).IsValueType)
-            {
-                return new StructHandler<T>(serializer, name, id);
-            }
-            else
+#pragma warning disable SA1005 // Single line comments should begin with single space
+            //if (typeof(T).IsValueType)
+            //{
+            //    return new StructHandler<T>(serializer, name, id);
+            //}
+            //else
+#pragma warning restore SA1005 // Single line comments should begin with single space
             {
                 return new RefHandler<T>(serializer, name, id);
             }

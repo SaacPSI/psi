@@ -28,11 +28,13 @@ namespace Microsoft.Psi.Serialization
             {
                 this.IsClearRequired = innerSerializer.IsClearRequired.Value;
             }
+#pragma warning disable SA1005 // Single line comments should begin with single space
 
-            if (typeof(T).IsValueType)
-            {
-                throw new InvalidOperationException("Cannot use a class handler with a value type serializer");
-            }
+            //if (typeof(T).IsValueType)
+            //{
+            //    throw new InvalidOperationException("Cannot use a class handler with a value type serializer");
+            //}
+#pragma warning restore SA1005 // Single line comments should begin with single space
         }
 
         // serialize the ref envelope (null, duplicate reference, circular reference, polymorphism), before serializing the object itself
