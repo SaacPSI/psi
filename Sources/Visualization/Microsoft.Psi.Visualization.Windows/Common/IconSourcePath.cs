@@ -347,5 +347,15 @@ namespace Microsoft.Psi.Visualization
         /// Go to time button.
         /// </summary>
         public const string GoToTime = IconPrefix + "go-to-time.png";
+
+        /// <summary>
+        /// Plugins button.
+        /// </summary>
+        public const string Plugins = IconPrefix + "plugins.png";
+
+        /// <summary>
+        /// Plugin settings.
+        /// </summary>
+        public const string PluginsSettings = IconPrefix + "plugin-settings.png";
     }
 }

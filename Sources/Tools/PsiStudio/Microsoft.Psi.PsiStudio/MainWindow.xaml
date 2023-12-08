@@ -230,6 +230,12 @@
                 <Button Command="{Binding EditSettingsCommand}" ToolTip="Edit Settings" AutomationProperties.Name="EditSettingsButton">
                     <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=settings.png}"/>
                 </Button>
+                <Button Command="{Binding PluginsWindowCommand}" ToolTip="Plugins management" AutomationProperties.Name="PluginsWindowButton">
+                    <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=settings.png}"/>
+                </Button>
+                <Button Command="{Binding EditPluginSettingsCommand}" ToolTip="Edit Plugin Settings" AutomationProperties.Name="EditPluginSettingsButton">
+                    <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=settings.png}"/>
+                </Button>
             </ToolBar>
         </ToolBarTray>
 

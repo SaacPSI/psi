@@ -128,6 +128,13 @@ namespace Microsoft.Psi.PsiStudio
         public List<string> AdditionalAssemblies { get; set; } = new ();
 
         /// <summary>
+        /// Gets or sets the list of add-in plugins.
+        /// </summary>
+        [XmlArray("AdditionalPlugins")]
+        [XmlArrayItem("Plugins")]
+        public List<string> AdditionalPlugins { get; set; } = new ();
+
+        /// <summary>
         /// Gets or sets the set of type mappings.
         /// </summary>
         [XmlIgnore]

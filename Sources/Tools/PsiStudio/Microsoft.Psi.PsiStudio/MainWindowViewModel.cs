@@ -12,6 +12,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
@@ -59,6 +60,7 @@ namespace Microsoft.Psi.PsiStudio
         private List<LayoutInfo> availableLayouts = new ();
         private List<AnnotationSchema> annotationSchemas;
         private LayoutInfo currentLayout = null;
+        private PsiStudioPipelineAssemblyHandler psiStudioPipelineInstance = null;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -123,6 +125,8 @@ namespace Microsoft.Psi.PsiStudio
         private RelayCommand closedCommand;
         private RelayCommand exitCommand;
         private RelayCommand editSettingsCommand;
+        private RelayCommand pluginsWindowCommand;
+        private RelayCommand editPluginSettingsCommand;
         private RelayCommand viewAdditionalAssemblyLoadErrorLogCommand;
 
         /// <summary>
@@ -215,7 +219,20 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand PlayPauseCommand
             => this.playPauseCommand ??= new RelayCommand(
-                () => VisualizationContext.Instance.PlayOrPause(),
+                async () =>
+                {
+                    if (this.psiStudioPipelineInstance != null)
+                    {
+                        this.psiStudioPipelineInstance.RunPipeline();
+                        Thread.Sleep(1000);
+                        await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelineInstance.GetDatasetPath(), false, false);
+                        this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelineInstance.GetDatasetPath());
+                    }
+                    else
+                    {
+                        VisualizationContext.Instance.PlayOrPause();
+                    }
+                },
                 () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live);
 
         /// <summary>
@@ -690,6 +707,22 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand EditSettingsCommand
             => this.editSettingsCommand ??= new RelayCommand(() => this.EditSettings());
+
+        /// <summary>
+        /// Gets the edit pipeline command.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand PluginsWindowCommand
+            => this.pluginsWindowCommand ??= new RelayCommand(() => this.PluginsWindow());
+
+        /// <summary>
+        /// Gets the edit pipeline command.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand EditPluginSettingsCommand
+            => this.editPluginSettingsCommand ??= new RelayCommand(() => this.EditPluginSettings());
 
         /// <summary>
         /// Gets the command for viewing the error log for additional assembly load.
@@ -1306,6 +1339,24 @@ namespace Microsoft.Psi.PsiStudio
                         null)
                         .ShowDialog();
                 }
+            }
+        }
+
+        private void PluginsWindow()
+        {
+            var psiStudioPipelineWindow = new PipelineWindow(Application.Current.MainWindow, this.Settings.AdditionalPlugins);
+
+            if (psiStudioPipelineWindow.ShowDialog() == true)
+            {
+                this.psiStudioPipelineInstance = psiStudioPipelineWindow.PsiStudioPipeline;
+            }
+        }
+
+        private void EditPluginSettings()
+        {
+            if (this.psiStudioPipelineInstance != null)
+            {
+                this.psiStudioPipelineInstance.ShowWindow();
             }
         }
 
