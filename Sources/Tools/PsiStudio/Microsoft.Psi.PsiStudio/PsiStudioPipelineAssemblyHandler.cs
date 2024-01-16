@@ -4,6 +4,7 @@
 namespace Microsoft.Psi.PsiStudio
 {
     using System;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Windows;
@@ -21,8 +22,9 @@ namespace Microsoft.Psi.PsiStudio
         private MethodInfo runPipelineMethod;
         private MethodInfo stopPipelineMethod;
         private MethodInfo layoutMethod;
+        private MethodInfo annotationMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
@@ -30,6 +32,7 @@ namespace Microsoft.Psi.PsiStudio
             this.runPipelineMethod = runPipelineMethod;
             this.stopPipelineMethod = stopPipelineMethod;
             this.layoutMethod = layoutMethod;
+            this.annotationMethod = annotationMethod;
             this.IsRunning = false;
             this.Name = name;
         }
@@ -100,11 +103,10 @@ namespace Microsoft.Psi.PsiStudio
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo layoutMethod = GetMethod(classDefinition, "GetLayout", true);
 
-                // Generate the name of the assembly from the filename.
-                string name = assemblyPath.Substring(assemblyPath.LastIndexOfAny(['\\', '/']));
-                name = name.Remove(name.IndexOf('.'));
+                // Make a late-bound call to an instance method of the object.
+                MethodInfo annotationMethod = GetMethod(classDefinition, "GetAnnotation", true);
 
-                return new PsiStudioPipelineAssemblyHandler(instance, name, windowMethod, storeMethod, runMethod, stopMethod, layoutMethod);
+                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), windowMethod, storeMethod, runMethod, stopMethod, layoutMethod, annotationMethod);
             }
             catch (Exception ex)
             {
@@ -167,6 +169,24 @@ namespace Microsoft.Psi.PsiStudio
             if (this.layoutMethod != null)
             {
                 var ret = this.layoutMethod.Invoke(this.assemblyInstance, null);
+                if (ret != null)
+                {
+                    return (string)ret;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Get the annotation configuration.
+        /// </summary>
+        /// <returns>Return the json of the layout or null, if the annotation is not created.</returns>
+        public string GetAnnotation()
+        {
+            if (this.annotationMethod != null)
+            {
+                var ret = this.annotationMethod.Invoke(this.assemblyInstance, null);
                 if (ret != null)
                 {
                     return (string)ret;

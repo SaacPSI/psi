@@ -47,6 +47,17 @@ namespace Microsoft.Psi.Data.Annotations
         public List<AnnotationAttributeSchema> AttributeSchemas { get; private set; }
 
         /// <summary>
+        /// Loads an annotation schema from stream.
+        /// </summary>
+        /// <param name="stream">The full path and filename of the annotation schema to load.</param>
+        /// <returns>The requested annotation schema.</returns>
+        public static AnnotationSchema LoadFromStream(string stream)
+        {
+            using var streamReader = new StringReader(stream);
+            return LoadFrom(streamReader);
+        }
+
+        /// <summary>
         /// Loads an annotation schema from disk.
         /// </summary>
         /// <param name="fileName">The full path and filename of the annotation schema to load.</param>
@@ -191,7 +202,7 @@ namespace Microsoft.Psi.Data.Annotations
             }
         }
 
-        private static AnnotationSchema LoadFrom(StreamReader streamReader)
+        private static AnnotationSchema LoadFrom(TextReader streamReader)
         {
             var reader = new JsonTextReader(streamReader);
             var serializer = JsonSerializer.Create(JsonSerializerSettings);

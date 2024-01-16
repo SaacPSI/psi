@@ -10,6 +10,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
@@ -224,7 +225,7 @@ namespace Microsoft.Psi.PsiStudio
                     if (this.psiStudioPipelineInstance != null)
                     {
                         this.psiStudioPipelineInstance.RunPipeline();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(1000); // TODO: really better, should be triggered when all stores in the pipeline are initialised.
                         await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelineInstance.GetDatasetPath(), false, false);
                         this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelineInstance.GetDatasetPath());
                     }
@@ -1354,24 +1355,52 @@ namespace Microsoft.Psi.PsiStudio
                     return;
                 }
 
-                string layoutStream = this.psiStudioPipelineInstance.GetLayout();
-                if (layoutStream != null)
+                // **** LAYOUT ****
+                // Checking if there is an existing layout to activate.
+                if (this.userConsentObtained.ContainsKey(this.psiStudioPipelineInstance.Name) == false)
                 {
-                    // Attempt to open the current layout. User consent may be needed for layouts containing scripts.
-                    this.userConsentObtained.TryGetValue(this.CurrentLayout.Name, out bool userConsent);
-                    bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelineInstance.Name, ref userConsent);
-                    if (!success)
+                    // Checking if the assembly have a default layout.
+                    string layoutStream = this.psiStudioPipelineInstance.GetLayout();
+                    if (layoutStream != null)
                     {
-                        // If the load failed, load the default layout instead.  This method
-                        // may have been initially called by the SelectedItemChanged handler
-                        // from the Layouts combobox, and it's bound to CurrentLayout, so
-                        // we need to asynchronously dispatch a message to change its value
-                        // back rather than set it directly here.
-                        Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[0]);
+                        // Attempt to open the layout. User consent may be needed for layouts containing scripts.
+                        this.userConsentObtained.TryGetValue(this.psiStudioPipelineInstance.Name, out bool userConsent);
+                        bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelineInstance.Name, ref userConsent);
+                        if (!success)
+                        {
+                            // If the load failed, load the default layout instead.  This method
+                            // may have been initially called by the SelectedItemChanged handler
+                            // from the Layouts combobox, and it's bound to CurrentLayout, so
+                            // we need to asynchronously dispatch a message to change its value
+                            // back rather than set it directly here.
+                            Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[0]);
+                        }
+                        else
+                        {
+                            this.userConsentObtained[this.psiStudioPipelineInstance.Name] = userConsent;
+                            this.CurrentLayout.Name = this.psiStudioPipelineInstance.Name;
+                            this.CurrentLayout.Path = Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelineInstance.Name + ".plo");
+                        }
                     }
-                    else
+                }
+                else
+                {
+                    Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[this.availableLayouts.FindLastIndex(x => x.Name == this.psiStudioPipelineInstance.Name)]);
+                }
+
+                // **** ANNOTATION ****
+                // Checking if there is an existing annotation.
+                if (this.annotationSchemas.Exists(x => x.Name == this.psiStudioPipelineInstance.Name) == false)
+                {
+                    // Checking if the assembly have a default annotation.
+                    string annotationStream = this.psiStudioPipelineInstance.GetAnnotation();
+                    if (annotationStream != null)
                     {
-                        this.userConsentObtained[this.psiStudioPipelineInstance.Name] = userConsent;
+                        AnnotationSchema annotationSchema = AnnotationSchema.LoadFromStream(annotationStream);
+                        if (annotationSchema != null)
+                        {
+                            this.annotationSchemas.Add(annotationSchema);
+                        }
                     }
                 }
             }
