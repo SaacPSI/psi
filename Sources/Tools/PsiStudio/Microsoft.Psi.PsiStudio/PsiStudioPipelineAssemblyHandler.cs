@@ -20,16 +20,24 @@ namespace Microsoft.Psi.PsiStudio
         private MethodInfo getDatasetMethod;
         private MethodInfo runPipelineMethod;
         private MethodInfo stopPipelineMethod;
+        private MethodInfo layoutMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
             this.getDatasetMethod = getDatasetMethod;
             this.runPipelineMethod = runPipelineMethod;
             this.stopPipelineMethod = stopPipelineMethod;
+            this.layoutMethod = layoutMethod;
             this.IsRunning = false;
+            this.Name = name;
         }
+
+        /// <summary>
+        /// Gets a the name of the pipeline assembly.
+        /// </summary>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the pipeline is running or not.
@@ -50,7 +58,7 @@ namespace Microsoft.Psi.PsiStudio
                 Assembly assembly = Assembly.LoadFrom(assemblyPath.Trim());
 
                 // Check if only one class is public.
-                if (Enumerable.Count(assembly.ExportedTypes) != 1)
+                if (Enumerable.Count(assembly.ExportedTypes) != 2)
                 {
                     throw new Exception("The assembly require to have only one public class.");
                 }
@@ -89,7 +97,14 @@ namespace Microsoft.Psi.PsiStudio
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo storeMethod = GetMethod(classDefinition, "GetDataset");
 
-                return new PsiStudioPipelineAssemblyHandler(instance, windowMethod, storeMethod, runMethod, stopMethod);
+                // Make a late-bound call to an instance method of the object.
+                MethodInfo layoutMethod = GetMethod(classDefinition, "GetLayout", true);
+
+                // Generate the name of the assembly from the filename.
+                string name = assemblyPath.Substring(assemblyPath.LastIndexOfAny(['\\', '/']));
+                name = name.Remove(name.IndexOf('.'));
+
+                return new PsiStudioPipelineAssemblyHandler(instance, name, windowMethod, storeMethod, runMethod, stopMethod, layoutMethod);
             }
             catch (Exception ex)
             {
@@ -143,10 +158,28 @@ namespace Microsoft.Psi.PsiStudio
             this.stopPipelineMethod.Invoke(this.assemblyInstance, null);
         }
 
-        private static MethodInfo GetMethod(Type classDefinition, string methodName)
+        /// <summary>
+        /// Get the layout configuration.
+        /// </summary>
+        /// <returns>Return the json of the layout or null, if the layout is not created.</returns>
+        public string GetLayout()
+        {
+            if (this.layoutMethod != null)
+            {
+                var ret = this.layoutMethod.Invoke(this.assemblyInstance, null);
+                if (ret != null)
+                {
+                    return (string)ret;
+                }
+            }
+
+            return null;
+        }
+
+        private static MethodInfo GetMethod(Type classDefinition, string methodName, bool canBeNull = false)
         {
             MethodInfo method = classDefinition.GetMethod(methodName);
-            if (method == null)
+            if (method == null && canBeNull == false)
             {
                 throw new Exception($"Failed to instanciate {methodName} from {classDefinition.Name}.");
             }

@@ -1349,6 +1349,31 @@ namespace Microsoft.Psi.PsiStudio
             if (psiStudioPipelineWindow.ShowDialog() == true)
             {
                 this.psiStudioPipelineInstance = psiStudioPipelineWindow.PsiStudioPipeline;
+                if (this.psiStudioPipelineInstance == null)
+                {
+                    return;
+                }
+
+                string layoutStream = this.psiStudioPipelineInstance.GetLayout();
+                if (layoutStream != null)
+                {
+                    // Attempt to open the current layout. User consent may be needed for layouts containing scripts.
+                    this.userConsentObtained.TryGetValue(this.CurrentLayout.Name, out bool userConsent);
+                    bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelineInstance.Name, ref userConsent);
+                    if (!success)
+                    {
+                        // If the load failed, load the default layout instead.  This method
+                        // may have been initially called by the SelectedItemChanged handler
+                        // from the Layouts combobox, and it's bound to CurrentLayout, so
+                        // we need to asynchronously dispatch a message to change its value
+                        // back rather than set it directly here.
+                        Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[0]);
+                    }
+                    else
+                    {
+                        this.userConsentObtained[this.psiStudioPipelineInstance.Name] = userConsent;
+                    }
+                }
             }
         }
 

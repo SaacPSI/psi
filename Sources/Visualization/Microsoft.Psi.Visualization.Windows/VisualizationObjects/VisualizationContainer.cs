@@ -189,6 +189,67 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
             => this.deleteVisualizationPanelCommand ??= new RelayCommand<VisualizationPanel>(o => this.RemovePanel(o));
 
         /// <summary>
+        /// Loads a visualization layout from the given stream.
+        /// </summary>
+        /// <param name="stream">Stream of visualization layout.</param>
+        /// <param name="layoutName">The name of the layout.</param>
+        /// <param name="currentVisualizationContainer">The current visualization container that will be replaced with the newly loaded one.</param>
+        /// <returns>The new visualization container.</returns>
+        public static VisualizationContainer LoadFromStream(string stream, string layoutName, VisualizationContainer currentVisualizationContainer)
+        {
+            var serializer = JsonSerializer.Create(
+                new JsonSerializerSettings()
+                {
+                    Formatting = Formatting.Indented,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                    SerializationBinder = new SafeSerializationBinder(),
+                    PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+                });
+
+            try
+            {
+                using var jsonReader = new JsonTextReader(new StringReader(stream));
+
+                // Get the layout file version
+                double layoutFileVersion = GetLayoutFileVersion(jsonReader);
+
+                // Make sure it's a version we know how to deserialize (currently only version 3.0)
+                if (layoutFileVersion != CurrentVisualizationContainerVersion)
+                {
+                    throw new ApplicationException("The layout could not be loaded because the stream is invalid or is an unsupported version.");
+                }
+
+                // Find the "Layout" node
+                if (SeekToLayoutElement(jsonReader))
+                {
+                    // Deserialize the visualization container
+                    var visualizationContainer = serializer.Deserialize<VisualizationContainer>(jsonReader);
+
+                    // Copy the settings from the current navigator to the new one.
+                    if (currentVisualizationContainer != null)
+                    {
+                        visualizationContainer.Navigator.CopyFrom(currentVisualizationContainer.Navigator);
+                    }
+
+                    return visualizationContainer;
+                }
+                else
+                {
+                    throw new ApplicationException("No Layout element was found in the stream");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Show the error message
+                new MessageBoxWindow(Application.Current.MainWindow, "Error Loading Layout", CreateLayoutLoadErrorText(layoutName, ex), "Close", null).ShowDialog();
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Loads a visualization layout from the specified file.
         /// </summary>
         /// <param name="filename">File to load visualization layout.</param>

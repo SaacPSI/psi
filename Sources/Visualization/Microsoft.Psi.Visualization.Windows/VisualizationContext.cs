@@ -99,6 +99,20 @@ namespace Microsoft.Psi.Visualization
         }
 
         /// <summary>
+        /// Opens an create a layout form a stream.
+        /// </summary>
+        /// <param name="stream">The stream to the layout to open.</param>
+        /// <param name="name">The name of the layout to open.</param>
+        /// <param name="userConsented">A flag indicating whether consent to apply this layout was explicitly given. This only applies to layouts containing scripts.</param>
+        /// <returns>True if the layout was successfully loaded, otherwise false.</returns>
+        public bool CreateLayout(string stream, string name, ref bool userConsented)
+        {
+            // Load the new layout.  If this operation fails, then null will be returned.
+            VisualizationContainer newVisualizationContainer = VisualizationContainer.LoadFromStream(stream, name, this.VisualizationContainer);
+            return this.OpenLayout(newVisualizationContainer, name, ref userConsented);
+        }
+
+        /// <summary>
         /// Opens a previously persisted layout file.
         /// </summary>
         /// <param name="path">The path to the layout to open.</param>
@@ -111,63 +125,77 @@ namespace Microsoft.Psi.Visualization
             {
                 // Load the new layout.  If this operation fails, then null will be returned.
                 VisualizationContainer newVisualizationContainer = VisualizationContainer.Load(path, name, this.VisualizationContainer);
-                if (newVisualizationContainer != null)
+                return this.OpenLayout(newVisualizationContainer, name, ref userConsented);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Opens a previously persisted layout file.
+        /// </summary>
+        /// <param name="newVisualizationContainer">The newly created VisualizationContainer.</param>
+        /// <param name="name">The name of the layout to open.</param>
+        /// <param name="userConsented">A flag indicating whether consent to apply this layout was explicitly given. This only applies to layouts containing scripts.</param>
+        /// <returns>True if the layout was successfully loaded, otherwise false.</returns>
+        public bool OpenLayout(VisualizationContainer newVisualizationContainer, string name, ref bool userConsented)
+        {
+            if (newVisualizationContainer != null)
+            {
+                // If the new layout contains scripts, seek confirmation from the user before binding to the data
+                // Check if the new visualization container contains any derived stream visualizers.
+                var derivedStreamVisualizationObjects = newVisualizationContainer.GetDerivedStreamVisualizationObjects();
+
+                // Checks whether the adapter is a ScriptAdapter or has a ScriptAdapter somewhere in its chain
+                static bool ContainsScriptAdapter(Type adapterType)
                 {
-                    // If the new layout contains scripts, seek confirmation from the user before binding to the data
-                    // Check if the new visualization container contains any derived stream visualizers.
-                    var derivedStreamVisualizationObjects = newVisualizationContainer.GetDerivedStreamVisualizationObjects();
-
-                    // Checks whether the adapter is a ScriptAdapter or has a ScriptAdapter somewhere in its chain
-                    static bool ContainsScriptAdapter(Type adapterType)
+                    if (adapterType.IsGenericType)
                     {
-                        if (adapterType.IsGenericType)
+                        var genericAdapterType = adapterType.GetGenericTypeDefinition();
+                        if (genericAdapterType == typeof(ScriptAdapter<,>))
                         {
-                            var genericAdapterType = adapterType.GetGenericTypeDefinition();
-                            if (genericAdapterType == typeof(ScriptAdapter<,>))
-                            {
-                                return true;
-                            }
-                            else if (genericAdapterType == typeof(ChainedStreamAdapter<,,,,>))
-                            {
-                                var genericTypeParams = adapterType.GetGenericArguments();
-                                return ContainsScriptAdapter(genericTypeParams[4]) || ContainsScriptAdapter(genericTypeParams[3]);
-                            }
+                            return true;
                         }
-
-                        return false;
+                        else if (genericAdapterType == typeof(ChainedStreamAdapter<,,,,>))
+                        {
+                            var genericTypeParams = adapterType.GetGenericArguments();
+                            return ContainsScriptAdapter(genericTypeParams[4]) || ContainsScriptAdapter(genericTypeParams[3]);
+                        }
                     }
 
-                    // Check whether any of the VO bindings contain scripted streams, and display a warning if consent has not previously been granted
-                    bool hasScripts = derivedStreamVisualizationObjects.Any(vo => ContainsScriptAdapter(vo.StreamBinding.DerivedStreamAdapterType));
-                    if (hasScripts && !userConsented)
-                    {
-                        var confirmationWindow = new ConfirmLayoutWindow(Application.Current.MainWindow, name);
-                        userConsented = confirmationWindow.ShowDialog() ?? false;
-                    }
+                    return false;
+                }
 
-                    if (!hasScripts || userConsented)
-                    {
-                        // NOTE: If we unbind the current VOs before binding the VOs of the new visualization
-                        // container we risk data layer objects being disposed of because they temporarily
-                        // have no subscribers.  To avoid this, we'll bind the VOs in the new visualization
-                        // container before we unbind the VOs from the visualization container that's being
-                        // replaced.  This way we'll ensure the subscriber count never goes to zero for data
-                        // layer objects that are used by both the old and the new visualization container.
+                // Check whether any of the VO bindings contain scripted streams, and display a warning if consent has not previously been granted
+                bool hasScripts = derivedStreamVisualizationObjects.Any(vo => ContainsScriptAdapter(vo.StreamBinding.DerivedStreamAdapterType));
+                if (hasScripts && !userConsented)
+                {
+                    var confirmationWindow = new ConfirmLayoutWindow(Application.Current.MainWindow, name);
+                    userConsented = confirmationWindow.ShowDialog() ?? false;
+                }
 
-                        // Bind the visualization objects in the new visualization container to their sources
-                        newVisualizationContainer.UpdateStreamSources(this.DatasetViewModel?.CurrentSessionViewModel);
+                if (!hasScripts || userConsented)
+                {
+                    // NOTE: If we unbind the current VOs before binding the VOs of the new visualization
+                    // container we risk data layer objects being disposed of because they temporarily
+                    // have no subscribers.  To avoid this, we'll bind the VOs in the new visualization
+                    // container before we unbind the VOs from the visualization container that's being
+                    // replaced.  This way we'll ensure the subscriber count never goes to zero for data
+                    // layer objects that are used by both the old and the new visualization container.
 
-                        // Clear the current visualization container
-                        this.ClearLayout();
+                    // Bind the visualization objects in the new visualization container to their sources
+                    newVisualizationContainer.UpdateStreamSources(this.DatasetViewModel?.CurrentSessionViewModel);
 
-                        // Set the new visualization container
-                        this.VisualizationContainer = newVisualizationContainer;
+                    // Clear the current visualization container
+                    this.ClearLayout();
 
-                        // And re-read the stream values at cursor (to publish to stream value visualizers)
-                        DataManager.Instance.ReadAndPublishStreamValue(this.VisualizationContainer.Navigator.Cursor);
+                    // Set the new visualization container
+                    this.VisualizationContainer = newVisualizationContainer;
 
-                        return true;
-                    }
+                    // And re-read the stream values at cursor (to publish to stream value visualizers)
+                    DataManager.Instance.ReadAndPublishStreamValue(this.VisualizationContainer.Navigator.Cursor);
+
+                    return true;
                 }
             }
 
