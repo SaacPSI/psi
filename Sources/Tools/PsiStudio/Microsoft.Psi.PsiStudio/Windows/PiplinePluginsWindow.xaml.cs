@@ -13,25 +13,25 @@ namespace Microsoft.Psi.Visualization.Windows
     using Microsoft.Psi.PsiStudio;
 
     /// <summary>
-    /// Interaction logic for PipelineWindow.xaml.
+    /// Interaction logic for PiplinePluginsWindow.xaml.
     /// </summary>
-    public partial class PipelineWindow : Window
+    public partial class PiplinePluginsWindow : Window
     {
         // private List<(string, string)> listing;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PipelineWindow"/> class.
+        /// Initializes a new instance of the <see cref="PiplinePluginsWindow"/> class.
         /// </summary>
         /// <param name="owner">The window owner.</param>
         /// <param name="pluginsList">Previous plugins loaded.</param>
-        public PipelineWindow(Window owner, List<string> pluginsList = null)
+        public PiplinePluginsWindow(Window owner, List<string> pluginsList = null)
         {
             this.InitializeComponent();
             this.Title = AdditionalAssembliesWarning.Title;
             this.WarningLine1.Text = string.Format(AdditionalAssembliesWarning.Line1, MainWindowViewModel.ApplicationName);
             this.WarningLine2.Text = AdditionalAssembliesWarning.Line2;
             this.WarningQuestion.Text = string.Format(AdditionalAssembliesWarning.Question, MainWindowViewModel.ApplicationName);
-            this.PipelineAssembly = null;
+            this.PipelinePluginPath = null;
             List<(string, string)> listing = new List<(string, string)>();
             foreach (string plugin in pluginsList)
             {
@@ -46,7 +46,7 @@ namespace Microsoft.Psi.Visualization.Windows
         /// <summary>
         /// Gets or sets the pipeline assembly the user wishes to use with PsiStudio.
         /// </summary>
-        public string PipelineAssembly { get; set; }
+        public string PipelinePluginPath { get; set; }
 
         /// <summary>
         /// Gets or sets dataset path.
@@ -55,9 +55,9 @@ namespace Microsoft.Psi.Visualization.Windows
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
-            if (this.PipelineAssembly != null)
+            if (this.PipelinePluginPath != null)
             {
-                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelineAssembly, true);
+                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath, true);
             }
 
             this.DialogResult = true;
@@ -77,9 +77,9 @@ namespace Microsoft.Psi.Visualization.Windows
             bool? result = dlg.ShowDialog();
             if (result == true)
             {
-                this.PipelineAssembly = dlg.FileName;
+                this.PipelinePluginPath = dlg.FileName;
                 List<(string, string)> listing = new List<(string, string)>();
-                listing.Add((Path.GetFileName(this.PipelineAssembly), this.PipelineAssembly));
+                listing.Add((Path.GetFileName(this.PipelinePluginPath), this.PipelinePluginPath));
                 this.plugins.ItemsSource = listing;
             }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Psi.Visualization.Windows
             var selection = this.plugins.SelectedItem;
             if (selection != null)
             {
-                this.PipelineAssembly = (((string, string))selection).Item2;
+                this.PipelinePluginPath = (((string, string))selection).Item2;
             }
         }
     }

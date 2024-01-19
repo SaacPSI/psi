@@ -61,7 +61,7 @@ namespace Microsoft.Psi.PsiStudio
         private List<LayoutInfo> availableLayouts = new ();
         private List<AnnotationSchema> annotationSchemas;
         private LayoutInfo currentLayout = null;
-        private PsiStudioPipelineAssemblyHandler psiStudioPipelineInstance = null;
+        private PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -222,12 +222,12 @@ namespace Microsoft.Psi.PsiStudio
             => this.playPauseCommand ??= new RelayCommand(
                 async () =>
                 {
-                    if (this.psiStudioPipelineInstance != null)
+                    if (this.psiStudioPipelinePluginInstance != null)
                     {
-                        this.psiStudioPipelineInstance.RunPipeline();
+                        this.psiStudioPipelinePluginInstance.RunPipeline();
                         Thread.Sleep(1000); // TODO: really better, should be triggered when all stores in the pipeline are initialised.
-                        await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelineInstance.GetDatasetPath(), false, false);
-                        this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelineInstance.GetDatasetPath());
+                        await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
+                        this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
                     }
                     else
                     {
@@ -715,7 +715,7 @@ namespace Microsoft.Psi.PsiStudio
         [Browsable(false)]
         [IgnoreDataMember]
         public RelayCommand PluginsWindowCommand
-            => this.pluginsWindowCommand ??= new RelayCommand(() => this.PluginsWindow());
+            => this.pluginsWindowCommand ??= new RelayCommand(() => this.PipelinePluginsWindow());
 
         /// <summary>
         /// Gets the edit pipeline command.
@@ -723,7 +723,7 @@ namespace Microsoft.Psi.PsiStudio
         [Browsable(false)]
         [IgnoreDataMember]
         public RelayCommand EditPluginSettingsCommand
-            => this.editPluginSettingsCommand ??= new RelayCommand(() => this.EditPluginSettings());
+            => this.editPluginSettingsCommand ??= new RelayCommand(() => this.EditPipelinePluginSettings());
 
         /// <summary>
         /// Gets the command for viewing the error log for additional assembly load.
@@ -1343,29 +1343,35 @@ namespace Microsoft.Psi.PsiStudio
             }
         }
 
-        private void PluginsWindow()
+        private void PipelinePluginsWindow()
         {
-            var psiStudioPipelineWindow = new PipelineWindow(Application.Current.MainWindow, this.Settings.AdditionalPlugins);
+            var psiStudioPipelinePluginsWindow = new PiplinePluginsWindow(Application.Current.MainWindow, this.Settings.AdditionalPlugins);
 
-            if (psiStudioPipelineWindow.ShowDialog() == true)
+            if (psiStudioPipelinePluginsWindow.ShowDialog() == true)
             {
-                this.psiStudioPipelineInstance = psiStudioPipelineWindow.PsiStudioPipeline;
-                if (this.psiStudioPipelineInstance == null)
+                this.psiStudioPipelinePluginInstance = psiStudioPipelinePluginsWindow.PsiStudioPipeline;
+                if (this.psiStudioPipelinePluginInstance == null)
                 {
                     return;
                 }
 
+                // Add the selected plugin to the list.
+                if (!this.Settings.AdditionalPlugins.Contains(psiStudioPipelinePluginsWindow.PipelinePluginPath))
+                {
+                    this.Settings.AdditionalPlugins.Add(psiStudioPipelinePluginsWindow.PipelinePluginPath);
+                }
+
                 // **** LAYOUT ****
                 // Checking if there is an existing layout to activate.
-                if (this.userConsentObtained.ContainsKey(this.psiStudioPipelineInstance.Name) == false)
+                if (this.userConsentObtained.ContainsKey(this.psiStudioPipelinePluginInstance.Name) == false)
                 {
                     // Checking if the assembly have a default layout.
-                    string layoutStream = this.psiStudioPipelineInstance.GetLayout();
+                    string layoutStream = this.psiStudioPipelinePluginInstance.GetLayout();
                     if (layoutStream != null)
                     {
                         // Attempt to open the layout. User consent may be needed for layouts containing scripts.
-                        this.userConsentObtained.TryGetValue(this.psiStudioPipelineInstance.Name, out bool userConsent);
-                        bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelineInstance.Name, ref userConsent);
+                        this.userConsentObtained.TryGetValue(this.psiStudioPipelinePluginInstance.Name, out bool userConsent);
+                        bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelinePluginInstance.Name, ref userConsent);
                         if (!success)
                         {
                             // If the load failed, load the default layout instead.  This method
@@ -1377,24 +1383,24 @@ namespace Microsoft.Psi.PsiStudio
                         }
                         else
                         {
-                            this.userConsentObtained[this.psiStudioPipelineInstance.Name] = userConsent;
-                            this.CurrentLayout.Name = this.psiStudioPipelineInstance.Name;
-                            this.CurrentLayout.Path = Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelineInstance.Name + ".plo");
+                            this.userConsentObtained[this.psiStudioPipelinePluginInstance.Name] = userConsent;
+                            this.CurrentLayout.Name = this.psiStudioPipelinePluginInstance.Name;
+                            this.CurrentLayout.Path = Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelinePluginInstance.Name + ".plo");
                         }
                     }
                 }
                 else
                 {
-                    Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[this.availableLayouts.FindLastIndex(x => x.Name == this.psiStudioPipelineInstance.Name)]);
+                    Application.Current?.Dispatcher.InvokeAsync(() => this.CurrentLayout = this.AvailableLayouts[this.availableLayouts.FindLastIndex(x => x.Name == this.psiStudioPipelinePluginInstance.Name)]);
                 }
 
                 // **** ANNOTATION ****
-                // Checking if there is an existing annotation.
-                if (this.annotationSchemas.Exists(x => x.Name == this.psiStudioPipelineInstance.Name) == false)
+                // Checking if the assembly have a default annotation.
+                string annotationStream = this.psiStudioPipelinePluginInstance.GetAnnotation();
+                if (annotationStream != null)
                 {
-                    // Checking if the assembly have a default annotation.
-                    string annotationStream = this.psiStudioPipelineInstance.GetAnnotation();
-                    if (annotationStream != null)
+                    // Checking if there is an existing annotation.
+                    if (this.annotationSchemas.Exists(x => x.Name == this.psiStudioPipelinePluginInstance.Name) == false)
                     {
                         AnnotationSchema annotationSchema = AnnotationSchema.LoadFromStream(annotationStream);
                         if (annotationSchema != null)
@@ -1406,11 +1412,11 @@ namespace Microsoft.Psi.PsiStudio
             }
         }
 
-        private void EditPluginSettings()
+        private void EditPipelinePluginSettings()
         {
-            if (this.psiStudioPipelineInstance != null)
+            if (this.psiStudioPipelinePluginInstance != null)
             {
-                this.psiStudioPipelineInstance.ShowWindow();
+                this.psiStudioPipelinePluginInstance.ShowWindow();
             }
         }
 

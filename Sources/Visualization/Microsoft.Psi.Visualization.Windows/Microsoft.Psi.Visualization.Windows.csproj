@@ -135,6 +135,8 @@
     <None Remove="Icons\session.png" />
     <None Remove="Icons\set-annotation-to-selection.png" />
     <None Remove="Icons\settings.png" />
+	<None Remove="Icons\plugin-settings.png" />
+	<None Remove="Icons\plugins.png" />
     <None Remove="Icons\speed.png" />
     <None Remove="Icons\stop.png" />
     <None Remove="Icons\store-open.png" />
@@ -468,6 +470,8 @@
     <Resource Include="Icons\session-stream.png" />
     <Resource Include="Icons\session.png" />
     <Resource Include="Icons\settings.png" />
+	<Resource Include="Icons\plugin-settings.png" />
+	<Resource Include="Icons\plugins.png" />
     <Resource Include="Icons\speed.png" />
     <Resource Include="Icons\stop.png" />
     <Resource Include="Icons\store-open.png" />
