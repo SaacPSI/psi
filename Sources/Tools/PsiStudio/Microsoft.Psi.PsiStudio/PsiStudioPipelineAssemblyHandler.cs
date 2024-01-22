@@ -124,7 +124,7 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public void ShowWindow()
         {
-            this.showMethod.Invoke(this.assemblyInstance, null);
+            this.SecureInvoke(this.showMethod);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <returns>Return the path of the dataset or null, if the dataset is not created.</returns>
         public string GetDatasetPath()
         {
-            var ret = this.getDatasetMethod.Invoke(this.assemblyInstance, null);
+            var ret = this.SecureInvoke(this.getDatasetMethod);
             if (ret != null)
             {
                 return (string)ret;
@@ -147,8 +147,13 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public void RunPipeline()
         {
+            if (this.IsRunning)
+            {
+                return;
+            }
+
             this.IsRunning = true;
-            this.runPipelineMethod.Invoke(this.assemblyInstance, null);
+            this.SecureInvoke(this.runPipelineMethod);
         }
 
         /// <summary>
@@ -156,8 +161,13 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public void StopPipeline()
         {
+            if (!this.IsRunning)
+            {
+                return;
+            }
+
             this.IsRunning = false;
-            this.stopPipelineMethod.Invoke(this.assemblyInstance, null);
+            this.SecureInvoke(this.stopPipelineMethod);
         }
 
         /// <summary>
@@ -168,7 +178,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (this.layoutMethod != null)
             {
-                var ret = this.layoutMethod.Invoke(this.assemblyInstance, null);
+                var ret = this.SecureInvoke(this.layoutMethod);
                 if (ret != null)
                 {
                     return (string)ret;
@@ -186,7 +196,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (this.annotationMethod != null)
             {
-                var ret = this.annotationMethod.Invoke(this.assemblyInstance, null);
+                var ret = this.SecureInvoke(this.annotationMethod);
                 if (ret != null)
                 {
                     return (string)ret;
@@ -205,6 +215,34 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             return method;
+        }
+
+        private object SecureInvoke(MethodInfo method)
+        {
+            if (method == null)
+            {
+                return null;
+            }
+
+            if (this.assemblyInstance == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return method.Invoke(this.assemblyInstance, null);
+            }
+            catch (Exception ex)
+            {
+                new MessageBoxWindow(
+                    Application.Current.MainWindow,
+                    $"Pipeline Error: {method.Name}",
+                    ex.Message,
+                    cancelButtonText: null).ShowDialog();
+            }
+
+            return null;
         }
     }
 }
