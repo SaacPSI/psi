@@ -21,7 +21,6 @@
 
     <StackPanel Orientation="Vertical" Width="600" Margin="5">
         <TextBlock Margin="5" Name="WarningLine1" TextWrapping="Wrap"/>
-        <TextBox Margin="5" Text="{Binding Path=PipelineAssembly, Mode=TwoWay}" AutomationProperties.Name="AddPipelineAssembly" />
         <ListView Margin="10" Name="plugins" SelectionChanged="Plugins_SelectionChanged">
             <ListView.View>
                 <GridView>

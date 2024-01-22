@@ -17,7 +17,7 @@ namespace Microsoft.Psi.Visualization.Windows
     /// </summary>
     public partial class PiplinePluginsWindow : Window
     {
-        // private List<(string, string)> listing;
+        private List<(string, string)> listing;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PiplinePluginsWindow"/> class.
@@ -32,13 +32,13 @@ namespace Microsoft.Psi.Visualization.Windows
             this.WarningLine2.Text = AdditionalAssembliesWarning.Line2;
             this.WarningQuestion.Text = string.Format(AdditionalAssembliesWarning.Question, MainWindowViewModel.ApplicationName);
             this.PipelinePluginPath = null;
-            List<(string, string)> listing = new List<(string, string)>();
+            this.listing = new List<(string, string)>();
             foreach (string plugin in pluginsList)
             {
-                listing.Add((Path.GetFileName(plugin), plugin));
+                this.listing.Add((Path.GetFileName(plugin), plugin));
             }
 
-            this.plugins.ItemsSource = listing;
+            this.plugins.ItemsSource = this.listing;
             this.DataContext = this;
             this.Owner = owner;
         }
@@ -78,9 +78,11 @@ namespace Microsoft.Psi.Visualization.Windows
             if (result == true)
             {
                 this.PipelinePluginPath = dlg.FileName;
-                List<(string, string)> listing = new List<(string, string)>();
-                listing.Add((Path.GetFileName(this.PipelinePluginPath), this.PipelinePluginPath));
-                this.plugins.ItemsSource = listing;
+                var item = (Path.GetFileName(this.PipelinePluginPath), this.PipelinePluginPath);
+                this.listing.Add(item);
+                this.listing = this.listing.Distinct().ToList();
+                this.plugins.ItemsSource = this.listing;
+                this.plugins.SelectedItem = item;
             }
 
             e.Handled = true;

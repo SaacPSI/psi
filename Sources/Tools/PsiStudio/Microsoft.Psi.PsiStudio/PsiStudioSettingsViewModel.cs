@@ -45,6 +45,7 @@ namespace Microsoft.Psi.PsiStudio
 
             // Generate a copy of the additional assemblies list
             this.AdditionalAssembliesAsStringList = psiStudioSettings.AdditionalAssemblies.ToList();
+            this.AdditionalPipelineAssembliesAsStringList = psiStudioSettings.AdditionalPlugins.ToList();
 
             // Generate a copy of the type mappings
             this.TypeMappingsAsStringList = psiStudioSettings.TypeMappingsAsStringList.ToList();
@@ -113,6 +114,14 @@ namespace Microsoft.Psi.PsiStudio
         public List<string> AdditionalAssembliesAsStringList { get; set; }
 
         /// <summary>
+        /// Gets or sets the list of additional pipeline assemblies to load.
+        /// </summary>
+        [PropertyOrder(1)]
+        [DisplayName("Additional Pipeline Plugins")]
+        [Description("The list of additional third party pipeline assemblies.")]
+        public List<string> AdditionalPipelineAssembliesAsStringList { get; set; }
+
+        /// <summary>
         /// Gets or sets the string representation of the type mappings.
         /// </summary>
         [PropertyOrder(1)]
@@ -131,7 +140,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets the name of the most recently used layout.
         /// </summary>
-        [PropertyOrder(2)]
+        [PropertyOrder(3)]
         [DisplayName("Most Recently Used Layout")]
         [Description("The name of the most recently used layout.")]
         public string MostRecentlyUsedLayoutName { get; set; }
@@ -139,7 +148,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets the list of most recently used dataset filenames.
         /// </summary>
-        [PropertyOrder(3)]
+        [PropertyOrder(4)]
         [DisplayName("Most Recently Used Dataset Filenames")]
         [Description("The list of most recently used dataset filenames.")]
         public List<string> MostRecentlyUsedDatasetFilenames { get; set; }
@@ -147,7 +156,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets a value indicating whether to set any open dataset object into autosave mode.
         /// </summary>
-        [PropertyOrder(4)]
+        [PropertyOrder(5)]
         [DisplayName("Auto Save Datasets")]
         [Description("Indicates whether datasets should be automatically saved when partitions/sessions are added or removed.")]
         public bool AutoSaveDatasets { get; set; }
@@ -155,7 +164,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets a value indicating whether to automatically load the most recently used dataset upon startup.
         /// </summary>
-        [PropertyOrder(5)]
+        [PropertyOrder(6)]
         [DisplayName("Auto Load Most Recently Used Dataset")]
         [Description("Indicates whether the most recently used dataset should be automatically loaded at start-up.")]
         public bool AutoLoadMostRecentlyUsedDatasetOnStartUp { get; set; }
@@ -163,7 +172,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets a value indicating whether the show absolute timing button should be pressed.
         /// </summary>
-        [PropertyOrder(6)]
+        [PropertyOrder(7)]
         [DisplayName("Show Absolute Time")]
         [Description("Indicates whether the navigator should automatically show the Absolute Time clock.")]
         public bool ShowAbsoluteTiming { get; set; }
@@ -171,7 +180,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets a value indicating whether the show timing relative to session start button should be pressed.
         /// </summary>
-        [PropertyOrder(7)]
+        [PropertyOrder(8)]
         [DisplayName("Show Time Relative to Session Start")]
         [Description("Indicates whether the navigator should automatically show the Time Relative to Session Start clock.")]
         public bool ShowTimingRelativeToSessionStart { get; set; }
@@ -179,7 +188,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets a value indicating whether the show timing relative to selection start button should be pressed.
         /// </summary>
-        [PropertyOrder(8)]
+        [PropertyOrder(9)]
         [DisplayName("Show Time Relative to Selection Start")]
         [Description("Indicates whether the navigator should automatically show the Time Relative to Selection Start clock.")]
         public bool ShowTimingRelativeToSelectionStart { get; set; }
@@ -188,7 +197,7 @@ namespace Microsoft.Psi.PsiStudio
         /// Gets or sets a value indicating whether to skip the security warning when loading
         /// third party assemblies or code.
         /// </summary>
-        [PropertyOrder(9)]
+        [PropertyOrder(10)]
         [DisplayName("Show Security Warning for Third Party Code")]
         [Description("Indicates whether to show the security warning when loading additional third party assemblies.")]
         public bool ShowSecurityWarningOnLoadingThirdPartyCode { get; set; }
@@ -197,7 +206,7 @@ namespace Microsoft.Psi.PsiStudio
         /// Gets or sets a value indicating whether to show the error log when errors occur
         /// while loading third party assemblies or code.
         /// </summary>
-        [PropertyOrder(10)]
+        [PropertyOrder(11)]
         [DisplayName("Show Error Log when Loading Additional Assemblies")]
         [Description("Indicates whether to show the error log when errors occur while loading third party assemblies or code.")]
         public bool ShowErrorLogOnLoadingAdditionalAssemblies { get; set; }
