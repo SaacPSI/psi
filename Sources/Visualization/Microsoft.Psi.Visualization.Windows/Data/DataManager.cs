@@ -425,6 +425,7 @@ namespace Microsoft.Psi.Visualization.Data
                 dataStoreReader.Dispose();
             }
 
+            this.dataDispatchTimer.Stop();
             this.dataStoreReaders = null;
             this.disposed = true;
             GC.SuppressFinalize(this);
