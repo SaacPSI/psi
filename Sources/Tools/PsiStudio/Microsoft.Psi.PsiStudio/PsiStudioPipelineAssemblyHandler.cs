@@ -124,7 +124,7 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public void ShowWindow()
         {
-            this.SecureInvoke(this.showMethod);
+            this.SecureInvoke(ref this.showMethod);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <returns>Return the path of the dataset or null, if the dataset is not created.</returns>
         public string GetDatasetPath()
         {
-            var ret = this.SecureInvoke(this.getDatasetMethod);
+            var ret = this.SecureInvoke(ref this.getDatasetMethod);
             if (ret != null)
             {
                 return (string)ret;
@@ -153,7 +153,7 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             this.IsRunning = true;
-            this.SecureInvoke(this.runPipelineMethod);
+            this.SecureInvoke(ref this.runPipelineMethod);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             this.IsRunning = false;
-            this.SecureInvoke(this.stopPipelineMethod);
+            this.SecureInvoke(ref this.stopPipelineMethod);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (this.layoutMethod != null)
             {
-                var ret = this.SecureInvoke(this.layoutMethod);
+                var ret = this.SecureInvoke(ref this.layoutMethod);
                 if (ret != null)
                 {
                     return (string)ret;
@@ -196,7 +196,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (this.annotationMethod != null)
             {
-                var ret = this.SecureInvoke(this.annotationMethod);
+                var ret = this.SecureInvoke(ref this.annotationMethod);
                 if (ret != null)
                 {
                     return (string)ret;
@@ -217,7 +217,7 @@ namespace Microsoft.Psi.PsiStudio
             return method;
         }
 
-        private object SecureInvoke(MethodInfo method)
+        private object SecureInvoke(ref MethodInfo method)
         {
             if (method == null)
             {

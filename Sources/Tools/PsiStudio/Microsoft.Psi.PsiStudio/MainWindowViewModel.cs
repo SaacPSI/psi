@@ -1383,9 +1383,17 @@ namespace Microsoft.Psi.PsiStudio
                         }
                         else
                         {
+                            // Generate the layout
                             this.userConsentObtained[this.psiStudioPipelinePluginInstance.Name] = userConsent;
-                            this.CurrentLayout.Name = this.psiStudioPipelinePluginInstance.Name;
-                            this.CurrentLayout.Path = Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelinePluginInstance.Name + ".plo");
+                            var layout = new LayoutInfo(this.psiStudioPipelinePluginInstance.Name, Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelinePluginInstance.Name + ".plo"));
+
+                            // Add it to the list of available layouts
+                            this.RaisePropertyChanging(nameof(this.AvailableLayouts));
+                            this.AvailableLayouts.Add(layout);
+                            this.RaisePropertyChanged(nameof(this.AvailableLayouts));
+
+                            // Set as most recently current layout.
+                            this.CurrentLayout = layout;
                         }
                     }
                 }
