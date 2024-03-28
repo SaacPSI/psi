@@ -17,6 +17,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
+    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Data.Annotations;
     using Microsoft.Psi.PsiStudio.Windows;
@@ -224,17 +225,25 @@ namespace Microsoft.Psi.PsiStudio
                 {
                     if (this.psiStudioPipelinePluginInstance != null)
                     {
-                        this.psiStudioPipelinePluginInstance.RunPipeline();
-                        Thread.Sleep(1000); // TODO: really better, should be triggered when all stores in the pipeline are initialised.
-                        await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
-                        this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
+                        if (this.psiStudioPipelinePluginInstance.IsRunning)
+                        {
+                            this.psiStudioPipelinePluginInstance.StopPipeline();
+                            VisualizationContext.Instance.PlayOrPause();
+                        }
+                        else
+                        {
+                            this.psiStudioPipelinePluginInstance.RunPipeline();
+                            Thread.Sleep(1000); // TODO: really better, should be triggered when all stores in the pipeline are initialised.
+                            await VisualizationContext.Instance.OpenDatasetAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
+                            this.Settings.AddRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
+                        }
                     }
                     else
                     {
                         VisualizationContext.Instance.PlayOrPause();
                     }
                 },
-                () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live);
+                () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live || this.psiStudioPipelinePluginInstance.IsRunning);
 
         /// <summary>
         /// Gets the go-to-time command.
