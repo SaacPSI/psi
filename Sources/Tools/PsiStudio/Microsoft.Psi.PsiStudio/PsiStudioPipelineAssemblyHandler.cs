@@ -238,7 +238,7 @@ namespace Microsoft.Psi.PsiStudio
                 new MessageBoxWindow(
                     Application.Current.MainWindow,
                     $"Pipeline Error: {method.Name}",
-                    ex.Message,
+                    $"{ex.Message} : {ex.InnerException}",
                     cancelButtonText: null).ShowDialog();
             }
 

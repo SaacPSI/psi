@@ -28,7 +28,7 @@ namespace Microsoft.Psi.Visualization
         private readonly DispatcherTimer liveStatusTimer = null;
 
         private VisualizationContainer visualizationContainer;
-        private DatasetViewModel datasetViewModel = null;
+        private DatasetViewModel datasetViewModel = new (new Dataset());
 
         static VisualizationContext()
         {
@@ -37,7 +37,7 @@ namespace Microsoft.Psi.Visualization
 
         private VisualizationContext()
         {
-            this.DatasetViewModels = new ObservableCollection<DatasetViewModel>();
+            this.DatasetViewModels = new ObservableCollection<DatasetViewModel>() { this.DatasetViewModel };
 
             // Periodically check if there's any live partitions in the dataset
             this.liveStatusTimer = new DispatcherTimer(TimeSpan.FromSeconds(10), DispatcherPriority.Normal, new EventHandler(this.OnLiveStatusTimer), Application.Current.Dispatcher);
@@ -205,10 +205,7 @@ namespace Microsoft.Psi.Visualization
         /// <summary>
         /// Clears the current layout.
         /// </summary>
-        public void ClearLayout()
-        {
-            this.VisualizationContainer?.Clear();
-        }
+        public void ClearLayout() => this.VisualizationContainer?.Clear();
 
         /// <summary>
         /// Gets the message data type for a stream.  If the data type is unknown (i.e. the assembly
@@ -217,11 +214,7 @@ namespace Microsoft.Psi.Visualization
         /// </summary>
         /// <param name="typeName">The type name.</param>
         /// <returns>The type of messages in the stream.</returns>
-        public Type GetDataType(string typeName)
-        {
-            return TypeResolutionHelper.GetVerifiedType(typeName) ??
-                (this.PluginMap.AdditionalTypeMappings.ContainsKey(typeName) ? this.PluginMap.AdditionalTypeMappings[typeName] : typeof(object));
-        }
+        public Type GetDataType(string typeName) => TypeResolutionHelper.GetVerifiedType(typeName, this.PluginMap.AdditionalTypeMappings) ?? typeof(object);
 
         /// <summary>
         /// Asychronously runs a specified batch processing task over a dataset.
@@ -362,55 +355,48 @@ namespace Microsoft.Psi.Visualization
         }
 
         /// <summary>
-        /// Asynchronously opens a previously persisted dataset.
+        /// Asynchronously opens a previously persisted dataset or store.
         /// </summary>
-        /// <param name="filename">Fully qualified path to dataset file.</param>
+        /// <param name="filename">Fully qualified path to dataset or store.</param>
         /// <param name="showStatusWindow">Indicates whether to show the status window.</param>
         /// <param name="autoSave">Indicates whether to enable autosave.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task OpenDatasetAsync(string filename, bool showStatusWindow, bool autoSave)
+        public async Task OpenDatasetOrStoreAsync(string filename, bool showStatusWindow, bool autoSave)
         {
-            var loadDatasetTask = default(Task<bool>);
+            bool loadDatasetResult = false;
             if (showStatusWindow)
             {
-                // Window that will be used to indicate that an open operation is in progress.
-                // Progress notification and cancellation are not yet fully supported.
-                var statusWindow = new LoadingDatasetWindow(Application.Current.MainWindow, filename);
-
-                // progress reporter for the load dataset task
-                var progress = new Progress<(string s, double p)>(t =>
-                {
-                    statusWindow.Status = t.s;
-                    if (t.p == 1.0)
-                    {
-                        // close the status window when the task reports completion
-                        statusWindow.Close();
-                    }
-                });
-
-                // start the load dataset task
-                loadDatasetTask = this.LoadDatasetOrStoreAsync(filename, progress, autoSave);
-
-                try
-                {
-                    // show the modal status window, which will be closed once the load dataset operation completes
-                    statusWindow.ShowDialog();
-                }
-                catch (InvalidOperationException)
-                {
-                    // This indicates that the window has already been closed in the async task,
-                    // which means the operation has already completed, so just ignore and continue.
-                }
+                loadDatasetResult = await ProgressWindow.RunWithProgressAsync(
+                    $"Opening dataset: {filename} ...",
+                    async progress => await this.LoadDatasetOrStoreAsync(filename, progress, autoSave));
             }
             else
             {
-                loadDatasetTask = this.LoadDatasetOrStoreAsync(filename, autoSave: autoSave);
+                loadDatasetResult = await this.LoadDatasetOrStoreAsync(filename, autoSave: autoSave);
+            }
+
+            // If the dataset view model contains invalid partitions, provide a notification.
+            if (this.DatasetViewModel.ContainsInvalidPartitions)
+            {
+                // Select the partitions with errors
+                var partitionsWithErrors = this.DatasetViewModel.SessionViewModels
+                    .Where(s => s.ContainsInvalidPartitions)
+                    .SelectMany(s => s.PartitionViewModels.Where(p => !p.IsValidPartition).Select(p => (s.Name, p.Name)));
+
+                new MessageBoxWindow(
+                    Application.Current.MainWindow,
+                    "Dataset Load Error",
+                    $"Errors were encoutered while trying to load the following {partitionsWithErrors.Count()} partition(s):",
+                    "Close",
+                    null,
+                    string.Join(Environment.NewLine, partitionsWithErrors.Select(t => $"Session: {t.Item1},  Partition: {t.Item2}")))
+                    .ShowDialog();
             }
 
             try
             {
-                // Await completion of the open dataset task. The return value indicates whether the dataset was actually opened.
-                if (await loadDatasetTask)
+                // loadDatasetResult indicates whether the dataset was actually opened.
+                if (loadDatasetResult)
                 {
                     this.DatasetViewModels.Clear();
                     this.DatasetViewModels.Add(this.DatasetViewModel);
@@ -436,9 +422,10 @@ namespace Microsoft.Psi.Visualization
         }
 
         /// <summary>
-        /// Pause or resume playback of streams.
+        /// Pause or resume playback.
         /// </summary>
-        public void PlayOrPause()
+        /// <param name="fromSelectionStart">If true, playback starts from selection start, otherwise, it starts from cursor.</param>
+        public void PlayOrPause(bool fromSelectionStart)
         {
             switch (this.VisualizationContainer.Navigator.CursorMode)
             {
@@ -446,6 +433,21 @@ namespace Microsoft.Psi.Visualization
                     this.VisualizationContainer.Navigator.SetCursorMode(CursorMode.Manual);
                     break;
                 case CursorMode.Manual:
+
+                    if (fromSelectionStart)
+                    {
+                        if (this.VisualizationContainer.Navigator.SelectionRange != null &&
+                            this.VisualizationContainer.Navigator.SelectionRange.StartTime != DateTime.MinValue)
+                        {
+                            this.VisualizationContainer.Navigator.Cursor = this.VisualizationContainer.Navigator.SelectionRange.StartTime;
+                        }
+                        else if (this.VisualizationContainer.Navigator.DataRange != null &&
+                            this.VisualizationContainer.Navigator.DataRange.StartTime != DateTime.MinValue)
+                        {
+                            this.VisualizationContainer.Navigator.Cursor = this.VisualizationContainer.Navigator.DataRange.StartTime;
+                        }
+                    }
+
                     this.VisualizationContainer.Navigator.SetCursorMode(CursorMode.Playback);
                     break;
             }
@@ -537,16 +539,8 @@ namespace Microsoft.Psi.Visualization
                                     null).ShowDialog();
                             }
 
+                            progress?.Report((string.Empty, 1));
                             return false;
-                        }
-
-                        progress?.Report(("Opening store...", 0));
-
-                        // If the store is not closed, and nobody's holding a reference to it, assume it was closed improperly and needs to be repaired.
-                        if (!PsiStore.IsClosed(name, fileInfo.DirectoryName) && !isLive)
-                        {
-                            progress?.Report(("Repairing store...", 0.5));
-                            await Task.Run(() => PsiStore.Repair(name, fileInfo.DirectoryName));
                         }
                     }
 
