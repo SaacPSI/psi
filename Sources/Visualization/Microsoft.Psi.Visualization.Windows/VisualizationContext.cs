@@ -101,14 +101,16 @@ namespace Microsoft.Psi.Visualization
         /// <summary>
         /// Opens an create a layout form a stream.
         /// </summary>
-        /// <param name="stream">The stream to the layout to open.</param>
-        /// <param name="name">The name of the layout to open.</param>
+        /// <param name="stream">The stream to the layout to create.</param>
+        /// <param name="name">The name of the layout to create.</param>
+        /// <param name="path">The path of the layout to save.</param>
         /// <param name="userConsented">A flag indicating whether consent to apply this layout was explicitly given. This only applies to layouts containing scripts.</param>
         /// <returns>True if the layout was successfully loaded, otherwise false.</returns>
-        public bool CreateLayout(string stream, string name, ref bool userConsented)
+        public bool CreateLayout(string stream, string name, string path, ref bool userConsented)
         {
             // Load the new layout.  If this operation fails, then null will be returned.
             VisualizationContainer newVisualizationContainer = VisualizationContainer.LoadFromStream(stream, name, this.VisualizationContainer);
+            newVisualizationContainer.Save(path);
             return this.OpenLayout(newVisualizationContainer, name, ref userConsented);
         }
 

@@ -1658,7 +1658,8 @@ namespace Microsoft.Psi.PsiStudio
                     {
                         // Attempt to open the layout. User consent may be needed for layouts containing scripts.
                         this.userConsentObtained.TryGetValue(this.psiStudioPipelinePluginInstance.Name, out bool userConsent);
-                        bool success = VisualizationContext.Instance.CreateLayout(layoutStream, this.psiStudioPipelinePluginInstance.Name, ref userConsent);
+                        var layout = new LayoutInfo(this.psiStudioPipelinePluginInstance.Name, Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelinePluginInstance.Name + ".plo"));
+                        bool success = VisualizationContext.Instance.CreateLayout(layoutStream, layout.Name, layout.Path, ref userConsent);
                         if (!success)
                         {
                             // If the load failed, load the default layout instead.  This method
@@ -1672,7 +1673,6 @@ namespace Microsoft.Psi.PsiStudio
                         {
                             // Generate the layout
                             this.userConsentObtained[this.psiStudioPipelinePluginInstance.Name] = userConsent;
-                            var layout = new LayoutInfo(this.psiStudioPipelinePluginInstance.Name, Path.Combine(PsiStudioLayoutsPath, this.psiStudioPipelinePluginInstance.Name + ".plo"));
 
                             // Add it to the list of available layouts
                             this.RaisePropertyChanging(nameof(this.AvailableLayouts));
