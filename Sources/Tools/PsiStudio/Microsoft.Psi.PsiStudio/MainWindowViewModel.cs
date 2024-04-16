@@ -793,6 +793,9 @@ namespace Microsoft.Psi.PsiStudio
 
                     // Explicitly dispose so that DataManager doesn't keep the app running for a while longer.
                     DataManager.Instance?.Dispose();
+
+                    // Dispose assembly
+                    this.psiStudioPipelinePluginInstance?.Dispose();
                 });
 
         /// <summary>
@@ -1639,6 +1642,7 @@ namespace Microsoft.Psi.PsiStudio
                 this.psiStudioPipelinePluginInstance = psiStudioPipelinePluginsWindow.PsiStudioPipeline;
                 if (this.psiStudioPipelinePluginInstance == null)
                 {
+                    psiStudioPipelinePluginsWindow.Close();
                     return;
                 }
 
@@ -1705,6 +1709,8 @@ namespace Microsoft.Psi.PsiStudio
                     }
                 }
             }
+
+            psiStudioPipelinePluginsWindow.Close();
         }
 
         private void EditPipelinePluginSettings()

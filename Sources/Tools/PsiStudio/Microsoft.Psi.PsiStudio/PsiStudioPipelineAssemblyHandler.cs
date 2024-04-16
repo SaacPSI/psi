@@ -81,7 +81,7 @@ namespace Microsoft.Psi.PsiStudio
                     throw new Exception($"The {classDefinition.Name} require to have IPsiStudioPipeline as interface.");
                 }
 
-                // Create an object from the assembly.
+                // Create an object from the assembly. MAKING a lock on PsiStudio closing...
                 var instance = assembly.CreateInstance(classDefinition.FullName, false, BindingFlags.ExactBinding, null, null, null, null);
                 if (instance == null)
                 {
@@ -110,13 +110,31 @@ namespace Microsoft.Psi.PsiStudio
             }
             catch (Exception ex)
             {
-                if (quietLoad)
+                if (!quietLoad)
                 {
                     new MessageBoxWindow(Application.Current.MainWindow, "Error on assembly load", ex.Message, "OK", null).ShowDialog();
                 }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Dispose the assembly.
+        /// </summary>
+        public void Dispose()
+        {
+            this.StopPipeline();
+            this.showMethod = null;
+            this.assemblyInstance = null;
+            this.showMethod = null;
+            this.getDatasetMethod = null;
+            this.runPipelineMethod = null;
+            this.stopPipelineMethod = null;
+            this.layoutMethod = null;
+            this.annotationMethod = null;
+            this.IsRunning = false;
+            this.Name = null;
         }
 
         /// <summary>
