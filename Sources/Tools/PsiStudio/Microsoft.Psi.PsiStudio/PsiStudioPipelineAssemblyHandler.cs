@@ -60,19 +60,23 @@ namespace Microsoft.Psi.PsiStudio
                 // Load the assembly
                 Assembly assembly = Assembly.LoadFrom(assemblyPath.Trim());
 
-                // Check if only one class is public.
-                if (Enumerable.Count(assembly.ExportedTypes) != 2)
+                // Get the class definition from the assembly
+                Type classDefinition = null;
+
+                // Try to find a class with Window as base.
+                foreach (Type exportedType in assembly.ExportedTypes)
                 {
-                    throw new Exception("The assembly require to have only one public class.");
+                    if (classDefinition.BaseType == typeof(Window))
+                    {
+                        classDefinition = exportedType;
+                        break;
+                    }
                 }
 
-                // Get the class definition from the assembly
-                Type classDefinition = assembly.ExportedTypes.First();
-
-                // Check if only the class have Window for base => it make sure that ShowDialog method exist.
-                if (classDefinition.BaseType != typeof(Window))
+                // Check if their is a class that have Window for base => it make sure that ShowDialog method exist.
+                if (classDefinition == null)
                 {
-                    throw new Exception($"The {classDefinition.Name} require to have Window as base.");
+                    throw new Exception($"The assembly require to have a class with Window as base.");
                 }
 
                 // Check if only the class have IPsiStudioPipeline for interface => it make sure that methods exist.
