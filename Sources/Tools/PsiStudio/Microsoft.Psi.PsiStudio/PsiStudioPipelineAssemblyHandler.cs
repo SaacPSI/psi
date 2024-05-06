@@ -66,7 +66,7 @@ namespace Microsoft.Psi.PsiStudio
                 // Try to find a class with Window as base.
                 foreach (Type exportedType in assembly.ExportedTypes)
                 {
-                    if (classDefinition.BaseType == typeof(Window))
+                    if (exportedType.BaseType == typeof(Window))
                     {
                         classDefinition = exportedType;
                         break;
