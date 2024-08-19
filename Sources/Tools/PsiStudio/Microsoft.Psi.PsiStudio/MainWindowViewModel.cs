@@ -293,7 +293,7 @@ namespace Microsoft.Psi.PsiStudio
                         VisualizationContext.Instance.PlayOrPause(true);
                     }
                 },
-                () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live || this.psiStudioPipelinePluginInstance.IsRunning);
+                () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live || (this.psiStudioPipelinePluginInstance != null && this.psiStudioPipelinePluginInstance.IsRunning));
 
         /// <summary>
         /// Gets the go-to-time command.
