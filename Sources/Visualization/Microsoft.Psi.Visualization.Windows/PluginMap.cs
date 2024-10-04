@@ -92,11 +92,14 @@ namespace Microsoft.Psi.Visualization
             string batchProcessingTaskConfigurationsPath)
         {
             // Append the additional assemblies to the list of default assemblies to search for plugins
-            List<string> assembliesToSearch = this.defaultAssemblies.ToList();
+            List<string> assembliesToSearch = new List<string>();
             if ((additionalAssembliesToSearch != null) && (additionalAssembliesToSearch.Count > 0))
             {
                 assembliesToSearch.AddRange(additionalAssembliesToSearch);
             }
+
+            // Add the default assemblies at the end of the list, to make sur the external visualizers have the priority over the default ones.
+            assembliesToSearch.AddRange(this.defaultAssemblies.ToList());
 
             // Load all the visualizers, summarizers, stream adapters, stream readers, and batch processing tasks
             this.DiscoverPlugins(assembliesToSearch, loadLogFilename, showErrorLog, batchProcessingTaskConfigurationsPath);
