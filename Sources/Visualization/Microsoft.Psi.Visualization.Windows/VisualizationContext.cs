@@ -406,7 +406,17 @@ namespace Microsoft.Psi.Visualization
                     // Check for live partitions
                     this.DatasetViewModel.UpdateLivePartitionStatuses();
 
-                    // The first session (if there is one) will already have been selected in the dataset, so visualize it.
+                    // Search for a live partition and visualize it if found.
+                    foreach (SessionViewModel sessionViewModel in this.DatasetViewModel.SessionViewModels)
+                    {
+                        if (sessionViewModel.ContainsLivePartitions)
+                        {
+                            this.DatasetViewModel.VisualizeSession(sessionViewModel);
+                            return;
+                        }
+                    }
+
+                    // Else pick the first session (if there is one) will already have been selected in the dataset, so visualize it.
                     this.DatasetViewModel.VisualizeSession(this.DatasetViewModel.CurrentSessionViewModel);
                 }
             }

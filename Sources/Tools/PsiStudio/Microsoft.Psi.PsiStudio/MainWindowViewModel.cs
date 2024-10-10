@@ -283,7 +283,15 @@ namespace Microsoft.Psi.PsiStudio
                         else
                         {
                             this.psiStudioPipelinePluginInstance.RunPipeline();
-                            Thread.Sleep(1000); // TODO: really better, should be triggered when all stores in the pipeline are initialised.
+
+                            // Wait for pipeline plugin to instantiate the dataset if needed.
+                            while (!File.Exists(this.psiStudioPipelinePluginInstance.GetDatasetPath()))
+                            {
+                                Thread.Sleep(500);
+                            }
+
+                            // Wait a little to make sure the pipeline plugin to run.
+                            Thread.Sleep(200);
                             await VisualizationContext.Instance.OpenDatasetOrStoreAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
                             this.Settings.AddMostRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
                         }
