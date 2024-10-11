@@ -167,29 +167,31 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Start the pipeline.
         /// </summary>
-        public void RunPipeline()
+        /// <returns>Return True if done, False otherwise.</returns>
+        public bool RunPipeline()
         {
             if (this.IsRunning)
             {
-                return;
+                return true;
             }
 
             this.IsRunning = true;
-            this.SecureInvoke(ref this.runPipelineMethod);
+            return this.SecureInvokeBool(ref this.runPipelineMethod);
         }
 
         /// <summary>
         /// Stop the pipeline.
         /// </summary>
-        public void StopPipeline()
+        /// <returns>Return True if done, False otherwise.</returns>
+        public bool StopPipeline()
         {
             if (!this.IsRunning)
             {
-                return;
+                return true;
             }
 
             this.IsRunning = false;
-            this.SecureInvoke(ref this.stopPipelineMethod);
+            return this.SecureInvokeBool(ref this.stopPipelineMethod);
         }
 
         /// <summary>
@@ -265,6 +267,35 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             return null;
+        }
+
+        private bool SecureInvokeBool(ref MethodInfo method)
+        {
+            if (method == null)
+            {
+                return false;
+            }
+
+            if (this.assemblyInstance == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                method.Invoke(this.assemblyInstance, null);
+            }
+            catch (Exception ex)
+            {
+                new MessageBoxWindow(
+                    Application.Current.MainWindow,
+                    $"Pipeline Error: {method.Name}",
+                    $"{ex.Message} : {ex.InnerException}",
+                    cancelButtonText: null).ShowDialog();
+                return false;
+            }
+
+            return true;
         }
     }
 }

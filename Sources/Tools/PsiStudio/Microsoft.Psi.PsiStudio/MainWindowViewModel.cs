@@ -282,7 +282,10 @@ namespace Microsoft.Psi.PsiStudio
                         }
                         else
                         {
-                            this.psiStudioPipelinePluginInstance.RunPipeline();
+                            if (this.psiStudioPipelinePluginInstance.RunPipeline() == false)
+                            {
+                                return;
+                            }
 
                             // Wait for pipeline plugin to instantiate the dataset if needed.
                             while (!File.Exists(this.psiStudioPipelinePluginInstance.GetDatasetPath()))
@@ -291,9 +294,10 @@ namespace Microsoft.Psi.PsiStudio
                             }
 
                             // Wait a little to make sure the pipeline plugin to run.
-                            Thread.Sleep(200);
+                            Thread.Sleep(1000);
                             await VisualizationContext.Instance.OpenDatasetOrStoreAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
                             this.Settings.AddMostRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
+                            VisualizationContext.Instance.PlayOrPause(true);
                         }
                     }
                     else
