@@ -1720,6 +1720,9 @@ namespace Microsoft.Psi.PsiStudio
                         }
                     }
                 }
+
+                // Give a feedback that the assembly is loaded correctly by displaying the window.
+                this.psiStudioPipelinePluginInstance.ShowWindow();
             }
 
             psiStudioPipelinePluginsWindow.Close();
