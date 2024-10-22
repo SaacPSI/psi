@@ -276,8 +276,8 @@ namespace Microsoft.Psi.PsiStudio
                         if (this.psiStudioPipelinePluginInstance.IsRunning)
                         {
                             this.psiStudioPipelinePluginInstance.StopPipeline();
-                            VisualizationContext.Instance.PlayOrPause(true);
                             VisualizationContext.Instance.ToggleLiveMode();
+                            VisualizationContext.Instance.PlayOrPause(true);
                         }
                         else
                         {
