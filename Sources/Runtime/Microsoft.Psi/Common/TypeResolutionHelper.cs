@@ -33,7 +33,6 @@ namespace Microsoft.Psi
             }
 
             var type = Type.GetType(typeName, AssemblyResolver, null);
-
             if (type == null)
             {
                 // Unable to resolve type. Attempt to resolve base class library types
@@ -41,6 +40,7 @@ namespace Microsoft.Psi
                 // Type.GetType will attempt to resolve types without assembly names from
                 // mscorlib/System.Private.CoreLib or the currently executing assembly.
                 typeName = RemoveCoreAssemblyName(typeName);
+
                 type = Type.GetType(typeName, AssemblyResolver, null);
             }
 
