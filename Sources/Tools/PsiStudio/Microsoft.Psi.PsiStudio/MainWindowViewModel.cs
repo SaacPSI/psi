@@ -253,6 +253,11 @@ namespace Microsoft.Psi.PsiStudio
         }
 
         /// <summary>
+        /// Gets a value indicating whether we're currently running a pipeline plugin or playing a playback.
+        /// </summary>
+        public bool IsPlaying => (this.psiStudioPipelinePluginInstance != null && this.psiStudioPipelinePluginInstance.IsRunning) || this.VisualizationContainer.Navigator.IsCursorModePlayback;
+
+        /// <summary>
         /// Gets the play/pause from cursor command.
         /// </summary>
         [Browsable(false)]
@@ -276,8 +281,9 @@ namespace Microsoft.Psi.PsiStudio
                         if (this.psiStudioPipelinePluginInstance.IsRunning)
                         {
                             this.psiStudioPipelinePluginInstance.StopPipeline();
-                            VisualizationContext.Instance.ToggleLiveMode();
-                            VisualizationContext.Instance.PlayOrPause(true);
+                            this.psiStudioPipelinePluginInstance = null;
+                            VisualizationContext.Instance.PlayOrPause(false);
+                            this.VisualizationContainer.Navigator.SetManualCursorMode();
                         }
                         else
                         {
@@ -286,23 +292,16 @@ namespace Microsoft.Psi.PsiStudio
                                 return;
                             }
 
-                            // Wait for pipeline plugin to instantiate the dataset if needed.
-                            while (!File.Exists(this.psiStudioPipelinePluginInstance.GetDatasetPath()))
-                            {
-                                Thread.Sleep(500);
-                            }
-
-                            // Wait a little to make sure the pipeline plugin to run.
-                            Thread.Sleep(5000);
-                            await VisualizationContext.Instance.OpenDatasetOrStoreAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
-                            this.Settings.AddMostRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
-                            VisualizationContext.Instance.PlayOrPause(true);
+                            await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), true, false);
+                            VisualizationContext.Instance.PlayOrPause(false);
                         }
                     }
                     else
                     {
                         VisualizationContext.Instance.PlayOrPause(true);
                     }
+
+                    this.RaisePropertyChanged(nameof(this.IsPlaying));
                 },
                 () => this.VisualizationContainer.Navigator.CursorMode != CursorMode.Live || (this.psiStudioPipelinePluginInstance != null && this.psiStudioPipelinePluginInstance.IsRunning));
 

@@ -434,6 +434,74 @@ namespace Microsoft.Psi.Visualization
         }
 
         /// <summary>
+        /// Asynchronously opens a previously persisted dataset or store.
+        /// </summary>
+        /// <param name="dataset">Dataset to visualize.</param>
+        /// <param name="showStatusWindow">Indicates whether to show the status window.</param>
+        /// <param name="autoSave">Indicates whether to enable autosave.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task OpenDataset(Dataset dataset, bool showStatusWindow, bool autoSave)
+        {
+            var toto = Task.Run(() =>
+            {
+                this.DatasetViewModel = new DatasetViewModel(dataset);
+            });
+
+            await toto.ConfigureAwait(true);
+
+            // If the dataset view model contains invalid partitions, provide a notification.
+            if (this.DatasetViewModel.ContainsInvalidPartitions)
+            {
+                // Select the partitions with errors
+                var partitionsWithErrors = this.DatasetViewModel.SessionViewModels
+                    .Where(s => s.ContainsInvalidPartitions)
+                    .SelectMany(s => s.PartitionViewModels.Where(p => !p.IsValidPartition).Select(p => (s.Name, p.Name)));
+
+                new MessageBoxWindow(
+                    Application.Current.MainWindow,
+                    "Dataset Load Error",
+                    $"Errors were encoutered while trying to load the following {partitionsWithErrors.Count()} partition(s):",
+                    "Close",
+                    null,
+                    string.Join(Environment.NewLine, partitionsWithErrors.Select(t => $"Session: {t.Item1},  Partition: {t.Item2}")))
+                    .ShowDialog();
+            }
+
+            try
+            {
+                // this.DatasetViewModels.Clear();
+                this.DatasetViewModels.Add(this.DatasetViewModel);
+
+                // Check for live partitions
+                this.DatasetViewModel.UpdateLivePartitionStatuses();
+
+                // Search for a live partition and visualize it if found.
+                foreach (SessionViewModel sessionViewModel in this.DatasetViewModel.SessionViewModels)
+                {
+                    if (sessionViewModel.ContainsLivePartitions)
+                    {
+                        this.DatasetViewModel.VisualizeSession(sessionViewModel);
+                        return;
+                    }
+                }
+
+                // Else pick the first session (if there is one) will already have been selected in the dataset, so visualize it.
+                this.DatasetViewModel.VisualizeSession(this.DatasetViewModel.CurrentSessionViewModel);
+            }
+            catch (Exception e)
+            {
+                // create an empty dataset
+                this.DatasetViewModels.Clear();
+                this.DatasetViewModel = new DatasetViewModel();
+                this.DatasetViewModels.Add(this.DatasetViewModel);
+
+                // catch and display any exceptions that occurred during the open dataset operation
+                var exception = e.InnerException ?? e;
+                MessageBox.Show(exception.Message, exception.GetType().Name, MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
         /// Pause or resume playback.
         /// </summary>
         /// <param name="fromSelectionStart">If true, playback starts from selection start, otherwise, it starts from cursor.</param>

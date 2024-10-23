@@ -330,11 +330,17 @@ namespace Microsoft.Psi.Visualization.ViewModels
         /// Initializes a new instance of the <see cref="DatasetViewModel"/> class.
         /// </summary>
         /// <param name="dataset">The dataset for which to create the view model.</param>
-        public DatasetViewModel(Dataset dataset)
+        /// <param name="updateOnChange">boolean to set if the visualisation is updated on change.</param>
+        public DatasetViewModel(Dataset dataset, bool updateOnChange = false)
         {
             this.PropertyChanged += this.OnPropertyChanged;
 
             this.dataset = dataset;
+            if (updateOnChange)
+            {
+                this.dataset.DatasetChanged += this.UpdateOnDatasetChanged;
+            }
+
             this.internalSessionViewModels = new ObservableCollection<SessionViewModel>();
             this.sessionViewModels = new ReadOnlyObservableCollection<SessionViewModel>(this.internalSessionViewModels);
             foreach (var item in this.dataset.Sessions)
@@ -1141,6 +1147,15 @@ namespace Microsoft.Psi.Visualization.ViewModels
             if (e.PropertyName == nameof(this.ShowAuxiliaryDatasetInfo))
             {
                 this.UpdateAuxiliaryInfo();
+            }
+        }
+
+        private void UpdateOnDatasetChanged(object sender, EventArgs e)
+        {
+            Dataset dataset = sender as Dataset;
+            if (dataset != null)
+            {
+                this.Update(dataset);
             }
         }
 

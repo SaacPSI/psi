@@ -187,10 +187,10 @@
                         <Image.Style>
                             <Style TargetType="Image">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding VisualizationContainer.Navigator.IsCursorModePlayback}" Value="True">
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
                                         <Setter Property="Source" Value="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=stop.png}"/>
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding VisualizationContainer.Navigator.IsCursorModePlayback}" Value="False">
+                                    <DataTrigger Binding="{Binding IsPlaying}" Value="False">
                                         <Setter Property="Source" Value="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=play.png}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -200,10 +200,10 @@
                     <Button.Style>
                         <Style TargetType="Button">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding VisualizationContainer.Navigator.IsCursorModePlayback}" Value="True">
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
                                     <Setter Property="ToolTip" Value="Stop"/>
                                 </DataTrigger>
-                                <DataTrigger Binding="{Binding VisualizationContainer.Navigator.IsCursorModePlayback}" Value="False">
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="False">
                                     <Setter Property="ToolTip" Value="Play"/>
                                 </DataTrigger>
                             </Style.Triggers>

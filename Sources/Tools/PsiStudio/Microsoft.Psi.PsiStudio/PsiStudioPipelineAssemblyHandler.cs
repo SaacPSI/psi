@@ -8,6 +8,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Linq;
     using System.Reflection;
     using System.Windows;
+    using Microsoft.Psi.Data;
     using Microsoft.Psi.Visualization.Windows;
 
     /// <summary>
@@ -152,13 +153,13 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Get the fullname of the dataset.
         /// </summary>
-        /// <returns>Return the path of the dataset or null, if the dataset is not created.</returns>
-        public string GetDatasetPath()
+        /// <returns>Return the dataset or null, if the dataset is not created.</returns>
+        public Dataset GetDataset()
         {
             var ret = this.SecureInvoke(ref this.getDatasetMethod);
             if (ret != null)
             {
-                return (string)ret;
+                return (Dataset)ret;
             }
 
             return null;

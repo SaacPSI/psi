@@ -68,6 +68,7 @@ namespace PsiStudioTestPipeline
         }
 
         private Pipeline pipeline;
+        private Dataset dataset;
 
         public PipelineSetting()
         {
@@ -75,9 +76,9 @@ namespace PsiStudioTestPipeline
             DataContext = this;
         }
 
-        public string GetDataset()
+        public Dataset GetDataset()
         {
-            return Path.Combine(DatasetPath, DatasetName);
+            return dataset;
         }
 
         public void RunPipeline()
@@ -86,7 +87,7 @@ namespace PsiStudioTestPipeline
                 throw new Exception("Argument(s) missing!");
             pipeline = Pipeline.Create("WebcamAndStore");
             string datasetPath = Path.Combine(DatasetPath, DatasetName);
-            Dataset dataset;
+
             if (File.Exists(datasetPath))
                 dataset = Dataset.Load(datasetPath);
             else

@@ -821,7 +821,10 @@ namespace Microsoft.Psi.Visualization.Navigation
         private void StopPlaybackMode()
         {
             // Pause the playback timer
-            this.playbackTimer.Stop();
+            if (this.playbackTimer != null)
+            {
+                this.playbackTimer.Stop();
+            }
 
             // If we have an audio playback pipeline that's still running
             if (this.audioPlaybackPipeline != null && this.audioPlaybackPipeline.IsRunning)
