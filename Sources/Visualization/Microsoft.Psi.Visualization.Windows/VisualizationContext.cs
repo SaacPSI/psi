@@ -469,7 +469,7 @@ namespace Microsoft.Psi.Visualization
 
             try
             {
-                // this.DatasetViewModels.Clear();
+                this.DatasetViewModels.Clear();
                 this.DatasetViewModels.Add(this.DatasetViewModel);
 
                 // Check for live partitions
