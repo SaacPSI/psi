@@ -57,10 +57,14 @@ namespace Microsoft.Psi.Visualization.Windows
         {
             if (this.PipelinePluginPath != null)
             {
-                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath, true);
+                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
             }
 
-            this.DialogResult = true;
+            if (this.PsiStudioPipeline != null)
+            {
+                this.DialogResult = true;
+            }
+
             e.Handled = true;
         }
 
@@ -95,6 +99,22 @@ namespace Microsoft.Psi.Visualization.Windows
             {
                 this.PipelinePluginPath = (((string, string))selection).Item2;
             }
+        }
+
+        private void Plugins_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var selection = this.plugins.SelectedItem;
+            if (selection != null)
+            {
+                this.PipelinePluginPath = (((string, string))selection).Item2;
+                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
+                if (this.PsiStudioPipeline != null)
+                {
+                    this.DialogResult = true;
+                }
+            }
+
+            e.Handled = true;
         }
     }
 }

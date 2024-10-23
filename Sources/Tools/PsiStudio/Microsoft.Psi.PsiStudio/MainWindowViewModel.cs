@@ -293,7 +293,7 @@ namespace Microsoft.Psi.PsiStudio
                             }
 
                             // Wait a little to make sure the pipeline plugin to run.
-                            Thread.Sleep(1000);
+                            Thread.Sleep(5000);
                             await VisualizationContext.Instance.OpenDatasetOrStoreAsync(this.psiStudioPipelinePluginInstance.GetDatasetPath(), false, false);
                             this.Settings.AddMostRecentlyUsedDatasetFilename(this.psiStudioPipelinePluginInstance.GetDatasetPath());
                             VisualizationContext.Instance.PlayOrPause(true);

@@ -21,7 +21,7 @@
 
     <StackPanel Orientation="Vertical" Width="600" Margin="5">
         <TextBlock Margin="5" Name="WarningLine1" TextWrapping="Wrap"/>
-        <ListView Margin="10" Name="plugins" SelectionChanged="Plugins_SelectionChanged">
+        <ListView Margin="10" Name="plugins" SelectionChanged="Plugins_SelectionChanged" MouseDoubleClick="Plugins_MouseDoubleClick">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" Width="120" DisplayMemberBinding="{Binding Item1}" />
