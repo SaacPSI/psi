@@ -444,7 +444,7 @@ namespace Microsoft.Psi.Visualization
         {
             await Task.Run(() =>
             {
-                this.DatasetViewModel = new DatasetViewModel(dataset);
+                this.DatasetViewModel = new DatasetViewModel(dataset, false);
             });
 
             // If the dataset view model contains invalid partitions, provide a notification.

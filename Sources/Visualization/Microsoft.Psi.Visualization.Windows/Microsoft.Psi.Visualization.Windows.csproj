@@ -37,6 +37,7 @@
     <None Remove="Icons\dataset-remove.png" />
     <None Remove="Icons\dataset-repairing.png" />
     <None Remove="Icons\dataset-save.png" />
+	<None Remove="Icons\dataset-update.png" />
     <None Remove="Icons\dataset.png" />
     <None Remove="Icons\diagnostics-live.png" />
     <None Remove="Icons\diagnostics.png" />
@@ -387,6 +388,7 @@
     <Resource Include="Icons\dataset-remove.png" />
     <Resource Include="Icons\dataset-repairing.png" />
     <Resource Include="Icons\dataset-save.png" />
+	<Resource Include="Icons\dataset-update.png" />
     <Resource Include="Icons\dataset.png" />
     <Resource Include="Icons\diagnostics-live.png" />
     <Resource Include="Icons\diagnostics.png" />

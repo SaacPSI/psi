@@ -324,6 +324,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
         private RelayCommand addSessionFromFileCommand;
         private RelayCommand addSessionFromFolderCommand;
         private RelayCommand addMultipleSessionsFromFolderCommand;
+        private RelayCommand updateDatasetCommand;
         private RelayCommand<Grid> contextMenuOpeningCommand;
 
         /// <summary>
@@ -444,6 +445,13 @@ namespace Microsoft.Psi.Visualization.ViewModels
         [Browsable(false)]
         public RelayCommand<Grid> ContextMenuOpeningCommand =>
             this.contextMenuOpeningCommand ??= new RelayCommand<Grid>(panel => panel.ContextMenu = this.CreateContextMenu());
+
+        /// <summary>
+        ///  Gets the update called the dataset in case of plugin pipeline.
+        /// </summary>
+        [Browsable(false)]
+        public RelayCommand UpdateDatasetCommand =>
+            this.updateDatasetCommand ??= new RelayCommand(async () => await this.UpdateAsync());
 
         /// <summary>
         /// Gets the auxiliary info.
@@ -575,43 +583,12 @@ namespace Microsoft.Psi.Visualization.ViewModels
         /// <param name="dataset">The new dataset.</param>
         public void Update(Dataset dataset)
         {
-            this.dataset = dataset;
-
-            var oldSessions = new HashSet<SessionViewModel>();
-            foreach (var existingSession in this.internalSessionViewModels)
+            if (this.dataset != dataset)
             {
-                oldSessions.Add(existingSession);
+                this.dataset = dataset;
             }
 
-            foreach (var session in this.dataset.Sessions)
-            {
-                var existingSession = this.internalSessionViewModels.FirstOrDefault(s => s.Name == session.Name);
-                if (existingSession != null)
-                {
-                    existingSession.Update(session);
-                    oldSessions.Remove(existingSession);
-                }
-                else
-                {
-                    this.internalSessionViewModels.Add(new SessionViewModel(this, session));
-                }
-            }
-
-            // The sessions remaining in oldSessions at this point are the ones that need to be removed.
-            // If the current session happens to be among them, change it to the first session.
-            if (oldSessions.Contains(this.currentSessionViewModel))
-            {
-                this.currentSessionViewModel = null;
-            }
-
-            // Now remove all the old sessions that are no longer in the dataset
-            foreach (var session in oldSessions)
-            {
-                this.internalSessionViewModels.Remove(session);
-            }
-
-            // now set the current session if null
-            this.currentSessionViewModel ??= this.internalSessionViewModels.FirstOrDefault();
+            this.Update();
         }
 
         /// <summary>
@@ -1026,6 +1003,69 @@ namespace Microsoft.Psi.Visualization.ViewModels
             }
         }
 
+        private async Task<bool> UpdateAsync()
+        {
+            return await Task<bool>.Run(() =>
+            {
+               return this.Update();
+            });
+        }
+
+        private bool Update()
+        {
+            bool asChanged = false;
+            var oldSessions = new HashSet<SessionViewModel>();
+            foreach (var existingSession in this.internalSessionViewModels)
+            {
+                oldSessions.Add(existingSession);
+            }
+
+            foreach (var session in this.dataset.Sessions)
+            {
+                var existingSession = this.internalSessionViewModels.FirstOrDefault(s => s.Name == session.Name);
+                if (existingSession != null)
+                {
+                    existingSession.Update(session);
+                    oldSessions.Remove(existingSession);
+                }
+                else
+                {
+                    this.internalSessionViewModels.Add(new SessionViewModel(this, session));
+                    asChanged = true;
+                }
+            }
+
+            // The sessions remaining in oldSessions at this point are the ones that need to be removed.
+            // If the current session happens to be among them, change it to the first session.
+            if (oldSessions.Contains(this.currentSessionViewModel))
+            {
+                this.currentSessionViewModel = null;
+
+                // Search for a live partition and visualize it if found.
+                foreach (SessionViewModel sessionViewModel in this.SessionViewModels)
+                {
+                    if (sessionViewModel.ContainsLivePartitions)
+                    {
+                        this.VisualizeSession(sessionViewModel);
+                        break;
+                    }
+                }
+
+                asChanged = true;
+            }
+
+            // Now remove all the old sessions that are no longer in the dataset
+            foreach (var session in oldSessions)
+            {
+                this.internalSessionViewModels.Remove(session);
+                asChanged = true;
+            }
+
+            // now set the current session if null
+            this.currentSessionViewModel ??= this.internalSessionViewModels.FirstOrDefault();
+            return asChanged;
+        }
+
         private SessionViewModel AddSession(Session session)
         {
             var sessionViewModel = new SessionViewModel(this, session);
@@ -1152,10 +1192,9 @@ namespace Microsoft.Psi.Visualization.ViewModels
 
         private void UpdateOnDatasetChanged(object sender, EventArgs e)
         {
-            Dataset dataset = sender as Dataset;
-            if (dataset != null)
+            if (this.UpdateDatasetCommand.CanExecute(sender))
             {
-                this.Update(dataset);
+                this.UpdateDatasetCommand.Execute(sender);
             }
         }
 

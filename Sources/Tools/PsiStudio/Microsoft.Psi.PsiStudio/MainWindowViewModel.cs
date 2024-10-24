@@ -147,6 +147,7 @@ namespace Microsoft.Psi.PsiStudio
         private RelayCommand expandVisualizationsTreeCommand;
         private RelayCommand collapseVisualizationsTreeCommand;
         private RelayCommand synchronizeTreesCommand;
+        private RelayCommand updateCurrentDatasetTreesCommand;
         private RelayCommand<RoutedPropertyChangedEventArgs<object>> selectedVisualizationChangedCommand;
         private RelayCommand<RoutedPropertyChangedEventArgs<object>> selectedDatasetChangedCommand;
         private RelayCommand<string> treeSelectedCommand;
@@ -719,6 +720,14 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand SynchronizeTreesCommand
             => this.synchronizeTreesCommand ??= new RelayCommand(this.SynchronizeDatasetsTreeToVisualizationsTree);
+
+        /// <summary>
+        /// Gets the update the current data trees command.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand UpdateCurrentDatasetTreesCommand
+            => this.updateCurrentDatasetTreesCommand ??= new RelayCommand(this.UpdateCurrentDataset);
 
         /// <summary>
         /// Gets the selected visualization changed command.
@@ -1518,6 +1527,14 @@ namespace Microsoft.Psi.PsiStudio
                         }
                     }
                 }
+            }
+        }
+
+        private void UpdateCurrentDataset()
+        {
+            if (VisualizationContext.Instance.DatasetViewModel != null)
+            {
+                VisualizationContext.Instance.DatasetViewModel.Update(VisualizationContext.Instance.DatasetViewModel.Dataset);
             }
         }
 

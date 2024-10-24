@@ -298,6 +298,9 @@
                                         <Button Command="{Binding ExpandDatasetsTreeCommand}" Margin="4, 4, 0, 4" ToolTip="Expand all nodes" AutomationProperties.Name="ExpandDatasetsButton">
                                             <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=expand-all.png}"/>
                                         </Button>
+                                        <Button Command="{Binding UpdateCurrentDatasetTreesCommand}" Margin="4, 4, 0, 4" ToolTip="Update current dataset">
+                                            <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=dataset-update.png}"/>
+                                        </Button>
                                     </StackPanel>
                                 </Border>
                                 <TreeView 
