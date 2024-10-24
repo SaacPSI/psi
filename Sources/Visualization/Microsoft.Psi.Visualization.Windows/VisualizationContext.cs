@@ -442,12 +442,10 @@ namespace Microsoft.Psi.Visualization
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task OpenDataset(Dataset dataset, bool showStatusWindow, bool autoSave)
         {
-            var toto = Task.Run(() =>
+            await Task.Run(() =>
             {
                 this.DatasetViewModel = new DatasetViewModel(dataset);
             });
-
-            await toto.ConfigureAwait(true);
 
             // If the dataset view model contains invalid partitions, provide a notification.
             if (this.DatasetViewModel.ContainsInvalidPartitions)
