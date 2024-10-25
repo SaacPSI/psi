@@ -10,9 +10,11 @@ namespace Microsoft.Psi.Visualization.ViewModels
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Threading;
     using GalaSoft.MvvmLight.CommandWpf;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Visualization;
@@ -1192,10 +1194,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
 
         private void UpdateOnDatasetChanged(object sender, EventArgs e)
         {
-            if (this.UpdateDatasetCommand.CanExecute(sender))
-            {
-                this.UpdateDatasetCommand.Execute(sender);
-            }
+            Application.Current.Dispatcher.BeginInvoke(new Action(() => { this.Update(); }), DispatcherPriority.Normal, null);
         }
 
         private void UpdateAuxiliaryInfo()

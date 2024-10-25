@@ -120,7 +120,7 @@
                 <Separator />
                 <MenuItem Header="_View Additional Assembly Load Error Log ..." Height="25" Command="{Binding ViewAdditionalAssemblyLoadErrorLogCommand}"/>
                 <Separator />
-                <MenuItem Header="_Exit" Command="{Binding ExitCommand}" Height="25"/>
+                <MenuItem Header="_Exit" Command="{Binding ClosedCommand}" Height="25"/>
             </MenuItem>
         </Menu>
 
