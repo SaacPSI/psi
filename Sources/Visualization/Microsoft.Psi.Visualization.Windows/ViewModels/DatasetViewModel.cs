@@ -583,6 +583,9 @@ namespace Microsoft.Psi.Visualization.ViewModels
             }
 
             this.Update();
+
+            // now set the current session if null
+            this.currentSessionViewModel ??= this.internalSessionViewModels.FirstOrDefault();
         }
 
         /// <summary>
@@ -1023,7 +1026,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
 
             // The sessions remaining in oldSessions at this point are the ones that need to be removed.
             // If the current session happens to be among them, change it to the first session.
-            if (oldSessions.Contains(this.currentSessionViewModel))
+            if (oldSessions.Contains(this.currentSessionViewModel) || this.currentSessionViewModel == null)
             {
                 this.currentSessionViewModel = null;
 
@@ -1033,6 +1036,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
                     if (sessionViewModel.ContainsLivePartitions)
                     {
                         this.VisualizeSession(sessionViewModel);
+                        VisualizationContext.Instance.ToggleLiveMode();
                         break;
                     }
                 }
@@ -1047,8 +1051,6 @@ namespace Microsoft.Psi.Visualization.ViewModels
                 asChanged = true;
             }
 
-            // now set the current session if null
-            this.currentSessionViewModel ??= this.internalSessionViewModels.FirstOrDefault();
             return asChanged;
         }
 
