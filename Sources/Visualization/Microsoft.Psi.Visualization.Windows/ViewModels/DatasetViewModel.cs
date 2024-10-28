@@ -326,7 +326,6 @@ namespace Microsoft.Psi.Visualization.ViewModels
         private RelayCommand addSessionFromFileCommand;
         private RelayCommand addSessionFromFolderCommand;
         private RelayCommand addMultipleSessionsFromFolderCommand;
-        private RelayCommand updateDatasetCommand;
         private RelayCommand<Grid> contextMenuOpeningCommand;
 
         /// <summary>
@@ -447,13 +446,6 @@ namespace Microsoft.Psi.Visualization.ViewModels
         [Browsable(false)]
         public RelayCommand<Grid> ContextMenuOpeningCommand =>
             this.contextMenuOpeningCommand ??= new RelayCommand<Grid>(panel => panel.ContextMenu = this.CreateContextMenu());
-
-        /// <summary>
-        ///  Gets the update called the dataset in case of plugin pipeline.
-        /// </summary>
-        [Browsable(false)]
-        public RelayCommand UpdateDatasetCommand =>
-            this.updateDatasetCommand ??= new RelayCommand(async () => await this.UpdateAsync());
 
         /// <summary>
         /// Gets the auxiliary info.
@@ -1003,14 +995,6 @@ namespace Microsoft.Psi.Visualization.ViewModels
             {
                 sessionViewModel.UpdateLivePartitionStatuses();
             }
-        }
-
-        private async Task<bool> UpdateAsync()
-        {
-            return await Task<bool>.Run(() =>
-            {
-               return this.Update();
-            });
         }
 
         private bool Update()
