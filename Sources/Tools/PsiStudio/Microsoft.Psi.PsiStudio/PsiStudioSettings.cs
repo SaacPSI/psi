@@ -141,6 +141,11 @@ namespace Microsoft.Psi.PsiStudio
         public bool AutoLoadMostRecentlyUsedFileOnStartUp { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets a value indicating whether to automatically refresh the dataset from plugins on change events.
+        /// </summary>
+        public bool AutoRefreshDatasetOnChangeFromPlugin { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the most recently used file is a dataset or a store.
         /// </summary>
         public bool MostRecentlyUsedFileIsDataset { get; set; } = true;

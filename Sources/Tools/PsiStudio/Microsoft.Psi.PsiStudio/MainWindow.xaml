@@ -300,6 +300,18 @@
                                         </Button>
                                         <Button Command="{Binding UpdateCurrentDatasetTreesCommand}" Margin="4, 4, 0, 4" ToolTip="Update current dataset">
                                             <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=dataset-update.png}"/>
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ShowUpdateDatasetButton}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding ShowUpdateDatasetButton}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
                                         </Button>
                                     </StackPanel>
                                 </Border>

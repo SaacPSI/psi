@@ -437,14 +437,13 @@ namespace Microsoft.Psi.Visualization
         /// Asynchronously opens a previously persisted dataset or store.
         /// </summary>
         /// <param name="dataset">Dataset to visualize.</param>
-        /// <param name="showStatusWindow">Indicates whether to show the status window.</param>
-        /// <param name="autoSave">Indicates whether to enable autosave.</param>
+        /// <param name="autoRefresh">Indicates whether to enable the onChange update.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task OpenDataset(Dataset dataset, bool showStatusWindow, bool autoSave)
+        public async Task OpenDataset(Dataset dataset, bool autoRefresh)
         {
             await Task.Run(() =>
             {
-                this.DatasetViewModel = new DatasetViewModel(dataset, true);
+                this.DatasetViewModel = new DatasetViewModel(dataset, autoRefresh);
             });
 
             // If the dataset view model contains invalid partitions, provide a notification.

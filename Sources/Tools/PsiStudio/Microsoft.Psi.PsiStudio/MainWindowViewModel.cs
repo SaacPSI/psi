@@ -256,6 +256,11 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets a value indicating whether we're currently running a pipeline plugin or playing a playback.
         /// </summary>
+        public bool ShowUpdateDatasetButton => this.psiStudioPipelinePluginInstance != null && !this.Settings.AutoRefreshDatasetOnChangeFromPlugin;
+
+        /// <summary>
+        /// Gets a value indicating whether we're currently running a pipeline plugin or playing a playback.
+        /// </summary>
         public bool IsPlaying => (this.psiStudioPipelinePluginInstance != null && this.psiStudioPipelinePluginInstance.IsRunning) || this.VisualizationContainer.Navigator.IsCursorModePlayback;
 
         /// <summary>
@@ -293,7 +298,7 @@ namespace Microsoft.Psi.PsiStudio
                                 return;
                             }
 
-                            await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), true, false);
+                            await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
                             VisualizationContext.Instance.PlayOrPause(false);
                         }
                     }
@@ -1728,6 +1733,7 @@ namespace Microsoft.Psi.PsiStudio
 
                 // Give a feedback that the assembly is loaded correctly by displaying the window.
                 this.psiStudioPipelinePluginInstance.ShowWindow();
+                this.RaisePropertyChanged(nameof(this.ShowUpdateDatasetButton));
             }
 
             psiStudioPipelinePluginsWindow.Close();
