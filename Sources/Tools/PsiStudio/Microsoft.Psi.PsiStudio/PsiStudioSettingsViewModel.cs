@@ -45,6 +45,7 @@ namespace Microsoft.Psi.PsiStudio
             this.AutoLoadMostRecentlyUsedFileOnStartUp = psiStudioSettings.AutoLoadMostRecentlyUsedFileOnStartUp;
             this.MostRecentlyUsedDatasetFilenames = psiStudioSettings.MostRecentlyUsedDatasetFilenames;
             this.MostRecentlyUsedStoreFilenames = psiStudioSettings.MostRecentlyUsedStoreFilenames;
+            this.AutoRefreshDatasetOnChangeFromPlugin = psiStudioSettings.AutoRefreshDatasetOnChangeFromPlugin;
 
             // Generate a copy of the additional assemblies list
             this.AdditionalAssembliesAsStringList = psiStudioSettings.AdditionalAssemblies.ToList();
@@ -229,6 +230,14 @@ namespace Microsoft.Psi.PsiStudio
         [DisplayName("Show Error Log when Loading Additional Assemblies")]
         [Description("Indicates whether to show the error log when errors occur while loading third party assemblies or code.")]
         public bool ShowErrorLogOnLoadingAdditionalAssemblies { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to automatically refresh the dataset from plugins on change events.
+        /// </summary>
+        [PropertyOrder(13)]
+        [DisplayName("Update Dataset from OnChange event (plugin pipeline)")]
+        [Description("Indicates whether to update the dataset visualization from internal Dataset event.")]
+        public bool AutoRefreshDatasetOnChangeFromPlugin { get; set; } = true;
 
         /// <summary>
         /// Gets the validation errors for this object.
