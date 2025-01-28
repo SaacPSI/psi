@@ -259,6 +259,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaApp", "Applications\Si
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaComputeServer", "Applications\Sigma\SigmaComputeServer\SigmaComputeServer.csproj", "{365D836D-AD15-428C-96D1-6C4870525FEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{F43253BE-7856-4E24-AB10-2C22912B16B9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{825B11E7-9BF3-43B7-9BCE-4309EE404AEE} = {825B11E7-9BF3-43B7-9BCE-4309EE404AEE}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -577,6 +582,10 @@ Global
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F43253BE-7856-4E24-AB10-2C22912B16B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F43253BE-7856-4E24-AB10-2C22912B16B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F43253BE-7856-4E24-AB10-2C22912B16B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F43253BE-7856-4E24-AB10-2C22912B16B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
