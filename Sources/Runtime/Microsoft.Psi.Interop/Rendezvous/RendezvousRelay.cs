@@ -4,8 +4,10 @@
 namespace Microsoft.Psi.Interop.Rendezvous
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using Microsoft.Psi.Remoting;
 
     /// <summary>
@@ -167,15 +169,19 @@ namespace Microsoft.Psi.Interop.Rendezvous
 
             // read endpoint info
             var endpointCount = reader.ReadInt32();
+            Trace.WriteLine($"ReadProcess -> Process {processName} version {processVersion}, endpointCount {endpointCount}");
             for (var i = 0; i < endpointCount; i++)
             {
                 Rendezvous.Endpoint endpoint;
-                switch (reader.ReadByte())
+                byte type = reader.ReadByte();
+                Trace.WriteLine($"ReadProcess -> Endpoint {i} type {type}");
+                switch (type)
                 {
                     case 0: // TcpEndpoint
                         var address = reader.ReadString();
                         var port = reader.ReadInt32();
                         endpoint = new Rendezvous.TcpSourceEndpoint(address, port);
+                        Trace.WriteLine($"ReadProcess -> TcpSourceEndpoint {address}:{port}");
                         break;
                     case 1: // NetMQEndpoint
                         endpoint = new Rendezvous.NetMQSourceEndpoint(reader.ReadString());
@@ -192,7 +198,7 @@ namespace Microsoft.Psi.Interop.Rendezvous
                         endpoint = new Rendezvous.RemoteClockExporterEndpoint(host, port);
                         break;
                     default:
-                        throw new Exception("Unknown type of Endpoint.");
+                        throw new Exception($"Unknown type of Endpoint from {processName}.");
                 }
 
                 // read stream info
