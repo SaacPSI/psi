@@ -293,12 +293,16 @@ namespace Microsoft.Psi.PsiStudio
                         }
                         else
                         {
-                            if (this.psiStudioPipelinePluginInstance.RunPipeline() == false)
+                            if (this.psiStudioPipelinePluginInstance.RunPipeline(this.VisualizationContainer.Navigator.Cursor) == false)
                             {
                                 return;
                             }
 
-                            await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
+                            if (this.psiStudioPipelinePluginInstance.IsReplayable() == false)
+                            {
+                                await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
+                            }
+
                             VisualizationContext.Instance.PlayOrPause(false);
                         }
                     }
@@ -1655,7 +1659,7 @@ namespace Microsoft.Psi.PsiStudio
             }
         }
 
-        private void PipelinePluginsWindow()
+        private async void PipelinePluginsWindow()
         {
             var psiStudioPipelinePluginsWindow = new PiplinePluginsWindow(Application.Current.MainWindow, this.Settings.AdditionalPlugins);
 
@@ -1672,6 +1676,14 @@ namespace Microsoft.Psi.PsiStudio
                 if (!this.Settings.AdditionalPlugins.Contains(psiStudioPipelinePluginsWindow.PipelinePluginPath))
                 {
                     this.Settings.AdditionalPlugins.Add(psiStudioPipelinePluginsWindow.PipelinePluginPath);
+                }
+
+                // *** DATASET ***
+                // Checking if the plugin is a replayable one
+                if (this.psiStudioPipelinePluginInstance.IsReplayable())
+                {
+                    // Open the dataset to be able to explore the data
+                    await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
                 }
 
                 // **** LAYOUT ****

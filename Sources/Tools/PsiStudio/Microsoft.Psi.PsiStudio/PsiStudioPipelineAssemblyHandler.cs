@@ -17,15 +17,15 @@ namespace Microsoft.Psi.PsiStudio
     public class PsiStudioPipelineAssemblyHandler
     {
         private object assemblyInstance;
-
         private MethodInfo showMethod;
         private MethodInfo getDatasetMethod;
         private MethodInfo runPipelineMethod;
         private MethodInfo stopPipelineMethod;
         private MethodInfo layoutMethod;
         private MethodInfo annotationMethod;
+        private MethodInfo isReplayableMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null, in MethodInfo isReplayableMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
@@ -34,6 +34,7 @@ namespace Microsoft.Psi.PsiStudio
             this.stopPipelineMethod = stopPipelineMethod;
             this.layoutMethod = layoutMethod;
             this.annotationMethod = annotationMethod;
+            this.isReplayableMethod = isReplayableMethod;
             this.IsRunning = false;
             this.Name = name;
         }
@@ -111,7 +112,10 @@ namespace Microsoft.Psi.PsiStudio
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo annotationMethod = GetMethod(classDefinition, "GetAnnotation", true);
 
-                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), windowMethod, storeMethod, runMethod, stopMethod, layoutMethod, annotationMethod);
+                // Make a late-bound call to an instance method of the object.
+                MethodInfo isReplayble = GetMethod(classDefinition, "IsReplayble", true);
+
+                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), windowMethod, storeMethod, runMethod, stopMethod, layoutMethod, annotationMethod, isReplayble);
             }
             catch (Exception ex)
             {
@@ -138,6 +142,7 @@ namespace Microsoft.Psi.PsiStudio
             this.stopPipelineMethod = null;
             this.layoutMethod = null;
             this.annotationMethod = null;
+            this.isReplayableMethod = null;
             this.IsRunning = false;
             this.Name = null;
         }
@@ -169,7 +174,8 @@ namespace Microsoft.Psi.PsiStudio
         /// Start the pipeline.
         /// </summary>
         /// <returns>Return True if done, False otherwise.</returns>
-        public bool RunPipeline()
+        /// <param name="startTime">Start the replay at this time (if valid).</param>
+        public bool RunPipeline(DateTime startTime = default)
         {
             if (this.IsRunning)
             {
@@ -177,7 +183,9 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             this.IsRunning = true;
-            return this.SecureInvokeBool(ref this.runPipelineMethod);
+#pragma warning disable SA1010 // Opening square brackets should be spaced correctly
+            return this.SecureInvokeBool(ref this.runPipelineMethod, [startTime]);
+#pragma warning restore SA1010 // Opening square brackets should be spaced correctly
         }
 
         /// <summary>
@@ -231,6 +239,15 @@ namespace Microsoft.Psi.PsiStudio
             return null;
         }
 
+        /// <summary>
+        /// Get if the application will replay a dataset.
+        /// </summary>
+        /// <returns>Return true if it's a replayable pipeline, false otherwise.</returns>
+        public bool IsReplayable()
+        {
+            return this.SecureInvokeBool(ref this.isReplayableMethod);
+        }
+
         private static MethodInfo GetMethod(Type classDefinition, string methodName, bool canBeNull = false)
         {
             MethodInfo method = classDefinition.GetMethod(methodName);
@@ -242,7 +259,7 @@ namespace Microsoft.Psi.PsiStudio
             return method;
         }
 
-        private object SecureInvoke(ref MethodInfo method)
+        private object SecureInvoke(ref MethodInfo method, object[] args = null)
         {
             if (method == null)
             {
@@ -256,7 +273,7 @@ namespace Microsoft.Psi.PsiStudio
 
             try
             {
-                return method.Invoke(this.assemblyInstance, null);
+                return method.Invoke(this.assemblyInstance, args);
             }
             catch (Exception ex)
             {
@@ -270,7 +287,7 @@ namespace Microsoft.Psi.PsiStudio
             return null;
         }
 
-        private bool SecureInvokeBool(ref MethodInfo method)
+        private bool SecureInvokeBool(ref MethodInfo method, object[] args = null)
         {
             if (method == null)
             {
@@ -284,7 +301,7 @@ namespace Microsoft.Psi.PsiStudio
 
             try
             {
-                method.Invoke(this.assemblyInstance, null);
+                method.Invoke(this.assemblyInstance, args);
             }
             catch (Exception ex)
             {
