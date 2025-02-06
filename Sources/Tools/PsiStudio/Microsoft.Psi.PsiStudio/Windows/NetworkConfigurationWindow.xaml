@@ -84,17 +84,17 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" Target="{Binding ElementName=IsActive}">Is Active</Label>
+            <Label Grid.Row="0" Grid.Column="0">Is Active</Label>
             <CheckBox Grid.Row="0" Grid.Column="1" Name="IsNetworkActive"></CheckBox>
-            <Label Grid.Row="1" Grid.Column="0" Target="{Binding ElementName=IsActive}">Is Using TCPWriters</Label>
+            <Label Grid.Row="1" Grid.Column="0">Is Using TCPWriters</Label>
             <CheckBox Grid.Row="1" Grid.Column="1" Name="IsUsingTCPWriters"></CheckBox>
-            <Label Grid.Row="2" Grid.Column="0" Target="{Binding ElementName=LayoutNameTextBox}">Endpoint Address</Label>
+            <Label Grid.Row="2" Grid.Column="0">Endpoint Address</Label>
             <TextBox Grid.Row="2" Grid.Column="1" Name="EndpointAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=LayoutNameTextBox}">RendezVous Port</Label>
+            <Label Grid.Row="3" Grid.Column="0">RendezVous Port</Label>
             <TextBox Grid.Row="3" Grid.Column="1" Name="RendezVousPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="4" Grid.Column="0" Target="{Binding ElementName=LayoutNameTextBox}">Exporter Starting Port</Label>
+            <Label Grid.Row="4" Grid.Column="0">Exporter Starting Port</Label>
             <TextBox Grid.Row="4" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="5" Grid.Column="0" Target="{Binding ElementName=LayoutNameTextBox}">Process name</Label>
+            <Label Grid.Row="5" Grid.Column="0">Process name</Label>
             <TextBox Grid.Row="5" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
         </Grid>
         

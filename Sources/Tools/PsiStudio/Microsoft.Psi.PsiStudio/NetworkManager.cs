@@ -6,9 +6,6 @@ namespace Microsoft.Psi.PsiStudio
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Microsoft.Psi.Components;
-    using Microsoft.Psi.Data;
     using Microsoft.Psi.Interop.Rendezvous;
     using Microsoft.Psi.Interop.Serialization;
     using Microsoft.Psi.Interop.Transport;
@@ -55,7 +52,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (newSettings.IsActive != this.Settings.IsActive)
             {
-                this.server.Stop();
+                this.server?.Stop();
                 if (newSettings.IsActive)
                 {
                     this.server = new RendezvousServer(newSettings.RendezVousPort);
@@ -71,7 +68,7 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public void Dispose()
         {
-            this.server.Dispose();
+            this.server?.Dispose();
             foreach (IDisposable networkStream in this.networkStreams)
             {
                 networkStream.Dispose();
@@ -118,14 +115,18 @@ namespace Microsoft.Psi.PsiStudio
 
                         foreach (var streamMetadata in partition.AvailableStreams)
                         {
-                            // StreamSource source = partitionVM.CreateStreamSource(new StreamBinding(streamMetadata.StoreName, partitionVM.Name), , );
-                            // var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
-                            //    GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
-                            //    Invoke([this.currentPort, , null]);
-                            // IDisposable networkedVisu = (IDisposable)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
-                            //    GetConstructor([typeof(TcpSimpleWriter<>), typeof(StreamSource)]).
-                            //    Invoke([tcpSimpleWriter, source]);
-                            // this.networkStreams.Add(networkedVisu);
+                            StreamSource source = partitionVM.CreateStreamSource(new StreamBinding(streamMetadata.Name, partitionVM.Name), null, null);
+                            if (source == null)
+                            {
+                                continue;
+                            }
+
+                            var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
+                               GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
+                               Invoke([this.currentPort, null, null]);
+                            IDisposable networkedVisu = (IDisposable)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
+                                GetConstructors()[0].Invoke([tcpSimpleWriter, source]);
+                            this.networkStreams.Add(networkedVisu);
                             process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort));
                             this.currentPort++;
                         }

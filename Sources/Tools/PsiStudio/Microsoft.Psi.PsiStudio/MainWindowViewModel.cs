@@ -1770,7 +1770,7 @@ namespace Microsoft.Psi.PsiStudio
                 this.networkManager = new NetworkManager();
             }
 
-            NetworkConfigurationWindow psiStudioNetworkSettings = new NetworkConfigurationWindow(Application.Current.MainWindow, this.networkManager.Settings);
+            NetworkConfigurationWindow psiStudioNetworkSettings = new NetworkConfigurationWindow(Application.Current.MainWindow, this.networkManager.Settings.DeepClone());
             if (psiStudioNetworkSettings.ShowDialog() == true)
             {
                 this.networkManager.UpdateSettings(psiStudioNetworkSettings.NetworkSettings);

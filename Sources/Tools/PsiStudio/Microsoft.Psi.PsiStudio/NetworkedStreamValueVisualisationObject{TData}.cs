@@ -27,10 +27,10 @@ namespace Microsoft.Psi.PsiStudio
 
             // TODO check RelativeTimeInterval & TimeInterval.
             this.SubscriberId = DataManager.Instance.RegisterStreamValueSubscriber<TData>(
-               this.StreamSource,
-               RelativeTimeInterval.Empty,
-               this.OnValueReceived,
-               TimeInterval.Empty);
+              this.StreamSource,
+              RelativeTimeInterval.Infinite,
+              this.OnValueReceived,
+              TimeInterval.Empty);
         }
 
         /// <summary>
