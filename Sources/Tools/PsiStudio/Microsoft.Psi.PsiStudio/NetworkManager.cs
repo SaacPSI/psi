@@ -121,9 +121,14 @@ namespace Microsoft.Psi.PsiStudio
                                 continue;
                             }
 
+                            if (VisualizationContext.Instance.PluginMap.SerializationsMappings.TryGetValue(Type.GetType(streamMetadata.TypeName), out Type format) == false)
+                            {
+                                continue;
+                            }
+
                             var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
                                GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
-                               Invoke([this.currentPort, null, null]);
+                               Invoke([this.currentPort, format.GetMethod("GetFormat").Invoke(null, null), null]);
                             IDisposable networkedVisu = (IDisposable)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
                                 GetConstructors()[0].Invoke([tcpSimpleWriter, source]);
                             this.networkStreams.Add(networkedVisu);

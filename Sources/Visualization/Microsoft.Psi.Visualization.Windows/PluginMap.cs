@@ -10,6 +10,7 @@ namespace Microsoft.Psi.Visualization
     using System.Linq;
     using System.Reflection;
     using System.Windows;
+    using Microsoft.Msagl.Core.ProjectionSolver;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Visualization.Adapters;
     using Microsoft.Psi.Visualization.Summarizers;
@@ -45,6 +46,9 @@ namespace Microsoft.Psi.Visualization
         // This list of stream readers that were found during discovery.
         private readonly List<(string Name, string Extension, Type ReaderType)> streamReaders = new ();
 
+        // The list of formats classes with (de)serializing type as key.
+        private readonly Dictionary<Type, Type> formats = new ();
+
         /// <summary>
         /// Gets a value indicating whether or not Initialize() has been called.
         /// </summary>
@@ -64,6 +68,11 @@ namespace Microsoft.Psi.Visualization
         /// Gets the set of available batch processing tasks.
         /// </summary>
         public IReadOnlyList<BatchProcessingTaskMetadata> BatchProcessingTasks => this.batchProcessingTasks.AsReadOnly();
+
+        /// <summary>
+        /// Gets the available serializations.
+        /// </summary>
+        public IReadOnlyDictionary<Type, Type> SerializationsMappings => this.formats;
 
         private IEnumerable<(string Name, string Extension, Type ReaderType)> StreamReaders
         {
@@ -196,7 +205,8 @@ namespace Microsoft.Psi.Visualization
                         }
 
                         // Look through the static public method for batch processing task methods
-                        foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public))
+                        var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+                        foreach (var method in methods)
                         {
                             var parameters = method.GetParameters();
                             if (parameters.Length == 3 &&
@@ -209,6 +219,11 @@ namespace Microsoft.Psi.Visualization
                                     logWriter.WriteError($"Ignoring method batch processing task defined by method {method.Name} on type {type.FullName} in assembly {assemblyPath}. Method-defined batch processing tasks are no longer supported. Please convert this batch processing task to the class-based approach (derive a class from BatchProcessingTask<TConfiguration>).");
                                 }
                             }
+                        }
+
+                        if (methods.Length == 3 && methods[0].Name == "GetFormat" && methods[1].Name.Contains("Write") && methods[2].Name.Contains("Read"))
+                        {
+                            this.formats.Add(methods[2].ReturnType, type);
                         }
                     }
                 }
