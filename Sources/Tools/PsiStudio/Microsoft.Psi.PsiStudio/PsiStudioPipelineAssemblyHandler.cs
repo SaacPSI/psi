@@ -174,8 +174,8 @@ namespace Microsoft.Psi.PsiStudio
         /// Start the pipeline.
         /// </summary>
         /// <returns>Return True if done, False otherwise.</returns>
-        /// <param name="startTime">Start the replay at this time (if valid).</param>
-        public bool RunPipeline(DateTime startTime = default)
+        /// <param name="timeInterval">Interval for replay mode.</param>
+        public bool RunPipeline(TimeInterval timeInterval)
         {
             if (this.IsRunning)
             {
@@ -184,7 +184,7 @@ namespace Microsoft.Psi.PsiStudio
 
             this.IsRunning = true;
 #pragma warning disable SA1010 // Opening square brackets should be spaced correctly
-            return this.SecureInvokeBool(ref this.runPipelineMethod, [startTime]);
+            return this.SecureInvokeBool(ref this.runPipelineMethod, [timeInterval]);
 #pragma warning restore SA1010 // Opening square brackets should be spaced correctly
         }
 

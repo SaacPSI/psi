@@ -293,7 +293,15 @@ namespace Microsoft.Psi.PsiStudio
                         }
                         else
                         {
-                            if (this.psiStudioPipelinePluginInstance.RunPipeline(this.VisualizationContainer.Navigator.Cursor) == false)
+                            TimeInterval timeInterval = TimeInterval.Infinite;
+                            if (this.VisualizationContainer.Navigator.DataRange != null &&
+                            this.VisualizationContainer.Navigator.DataRange.StartTime != DateTime.MinValue &&
+                            this.VisualizationContainer.Navigator.DataRange.EndTime != DateTime.MaxValue)
+                            {
+                                timeInterval = new TimeInterval(this.VisualizationContainer.Navigator.DataRange.StartTime, this.VisualizationContainer.Navigator.DataRange.EndTime);
+                            }
+
+                            if (this.psiStudioPipelinePluginInstance.RunPipeline(timeInterval) == false)
                             {
                                 return;
                             }
