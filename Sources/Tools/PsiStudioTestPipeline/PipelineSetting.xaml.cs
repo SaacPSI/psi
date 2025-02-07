@@ -81,7 +81,7 @@ namespace PsiStudioTestPipeline
             return dataset;
         }
 
-        public void RunPipeline()
+        public void RunPipeline(TimeInterval timeInterval)
         {
             if (DatasetName == null || DatasetPath == null || SessionName == null)
                 throw new Exception("Argument(s) missing!");
