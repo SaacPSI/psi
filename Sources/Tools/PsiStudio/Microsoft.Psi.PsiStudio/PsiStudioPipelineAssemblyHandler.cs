@@ -18,23 +18,29 @@ namespace Microsoft.Psi.PsiStudio
     {
         private object assemblyInstance;
         private MethodInfo showMethod;
+        private MethodInfo closeMethod;
         private MethodInfo getDatasetMethod;
         private MethodInfo runPipelineMethod;
         private MethodInfo stopPipelineMethod;
+        private MethodInfo startTimeMethod;
         private MethodInfo layoutMethod;
         private MethodInfo annotationMethod;
         private MethodInfo isReplayableMethod;
+        private MethodInfo onDatasetLoadedMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null, in MethodInfo isReplayableMethod = null)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo closeMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo startTimeMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null, in MethodInfo isReplayableMethod = null, in MethodInfo onDatasetLoadedMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
+            this.closeMethod = closeMethod;
             this.getDatasetMethod = getDatasetMethod;
             this.runPipelineMethod = runPipelineMethod;
             this.stopPipelineMethod = stopPipelineMethod;
+            this.startTimeMethod = startTimeMethod;
             this.layoutMethod = layoutMethod;
             this.annotationMethod = annotationMethod;
             this.isReplayableMethod = isReplayableMethod;
+            this.onDatasetLoadedMethod = onDatasetLoadedMethod;
             this.IsRunning = false;
             this.Name = name;
         }
@@ -95,7 +101,10 @@ namespace Microsoft.Psi.PsiStudio
                 }
 
                 // Make a late-bound call to an instance method of the object.
-                MethodInfo windowMethod = GetMethod(classDefinition, "Show");
+                MethodInfo showMethod = GetMethod(classDefinition, "Show");
+
+                // Make a late-bound call to an instance method of the object.
+                MethodInfo closeMethod = GetMethod(classDefinition, "Close");
 
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo runMethod = GetMethod(classDefinition, "RunPipeline");
@@ -107,6 +116,9 @@ namespace Microsoft.Psi.PsiStudio
                 MethodInfo storeMethod = GetMethod(classDefinition, "GetDataset");
 
                 // Make a late-bound call to an instance method of the object.
+                MethodInfo timeMethod = GetMethod(classDefinition, "GetStartTime");
+
+                // Make a late-bound call to an instance method of the object.
                 MethodInfo layoutMethod = GetMethod(classDefinition, "GetLayout", true);
 
                 // Make a late-bound call to an instance method of the object.
@@ -115,7 +127,10 @@ namespace Microsoft.Psi.PsiStudio
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo isReplayble = GetMethod(classDefinition, "IsReplayble", true);
 
-                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), windowMethod, storeMethod, runMethod, stopMethod, layoutMethod, annotationMethod, isReplayble);
+                // Make a late-bound call to an instance method of the object.
+                MethodInfo onDatasetLoaded = GetMethod(classDefinition, "OnDatasetLoaded", true);
+
+                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), showMethod, closeMethod, storeMethod, runMethod, stopMethod, timeMethod, layoutMethod, annotationMethod, isReplayble, onDatasetLoaded);
             }
             catch (Exception ex)
             {
@@ -140,9 +155,11 @@ namespace Microsoft.Psi.PsiStudio
             this.getDatasetMethod = null;
             this.runPipelineMethod = null;
             this.stopPipelineMethod = null;
+            this.startTimeMethod = null;
             this.layoutMethod = null;
             this.annotationMethod = null;
             this.isReplayableMethod = null;
+            this.onDatasetLoadedMethod = null;
             this.IsRunning = false;
             this.Name = null;
         }
@@ -156,7 +173,15 @@ namespace Microsoft.Psi.PsiStudio
         }
 
         /// <summary>
-        /// Get the fullname of the dataset.
+        /// Close the main window of the process.
+        /// </summary>
+        public void CloseWindow()
+        {
+            this.SecureInvoke(ref this.closeMethod);
+        }
+
+        /// <summary>
+        /// Get the dataset.
         /// </summary>
         /// <returns>Return the dataset or null, if the dataset is not created.</returns>
         public Dataset GetDataset()
@@ -168,6 +193,17 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Get the dataset.
+        /// </summary>
+        /// <param name="action">the delegate provided by PsiStudio.</param>
+        public void OnDatasetLoaded(Action<Dataset> action)
+        {
+#pragma warning disable SA1010 // Opening square brackets should be spaced correctly
+            this.SecureInvoke(ref this.onDatasetLoadedMethod, [action]);
+#pragma warning restore SA1010 // Opening square brackets should be spaced correctly
         }
 
         /// <summary>
@@ -201,6 +237,21 @@ namespace Microsoft.Psi.PsiStudio
 
             this.IsRunning = false;
             return this.SecureInvokeBool(ref this.stopPipelineMethod);
+        }
+
+        /// <summary>
+        /// Get the start time of the pipeline.
+        /// </summary>
+        /// <returns>Return the DateTime of the pipeline.</returns>
+        public DateTime GetStartTime()
+        {
+            if (!this.IsRunning)
+            {
+                return DateTime.MinValue;
+            }
+
+            var res = this.SecureInvoke(ref this.startTimeMethod);
+            return res == null ? DateTime.UtcNow : (DateTime)res;
         }
 
         /// <summary>
@@ -245,7 +296,8 @@ namespace Microsoft.Psi.PsiStudio
         /// <returns>Return true if it's a replayable pipeline, false otherwise.</returns>
         public bool IsReplayable()
         {
-            return this.SecureInvokeBool(ref this.isReplayableMethod);
+            var ret = this.SecureInvoke(ref this.isReplayableMethod);
+            return ret == null ? false : (bool)ret;
         }
 
         private static MethodInfo GetMethod(Type classDefinition, string methodName, bool canBeNull = false)

@@ -81,7 +81,7 @@ namespace Microsoft.Psi.Remoting
                     using var writer = new BinaryWriter(networkStream);
 
                     // current pipeline time, used by client to sync clocks
-                    if (this.pipeline.IsRunning || this.pipeline.ReplayDescriptor.Start != DateTime.MinValue)
+                    if (this.pipeline.IsRunning || (this.pipeline.ReplayDescriptor != null && this.pipeline.ReplayDescriptor?.Start != DateTime.MinValue))
                     {
                         writer.Write(0);
                         if (this.pipeline.IsRunning)
@@ -93,7 +93,7 @@ namespace Microsoft.Psi.Remoting
                             writer.Write(DateTime.UtcNow.Ticks);
                         }
                     }
-                    else if (this.pipeline.IsInitial || this.pipeline.IsStarting)
+                    else if ((this.pipeline.IsInitial || this.pipeline.IsStarting) && this.pipeline.ProposedOriginatingTimeInterval != null)
                     {
                         writer.Write(1);
                         writer.Write(Math.Max(this.pipeline.ProposedOriginatingTimeInterval.Left.Ticks, this.interval.Left.Ticks));

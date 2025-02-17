@@ -17,7 +17,6 @@ namespace Microsoft.Psi.PsiStudio
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Data.Annotations;
     using Microsoft.Psi.PsiStudio.Windows;
@@ -295,8 +294,7 @@ namespace Microsoft.Psi.PsiStudio
                         {
                             TimeInterval timeInterval = TimeInterval.Infinite;
                             if (this.VisualizationContainer.Navigator.DataRange != null &&
-                            this.VisualizationContainer.Navigator.DataRange.StartTime != DateTime.MinValue &&
-                            this.VisualizationContainer.Navigator.DataRange.EndTime != DateTime.MaxValue)
+                            this.VisualizationContainer.Navigator.DataRange.StartTime != DateTime.MinValue)
                             {
                                 timeInterval = new TimeInterval(this.VisualizationContainer.Navigator.DataRange.StartTime, this.VisualizationContainer.Navigator.DataRange.EndTime);
                             }
@@ -309,9 +307,10 @@ namespace Microsoft.Psi.PsiStudio
                             if (this.psiStudioPipelinePluginInstance.IsReplayable() == false)
                             {
                                 await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
+                                this.VisualizationContainer.Navigator.DataRange?.Set(this.psiStudioPipelinePluginInstance.GetStartTime(), this.VisualizationContainer.Navigator.DataRange.EndTime);
                             }
 
-                            VisualizationContext.Instance.PlayOrPause(false);
+                            VisualizationContext.Instance.PlayOrPause(true);
                         }
                     }
                     else
@@ -1667,8 +1666,11 @@ namespace Microsoft.Psi.PsiStudio
             }
         }
 
-        private async void PipelinePluginsWindow()
+        private void PipelinePluginsWindow()
         {
+            this.psiStudioPipelinePluginInstance?.CloseWindow();
+            this.psiStudioPipelinePluginInstance?.Dispose();
+            this.psiStudioPipelinePluginInstance = null;
             var psiStudioPipelinePluginsWindow = new PiplinePluginsWindow(Application.Current.MainWindow, this.Settings.AdditionalPlugins);
 
             if (psiStudioPipelinePluginsWindow.ShowDialog() == true)
@@ -1691,7 +1693,7 @@ namespace Microsoft.Psi.PsiStudio
                 if (this.psiStudioPipelinePluginInstance.IsReplayable())
                 {
                     // Open the dataset to be able to explore the data
-                    await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
+                    this.psiStudioPipelinePluginInstance.OnDatasetLoaded(async (d) => { await VisualizationContext.Instance.OpenDataset(d, this.Settings.AutoRefreshDatasetOnChangeFromPlugin); });
                 }
 
                 // **** LAYOUT ****
