@@ -77,6 +77,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -92,10 +93,12 @@
             <TextBox Grid.Row="2" Grid.Column="1" Name="EndpointAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
             <Label Grid.Row="3" Grid.Column="0">RendezVous Port</Label>
             <TextBox Grid.Row="3" Grid.Column="1" Name="RendezVousPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="4" Grid.Column="0">Exporter Starting Port</Label>
-            <TextBox Grid.Row="4" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="5" Grid.Column="0">Process name</Label>
-            <TextBox Grid.Row="5" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="4" Grid.Column="0">RendezVous ServerAddress</Label>
+            <TextBox Grid.Row="4" Grid.Column="1" Name="RendezVousAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="5" Grid.Column="0">Exporter Starting Port</Label>
+            <TextBox Grid.Row="5" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="6" Grid.Column="0">Process name</Label>
+            <TextBox Grid.Row="6" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
         </Grid>
         
         <StackPanel Name="ButtonsStackPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">

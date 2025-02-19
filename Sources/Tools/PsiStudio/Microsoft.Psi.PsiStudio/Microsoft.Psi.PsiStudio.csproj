@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xaml" />
-    <Page Include="Windows\NetworkConfigurationWindow.xaml" />
+    <Page Include="Network\NetworkConfigurationWindow.xaml" />
     <Page Include="Windows\PiplinePluginsWindow.xaml" />
     <Page Include="Windows\HelpWindow.xaml" />
     <Page Include="Windows\PsiStudioSettingsWindow.xaml" />

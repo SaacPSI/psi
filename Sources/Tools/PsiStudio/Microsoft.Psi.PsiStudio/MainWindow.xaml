@@ -260,7 +260,7 @@
                     <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=plugin-settings.png}"/>
                 </Button>
                 <Button Command="{Binding NetworkConfigurationCommand}" ToolTip="Network configuration" AutomationProperties.Name="NetworkConfigurationButton">
-                    <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=plugins.png}"/>
+                    <Image Source="{Binding ., Converter={StaticResource IconUriConverter}, ConverterParameter=network.png}"/>
                 </Button>
                 <Separator AutomationProperties.IsOffscreenBehavior="Offscreen"/>
                 <Button Command="{Binding HelpCommand}" ToolTip="Help" AutomationProperties.Name="HelpButton">

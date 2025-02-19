@@ -63,6 +63,7 @@
     <None Remove="Icons\move-to-beginning.png" />
     <None Remove="Icons\move-to-end.png" />
     <None Remove="Icons\multiple-sessions-from-folder.png" />
+	<None Remove="Icons\network.png" />
     <None Remove="Icons\panel-2d.png" />
     <None Remove="Icons\panel-showhide-smallbutton-faded.png" />
     <None Remove="Icons\panel-showhide-smallbutton.png" />
@@ -409,6 +410,7 @@
     <Resource Include="Icons\messages.png" />
     <Resource Include="Icons\move-to-beginning.png" />
     <Resource Include="Icons\move-to-end.png" />
+	<Resource Include="Icons\network.png" />
     <Resource Include="Icons\panel-2d.png" />
     <Resource Include="Icons\panel-xy.png" />
     <Resource Include="Icons\panel-xyz.png" />

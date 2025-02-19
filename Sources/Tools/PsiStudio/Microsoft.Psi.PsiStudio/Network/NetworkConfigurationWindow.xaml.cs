@@ -29,6 +29,7 @@ namespace Microsoft.Psi.Visualization.Windows
             this.IsUsingTCPWriters.IsChecked = this.NetworkSettings.UseTcpWriter;
             this.EndpointAddress.Text = this.NetworkSettings.EndpointAddress;
             this.RendezVousPort.Text = this.NetworkSettings.RendezVousPort.ToString();
+            this.RendezVousAddress.Text = this.NetworkSettings.RendezVousAddress;
             this.ExporterStartingPort.Text = this.NetworkSettings.ExporterStartingPort.ToString();
             this.ProcessNameOverriding.Text = this.NetworkSettings.ProcessNameOverriding;
             this.Owner = owner;
@@ -60,6 +61,7 @@ namespace Microsoft.Psi.Visualization.Windows
             }
 
             this.NetworkSettings.RendezVousPort = port;
+            this.NetworkSettings.RendezVousAddress = this.RendezVousAddress.Text;
             if (!int.TryParse(this.ExporterStartingPort.Text, out port))
             {
                 // Display validation errors

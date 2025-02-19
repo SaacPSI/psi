@@ -357,5 +357,10 @@ namespace Microsoft.Psi.Visualization
         /// Plugin settings.
         /// </summary>
         public const string PluginsSettings = IconPrefix + "plugin-settings.png";
+
+        /// <summary>
+        /// Plugin settings.
+        /// </summary>
+        public const string Network = IconPrefix + "network.png";
     }
 }

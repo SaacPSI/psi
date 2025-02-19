@@ -10,14 +10,11 @@ namespace Microsoft.Psi.PsiStudio
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
-    using Microsoft.CodeAnalysis.CSharp.Syntax;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Data.Annotations;
     using Microsoft.Psi.PsiStudio.Windows;
@@ -86,7 +83,7 @@ namespace Microsoft.Psi.PsiStudio
         private LayoutInfo currentLayout = null;
         private bool currentLayoutUpdating = false;
         private PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
-        private NetworkManager networkManager = null;
+        private NetworkStreamsManager networkManager = null;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -1767,7 +1764,7 @@ namespace Microsoft.Psi.PsiStudio
         {
             if (this.networkManager == null)
             {
-                this.networkManager = new NetworkManager();
+                this.networkManager = new NetworkStreamsManager(this.VisualizationContainer.Navigator);
             }
 
             NetworkConfigurationWindow psiStudioNetworkSettings = new NetworkConfigurationWindow(Application.Current.MainWindow, this.networkManager.Settings.DeepClone());

@@ -29,9 +29,14 @@ namespace Microsoft.Psi.PsiStudio
         public string EndpointAddress { get; set; } = "localhost";
 
         /// <summary>
-        /// Gets or sets the port of the server.
+        /// Gets or sets the port of the rendezVous.
         /// </summary>
         public int RendezVousPort { get; set; } = 13331;
+
+        /// <summary>
+        /// Gets or sets the port of the rendezVous address, if empty the network will instanciate a rendezVous else a client.
+        /// </summary>
+        public string RendezVousAddress { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the starting port for exporters.

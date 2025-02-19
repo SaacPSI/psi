@@ -6,14 +6,16 @@ namespace Microsoft.Psi.PsiStudio
     using System;
     using Microsoft.Psi.Interop.Transport;
     using Microsoft.Psi.Visualization.Data;
+    using Microsoft.Psi.Visualization.VisualizationObjects;
 
     /// <summary>
     /// Provides a base class for stream  objects that show the stream value at cursor.
     /// </summary>
     /// <typeparam name="TData">The type of stream values to visualize.</typeparam>
-    public class NetworkedStreamValueVisualisationObject<TData> : IDisposable
+    public class NetworkedStreamValueVisualisationObject<TData> : IActivableStreamVisualizationObject
     {
         private TcpSimpleWriter<TData> tcpSimpleWriter;
+        private int sequenceId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkedStreamValueVisualisationObject{TData}"/> class.
@@ -24,13 +26,15 @@ namespace Microsoft.Psi.PsiStudio
         {
             this.tcpSimpleWriter = writer;
             this.StreamSource = streamSource;
+            this.Name = streamSource.StreamName;
+            int.TryParse(this.StreamSource.StreamMetadata.StorePath.Split('.')[2], out this.sequenceId);
 
             // TODO check RelativeTimeInterval & TimeInterval.
             this.SubscriberId = DataManager.Instance.RegisterStreamValueSubscriber<TData>(
-              this.StreamSource,
-              RelativeTimeInterval.Infinite,
-              this.OnValueReceived,
-              TimeInterval.Empty);
+                this.StreamSource,
+                RelativeTimeInterval.Infinite,
+                this.OnValueReceived,
+                TimeInterval.Empty);
         }
 
         /// <summary>
@@ -39,13 +43,21 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public StreamSource StreamSource { get; private set; } = null;
 
+        /// <inheritdoc/>
+        public bool IsActive { get; set; } = false;
+
+        /// <inheritdoc/>
+        public string Name { get; private set; }
+
         /// <summary>
         /// Gets or sets the visualization object's subscriber id.  This value is Guid.Empty
         /// if the visualization object is not currently subscribed to a data provider.
         /// </summary>
         protected Guid SubscriberId { get; set; } = Guid.Empty;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Clean the internal attributes in order to exit proprely.
+        /// </summary>
         public void Dispose()
         {
             // Unregister the stream value visualization object from the data manager
@@ -66,10 +78,10 @@ namespace Microsoft.Psi.PsiStudio
         /// <param name="creationTime">The creation time for the new value.</param>
         private void OnValueReceived(bool dataAvailable, TData value, DateTime originatingTime, DateTime creationTime)
         {
-            if (dataAvailable)
+            if (dataAvailable && this.IsActive)
             {
                 // TODO check sourceid & sequenceid.
-                this.tcpSimpleWriter.Receive(value, new Envelope(originatingTime, creationTime, 0, 0));
+                this.tcpSimpleWriter.Receive(value, new Envelope(originatingTime, creationTime, this.StreamSource.StreamMetadata.Id, this.sequenceId));
             }
         }
     }
