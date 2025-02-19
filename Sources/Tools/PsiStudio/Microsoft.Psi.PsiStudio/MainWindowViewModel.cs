@@ -10,10 +10,8 @@ namespace Microsoft.Psi.PsiStudio
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
@@ -32,7 +30,7 @@ namespace Microsoft.Psi.PsiStudio
     /// <summary>
     /// Represents the view model for the main window of the psi studio application.
     /// </summary>
-    public class MainWindowViewModel : ObservableObject
+    public class MainWindowViewModel : ObservableObject, IDisposable
     {
         /// <summary>
         /// The path to the settings directiory.
@@ -85,6 +83,7 @@ namespace Microsoft.Psi.PsiStudio
         private LayoutInfo currentLayout = null;
         private bool currentLayoutUpdating = false;
         private PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
+        private NetworkStreamsManager networkManager = null;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -157,6 +156,7 @@ namespace Microsoft.Psi.PsiStudio
         private RelayCommand editPluginSettingsCommand;
         private RelayCommand helpCommand;
         private RelayCommand viewAdditionalAssemblyLoadErrorLogCommand;
+        private RelayCommand networkConfigurationCommand;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
@@ -811,17 +811,7 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand ClosedCommand
             => this.closedCommand ??= new RelayCommand(
-                () =>
-                {
-                    // Explicitly dispose the VisualizationContext to clean up resources before closing
-                    VisualizationContext.Instance?.Dispose();
-
-                    // Explicitly dispose so that DataManager doesn't keep the app running for a while longer.
-                    DataManager.Instance?.Dispose();
-
-                    // Dispose assembly
-                    this.psiStudioPipelinePluginInstance?.Dispose();
-                });
+                () => { this.Dispose(); });
 
         /// <summary>
         /// Gets the exit command.
@@ -880,6 +870,14 @@ namespace Microsoft.Psi.PsiStudio
             => this.viewAdditionalAssemblyLoadErrorLogCommand ??= new RelayCommand(
                 this.ViewAdditionalAssemblyLoadErrorLog,
                 () => File.Exists(Path.Combine(PsiStudioLogsPath, "VisualizersLog.txt")));
+
+        /// <summary>
+        /// Gets the command for viewing the error log for additional assembly load.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand NetworkConfigurationCommand
+            => this.networkConfigurationCommand ??= new RelayCommand(() => this.NetworkSettingsWindow());
 
         /// <summary>
         /// Gets or sets the collection of available layouts.
@@ -1075,6 +1073,22 @@ namespace Microsoft.Psi.PsiStudio
                 // Update the source bindings for all visualization objects in the current session
                 this.VisualizationContainer.UpdateStreamSources(currentSession);
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Explicitly dispose the VisualizationContext to clean up resources before closing
+            VisualizationContext.Instance?.Dispose();
+
+            // Explicitly dispose so that DataManager doesn't keep the app running for a while longer.
+            DataManager.Instance?.Dispose();
+
+            // Dispose assembly
+            this.psiStudioPipelinePluginInstance?.Dispose();
+
+            // Dispose network
+            this.networkManager?.Dispose();
         }
 
         private void MoveCursorBy(TimeSpan timeSpan, NearestType nearestType)
@@ -1766,6 +1780,20 @@ namespace Microsoft.Psi.PsiStudio
             if (this.psiStudioPipelinePluginInstance != null)
             {
                 this.psiStudioPipelinePluginInstance.ShowWindow();
+            }
+        }
+
+        private void NetworkSettingsWindow()
+        {
+            if (this.networkManager == null)
+            {
+                this.networkManager = new NetworkStreamsManager(this.VisualizationContainer.Navigator);
+            }
+
+            NetworkConfigurationWindow psiStudioNetworkSettings = new NetworkConfigurationWindow(Application.Current.MainWindow, this.networkManager.Settings.DeepClone());
+            if (psiStudioNetworkSettings.ShowDialog() == true)
+            {
+                this.networkManager.UpdateSettings(psiStudioNetworkSettings.NetworkSettings);
             }
         }
 

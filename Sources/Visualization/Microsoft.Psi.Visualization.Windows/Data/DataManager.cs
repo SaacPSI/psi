@@ -130,7 +130,7 @@ namespace Microsoft.Psi.Visualization.Data
         /// <typeparam name="TData">The type of data expected by the stream value subscriber.</typeparam>
         /// <param name="subscriberId">The subscriber id that the subscriber was assigned when it was initially registered.</param>
         public void UnregisterStreamValueSubscriber<TData>(Guid subscriberId) =>
-            this.GetDataStoreReaders()
+            this.GetDataStoreReaders()?
                 .ForEach(dataStoreReader => dataStoreReader.UnregisterStreamValueSubscriber<TData>(subscriberId));
 
         /// <summary>
@@ -448,6 +448,11 @@ namespace Microsoft.Psi.Visualization.Data
 
         private List<DataStoreReader> GetDataStoreReaders()
         {
+            if (this.dataStoreReaders == null)
+            {
+                return null;
+            }
+
             // Locks the data store reader collection and then extracts the list.
             lock (this.dataStoreReaders)
             {

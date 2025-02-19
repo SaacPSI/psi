@@ -29,6 +29,7 @@
     <None Remove="Windows\HelpWindow.xaml" />
     <None Remove="Windows\LayoutNameWindow.xaml" />
     <None Remove="Windows\LoadingDatasetWindow.xaml" />
+    <None Remove="Windows\NetworkConfigurationWindow.xaml" />
     <None Remove="Windows\PiplinePluginsWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainWindow.xaml" />
+    <Page Include="Network\NetworkConfigurationWindow.xaml" />
     <Page Include="Windows\PiplinePluginsWindow.xaml" />
     <Page Include="Windows\HelpWindow.xaml" />
     <Page Include="Windows\PsiStudioSettingsWindow.xaml" />
@@ -51,6 +53,7 @@
     <ProjectReference Include="..\..\..\Data\Microsoft.Psi.Data\Microsoft.Psi.Data.csproj" />
     <ProjectReference Include="..\..\..\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\..\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
+    <ProjectReference Include="..\..\..\Runtime\Microsoft.Psi.Interop\Microsoft.Psi.Interop.csproj" />
     <ProjectReference Include="..\..\..\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
     <ProjectReference Include="..\..\..\Speech\Microsoft.Psi.Speech.Windows\Microsoft.Psi.Speech.Windows.csproj" />
     <ProjectReference Include="..\..\..\Visualization\Microsoft.Psi.Visualization.Windows\Microsoft.Psi.Visualization.Windows.csproj" />
