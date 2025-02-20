@@ -438,8 +438,9 @@ namespace Microsoft.Psi.Visualization
         /// </summary>
         /// <param name="dataset">Dataset to visualize.</param>
         /// <param name="autoRefresh">Indicates whether to enable the onChange update.</param>
+        /// <param name="goToLiveSession">Indicates whether to search and load the live session.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task OpenDataset(Dataset dataset, bool autoRefresh)
+        public async Task OpenDataset(Dataset dataset, bool autoRefresh, bool goToLiveSession = true)
         {
             await Task.Run(() =>
             {
@@ -473,12 +474,15 @@ namespace Microsoft.Psi.Visualization
                 this.DatasetViewModel.UpdateLivePartitionStatuses();
 
                 // Search for a live partition and visualize it if found.
-                foreach (SessionViewModel sessionViewModel in this.DatasetViewModel.SessionViewModels)
+                if (goToLiveSession)
                 {
-                    if (sessionViewModel.ContainsLivePartitions)
+                    foreach (SessionViewModel sessionViewModel in this.DatasetViewModel.SessionViewModels)
                     {
-                        this.DatasetViewModel.VisualizeSession(sessionViewModel);
-                        return;
+                        if (sessionViewModel.ContainsLivePartitions)
+                        {
+                            this.DatasetViewModel.VisualizeSession(sessionViewModel);
+                            return;
+                        }
                     }
                 }
 

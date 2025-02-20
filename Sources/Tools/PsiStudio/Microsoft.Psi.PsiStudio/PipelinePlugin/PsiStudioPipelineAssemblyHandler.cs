@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-namespace Microsoft.Psi.PsiStudio
+namespace Microsoft.Psi.PsiStudio.PipelinePlugin
 {
     using System;
     using System.IO;
@@ -25,10 +25,10 @@ namespace Microsoft.Psi.PsiStudio
         private MethodInfo startTimeMethod;
         private MethodInfo layoutMethod;
         private MethodInfo annotationMethod;
-        private MethodInfo isReplayableMethod;
+        private MethodInfo getReplayableModeMethod;
         private MethodInfo onDatasetLoadedMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo closeMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo startTimeMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null, in MethodInfo isReplayableMethod = null, in MethodInfo onDatasetLoadedMethod = null)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo closeMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo startTimeMethod, in MethodInfo getReplayableModeMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null,  in MethodInfo onDatasetLoadedMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
@@ -39,7 +39,7 @@ namespace Microsoft.Psi.PsiStudio
             this.startTimeMethod = startTimeMethod;
             this.layoutMethod = layoutMethod;
             this.annotationMethod = annotationMethod;
-            this.isReplayableMethod = isReplayableMethod;
+            this.getReplayableModeMethod = getReplayableModeMethod;
             this.onDatasetLoadedMethod = onDatasetLoadedMethod;
             this.IsRunning = false;
             this.Name = name;
@@ -119,18 +119,18 @@ namespace Microsoft.Psi.PsiStudio
                 MethodInfo timeMethod = GetMethod(classDefinition, "GetStartTime");
 
                 // Make a late-bound call to an instance method of the object.
+                MethodInfo replayableModeMethod = GetMethod(classDefinition, "GetReplaybleMode");
+
+                // Make a late-bound call to an instance method of the object.
                 MethodInfo layoutMethod = GetMethod(classDefinition, "GetLayout", true);
 
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo annotationMethod = GetMethod(classDefinition, "GetAnnotation", true);
 
                 // Make a late-bound call to an instance method of the object.
-                MethodInfo isReplayble = GetMethod(classDefinition, "IsReplayble", true);
-
-                // Make a late-bound call to an instance method of the object.
                 MethodInfo onDatasetLoaded = GetMethod(classDefinition, "OnDatasetLoaded", true);
 
-                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), showMethod, closeMethod, storeMethod, runMethod, stopMethod, timeMethod, layoutMethod, annotationMethod, isReplayble, onDatasetLoaded);
+                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), showMethod, closeMethod, storeMethod, runMethod, stopMethod, timeMethod, replayableModeMethod, layoutMethod, annotationMethod, onDatasetLoaded);
             }
             catch (Exception ex)
             {
@@ -158,7 +158,7 @@ namespace Microsoft.Psi.PsiStudio
             this.startTimeMethod = null;
             this.layoutMethod = null;
             this.annotationMethod = null;
-            this.isReplayableMethod = null;
+            this.getReplayableModeMethod = null;
             this.onDatasetLoadedMethod = null;
             this.IsRunning = false;
             this.Name = null;
@@ -255,6 +255,16 @@ namespace Microsoft.Psi.PsiStudio
         }
 
         /// <summary>
+        /// Get the plugin will replay a dataset.
+        /// </summary>
+        /// <returns>Return replayable mode of the plugin.</returns>
+        public PipelineReplaybleMode GetReplayableMode()
+        {
+            var ret = this.SecureInvoke(ref this.getReplayableModeMethod);
+            return (PipelineReplaybleMode)ret;
+        }
+
+        /// <summary>
         /// Get the layout configuration.
         /// </summary>
         /// <returns>Return the json of the layout or null, if the layout is not created.</returns>
@@ -288,16 +298,6 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Get if the application will replay a dataset.
-        /// </summary>
-        /// <returns>Return true if it's a replayable pipeline, false otherwise.</returns>
-        public bool IsReplayable()
-        {
-            var ret = this.SecureInvoke(ref this.isReplayableMethod);
-            return ret == null ? false : (bool)ret;
         }
 
         private static MethodInfo GetMethod(Type classDefinition, string methodName, bool canBeNull = false)

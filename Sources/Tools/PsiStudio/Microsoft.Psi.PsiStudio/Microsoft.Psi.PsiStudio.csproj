@@ -41,7 +41,7 @@
   <ItemGroup>
     <Page Include="MainWindow.xaml" />
     <Page Include="Network\NetworkConfigurationWindow.xaml" />
-    <Page Include="Windows\PiplinePluginsWindow.xaml" />
+    <Page Include="PipelinePlugin\PiplinePluginsWindow.xaml" />
     <Page Include="Windows\HelpWindow.xaml" />
     <Page Include="Windows\PsiStudioSettingsWindow.xaml" />
     <Page Include="Windows\AdditionalAssembliesWindow.xaml" />

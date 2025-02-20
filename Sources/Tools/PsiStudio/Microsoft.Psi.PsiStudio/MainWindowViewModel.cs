@@ -7,6 +7,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Data;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -82,7 +83,7 @@ namespace Microsoft.Psi.PsiStudio
         private List<AnnotationSchema> annotationSchemas;
         private LayoutInfo currentLayout = null;
         private bool currentLayoutUpdating = false;
-        private PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
+        private PipelinePlugin.PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
         private NetworkStreamsManager networkManager = null;
 
         /// <summary>
@@ -279,7 +280,7 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand PlayPauseFromSelectionStartCommand
             => this.playPauseFromSelectionStartCommand ??= new RelayCommand(
-                async () =>
+                () =>
                 {
                     if (this.psiStudioPipelinePluginInstance != null)
                     {
@@ -304,9 +305,9 @@ namespace Microsoft.Psi.PsiStudio
                                 return;
                             }
 
-                            if (this.psiStudioPipelinePluginInstance.IsReplayable() == false)
+                            if (this.psiStudioPipelinePluginInstance.GetReplayableMode() > PipelinePlugin.PipelineReplaybleMode.Not)
                             {
-                                await VisualizationContext.Instance.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset(), this.Settings.AutoRefreshDatasetOnChangeFromPlugin);
+                                this.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset());
                                 this.VisualizationContainer.Navigator.DataRange?.Set(this.psiStudioPipelinePluginInstance.GetStartTime(), this.VisualizationContainer.Navigator.DataRange.EndTime);
                             }
 
@@ -1704,10 +1705,10 @@ namespace Microsoft.Psi.PsiStudio
 
                 // *** DATASET ***
                 // Checking if the plugin is a replayable one
-                if (this.psiStudioPipelinePluginInstance.IsReplayable())
+                if (this.psiStudioPipelinePluginInstance.GetReplayableMode() > PipelinePlugin.PipelineReplaybleMode.Not)
                 {
                     // Open the dataset to be able to explore the data
-                    this.psiStudioPipelinePluginInstance.OnDatasetLoaded(async (d) => { await VisualizationContext.Instance.OpenDataset(d, this.Settings.AutoRefreshDatasetOnChangeFromPlugin); });
+                    this.psiStudioPipelinePluginInstance.OnDatasetLoaded((d) => { this.OpenDataset(d); });
                 }
 
                 // **** LAYOUT ****
@@ -1785,6 +1786,20 @@ namespace Microsoft.Psi.PsiStudio
 
         private void NetworkSettingsWindow()
         {
+            if (this.psiStudioPipelinePluginInstance?.GetReplayableMode() != PipelinePlugin.PipelineReplaybleMode.PsiStudio)
+            {
+                bool? result = new MessageBoxWindow(Application.Current.MainWindow, "Incompatible Mode", "The pipeline plugin is incompatible with an active Network.\nDo you want to continue and remove the plugin?", "Continue", "Cancel").ShowDialog();
+                if (result == true)
+                {
+                    this.psiStudioPipelinePluginInstance.Dispose();
+                    this.psiStudioPipelinePluginInstance = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
             if (this.networkManager == null)
             {
                 this.networkManager = new NetworkStreamsManager(this.VisualizationContainer.Navigator);
@@ -1795,6 +1810,18 @@ namespace Microsoft.Psi.PsiStudio
             {
                 this.networkManager.UpdateSettings(psiStudioNetworkSettings.NetworkSettings);
             }
+        }
+
+        private void OpenDataset(Dataset dataset)
+        {
+            bool checkLiveSession = this.psiStudioPipelinePluginInstance.GetReplayableMode() != PipelinePlugin.PipelineReplaybleMode.PsiStudio || this.networkManager == null;
+            if (checkLiveSession)
+            {
+                this.networkManager?.Dispose();
+                this.networkManager = null;
+            }
+
+            _ = VisualizationContext.Instance.OpenDataset(dataset, this.Settings.AutoRefreshDatasetOnChangeFromPlugin, checkLiveSession);
         }
 
         private void Help()

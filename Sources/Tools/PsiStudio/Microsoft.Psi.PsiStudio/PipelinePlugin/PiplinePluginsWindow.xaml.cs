@@ -3,11 +3,9 @@
 
 namespace Microsoft.Psi.Visualization.Windows
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Windows;
     using Microsoft.Psi.Common;
     using Microsoft.Psi.PsiStudio;
@@ -51,13 +49,13 @@ namespace Microsoft.Psi.Visualization.Windows
         /// <summary>
         /// Gets or sets dataset path.
         /// </summary>
-        public PsiStudioPipelineAssemblyHandler PsiStudioPipeline { get; set; }
+        public PsiStudio.PipelinePlugin.PsiStudioPipelineAssemblyHandler PsiStudioPipeline { get; set; }
 
         private void OKButton_Click(object sender, RoutedEventArgs e)
         {
             if (this.PipelinePluginPath != null)
             {
-                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
+                this.PsiStudioPipeline = PsiStudio.PipelinePlugin.PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
             }
 
             if (this.PsiStudioPipeline != null)
@@ -107,7 +105,7 @@ namespace Microsoft.Psi.Visualization.Windows
             if (selection != null)
             {
                 this.PipelinePluginPath = (((string, string))selection).Item2;
-                this.PsiStudioPipeline = PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
+                this.PsiStudioPipeline = PsiStudio.PipelinePlugin.PsiStudioPipelineAssemblyHandler.Load(this.PipelinePluginPath);
                 if (this.PsiStudioPipeline != null)
                 {
                     this.DialogResult = true;

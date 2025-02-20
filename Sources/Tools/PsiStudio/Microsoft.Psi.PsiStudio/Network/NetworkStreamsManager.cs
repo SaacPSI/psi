@@ -6,6 +6,8 @@ namespace Microsoft.Psi.PsiStudio
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using System.Windows;
     using Microsoft.Psi.Interop.Rendezvous;
     using Microsoft.Psi.Interop.Serialization;
     using Microsoft.Psi.Interop.Transport;
@@ -14,6 +16,7 @@ namespace Microsoft.Psi.PsiStudio
     using Microsoft.Psi.Visualization.Navigation;
     using Microsoft.Psi.Visualization.ViewModels;
     using Microsoft.Psi.Visualization.VisualizationObjects;
+    using Microsoft.Psi.Visualization.Windows;
 
     /// <summary>
     /// Implements temporary network settings for Psi Studio.
@@ -64,18 +67,14 @@ namespace Microsoft.Psi.PsiStudio
         /// <param name="newSettings">The new network settings to update.</param>
         public void UpdateSettings(PsiStudioNetworkSettings newSettings)
         {
-            if (newSettings.IsActive != this.Settings.IsActive)
+            this.Settings = newSettings;
+            this.StopRendezVous();
+            if (this.Settings.IsActive && this.StartRendezVous())
             {
-                this.StopRendezVous();
-                if (newSettings.IsActive)
-                {
-                    this.StartRendezVous();
-                    this.GeneratePsiStudioProcess();
-                    this.UpdateStreams();
-                }
+                this.GeneratePsiStudioProcess();
+                this.UpdateStreams();
             }
 
-            this.Settings = newSettings;
             this.currentPort = this.Settings.ExporterStartingPort + 1;
         }
 
@@ -101,7 +100,7 @@ namespace Microsoft.Psi.PsiStudio
             this.psiStudioWriter?.Dispose();
         }
 
-        private void StartRendezVous()
+        private bool StartRendezVous()
         {
             if (this.Settings.RendezVousAddress == string.Empty)
             {
@@ -112,9 +111,36 @@ namespace Microsoft.Psi.PsiStudio
             else
             {
                 RendezvousClient client = new RendezvousClient(this.Settings.RendezVousAddress, this.Settings.RendezVousPort);
-                this.rendezVous = client;
-                client.Start();
+                MessageBoxWindow waitingMessageBox = new MessageBoxWindow(Application.Current.MainWindow, "RendezvousClient", "\nWaiting the server...\n\n", null, "Cancel");
+                SynchronizationContext currentContext = SynchronizationContext.Current;
+                Thread clientStartThread = new Thread(new ThreadStart( () =>
+                {
+                    client.Start();
+                    currentContext.Send(_ => waitingMessageBox.DialogResult = true, null);
+                }));
+                clientStartThread.Start();
+                bool? modalResult = waitingMessageBox.ShowDialog();
+                this.Settings.IsActive = modalResult != null ? (bool)modalResult : false;
+                if (this.Settings.IsActive == false)
+                {
+                    try
+                    {
+                        client.Dispose();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+                else
+                {
+                    this.rendezVous = client;
+                }
+
+                clientStartThread.Abort();
+                return this.Settings.IsActive;
             }
+
+            return true;
         }
 
         private void StopRendezVous()
