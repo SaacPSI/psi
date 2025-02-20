@@ -10,13 +10,14 @@ using System.IO;
 using Microsoft.Win32;
 using SharpDX;
 using System.Data;
+using Microsoft.Psi.PsiStudio.PipelinePlugin;
 
 namespace PsiStudioTestPipeline
 {
     /// <summary>
     /// Interaction logic for PipelineSetting.xaml
     /// </summary>
-    public partial class PipelineSetting : Window, INotifyPropertyChanged, IPsiStudioPipeline
+    public partial class PipelineSetting : Window, INotifyPropertyChanged, Microsoft.Psi.PsiStudio.PipelinePlugin.IPsiStudioPipeline
     {
         // UI
         #region INotifyPropertyChanged
@@ -136,6 +137,16 @@ namespace PsiStudioTestPipeline
         public string GetLayout()
         {
             return "{\"LayoutVersion\":5.0,\"Layout\":{\"$id\":\"1\",\"Panels\":[{\"$id\":\"2\",\"$type\":\"Microsoft.Psi.Visualization.VisualizationPanels.InstantVisualizationContainer,Microsoft.Psi.Visualization.Windows\",\"Panels\":[{\"$id\":\"3\",\"$type\":\"Microsoft.Psi.Visualization.VisualizationPanels.XYVisualizationPanel,Microsoft.Psi.Visualization.Windows\",\"AxisComputeMode\":0,\"CompatiblePanelTypes\":[2],\"DefaultCursorEpsilonNegMs\":500,\"DefaultCursorEpsilonPosMs\":0,\"RelativeWidth\":100,\"Name\":\"2DPanel\",\"Visible\":true,\"Height\":400.0,\"BackgroundColor\":\"#FF252526\",\"VisualizationObjects\":[{\"$id\":\"4\",\"$type\":\"Microsoft.Psi.Visualization.VisualizationObjects.ImageVisualizationObject,Microsoft.Psi.Visualization.Windows\",\"HorizontalFlip\":false,\"StreamBinding\":{\"$id\":\"5\",\"PartitionName\":\"Webcam\",\"SourceStreamName\":\"Image\",\"StreamName\":\"Image\",\"VisualizerStreamAdapterArguments\":[],\"VisualizerSummarizerArguments\":[],\"VisualizerStreamAdapterTypeName\":\"Microsoft.Psi.Visualization.Adapters.EncodedImageToImageAdapter,Microsoft.Psi.Visualization.Windows,Version=0.19.100.1,Culture=neutral,PublicKeyToken=null\"},\"Name\":\"Image\",\"Visible\":true,\"CursorEpsilonPosMs\":0,\"CursorEpsilonNegMs\":500}]}],\"CompatiblePanelTypes\":[],\"Name\":\"InstantVisualizationContainer\",\"Visible\":true,\"Height\":400.0,\"BackgroundColor\":\"#FF252526\",\"VisualizationObjects\":[]},{\"$id\":\"6\",\"$type\":\"Microsoft.Psi.Visualization.VisualizationPanels.TimelineVisualizationPanel,Microsoft.Psi.Visualization.Windows\",\"AxisComputeMode\":0,\"ShowLegend\":false,\"ShowTimeTicks\":false,\"Threshold\":{\"$id\":\"7\",\"ThresholdType\":0,\"ThresholdValue\":0.0,\"Opacity\":0.25},\"CompatiblePanelTypes\":[0],\"Name\":\"TimelinePanel\",\"Visible\":true,\"Height\":70.0,\"BackgroundColor\":\"#FF252526\",\"VisualizationObjects\":[{\"$id\":\"8\",\"$type\":\"Microsoft.Psi.Visualization.VisualizationObjects.AudioVisualizationObject,Microsoft.Psi.Visualization.Windows\",\"Channel\":0,\"PlayDisplayChannelOnly\":false,\"Color\":\"#FFD3D3D3\",\"LineWidth\":1.0,\"InterpolationStyle\":0,\"MarkerColor\":\"#FFD3D3D3\",\"MarkerSize\":4.0,\"MarkerStyle\":0,\"RangeColor\":\"#FFD3D3D3\",\"RangeWidth\":1.0,\"VisualizationInterval\":0,\"LegendFormat\":\"\",\"StreamBinding\":{\"$id\":\"9\",\"PartitionName\":\"Webcam\",\"SourceStreamName\":\"Audio\",\"StreamName\":\"Audio\",\"VisualizerStreamAdapterArguments\":[],\"VisualizerSummarizerArguments\":[],\"SummarizerTypeName\":\"Microsoft.Psi.Visualization.Summarizers.AudioSummarizer,Microsoft.Psi.Visualization.Windows,Version=0.19.100.1,Culture=neutral,PublicKeyToken=null\"},\"Name\":\"Audio\",\"Visible\":true,\"CursorEpsilonPosMs\":0,\"CursorEpsilonNegMs\":500}]}]}}";
+        }
+
+        public DateTime GetStartTime()
+        {
+            return pipeline.StartTime;
+        }
+
+        public PipelineReplaybleMode GetReplaybleMode()
+        {
+            return PipelineReplaybleMode.Not;
         }
     }
 }
