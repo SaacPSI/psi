@@ -1690,6 +1690,20 @@ namespace Microsoft.Psi.PsiStudio
 
             if (psiStudioPipelinePluginsWindow.ShowDialog() == true)
             {
+                if (this.networkManager != null && psiStudioPipelinePluginsWindow.PsiStudioPipeline != null && psiStudioPipelinePluginsWindow.PsiStudioPipeline.GetReplayableMode() != PipelinePlugin.PipelineReplaybleMode.PsiStudio)
+                {
+                    bool? result = new MessageBoxWindow(Application.Current.MainWindow, "Incompatible Mode", "This pipeline plugin is incompatible with an active Network.\nDo you want to continue and remove the network manager?", "Continue", "Cancel").ShowDialog();
+                    if (result == true)
+                    {
+                        this.networkManager.Dispose();
+                        this.networkManager = null;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
                 this.psiStudioPipelinePluginInstance = psiStudioPipelinePluginsWindow.PsiStudioPipeline;
                 if (this.psiStudioPipelinePluginInstance == null)
                 {
@@ -1786,7 +1800,7 @@ namespace Microsoft.Psi.PsiStudio
 
         private void NetworkSettingsWindow()
         {
-            if (this.psiStudioPipelinePluginInstance?.GetReplayableMode() != PipelinePlugin.PipelineReplaybleMode.PsiStudio)
+            if (this.psiStudioPipelinePluginInstance != null && this.psiStudioPipelinePluginInstance.GetReplayableMode() != PipelinePlugin.PipelineReplaybleMode.PsiStudio)
             {
                 bool? result = new MessageBoxWindow(Application.Current.MainWindow, "Incompatible Mode", "The pipeline plugin is incompatible with an active Network.\nDo you want to continue and remove the plugin?", "Continue", "Cancel").ShowDialog();
                 if (result == true)
@@ -1809,6 +1823,11 @@ namespace Microsoft.Psi.PsiStudio
             if (psiStudioNetworkSettings.ShowDialog() == true)
             {
                 this.networkManager.UpdateSettings(psiStudioNetworkSettings.NetworkSettings);
+            }
+            else
+            {
+                this.networkManager.Dispose();
+                this.networkManager = null;
             }
         }
 

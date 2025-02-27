@@ -45,9 +45,14 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
         public void RunPipeline(TimeInterval timeInterval);
 
         /// <summary>
-        /// Stop the pipeline's) of the plugin.
+        /// Stop the pipeline's of the plugin.
         /// </summary>
         public void StopPipeline();
+
+        /// <summary>
+        /// Dispose the plugin.
+        /// </summary>
+        public void Dispose();
 
         /// <summary>
         /// Gets the time of pipeline start (Pipeline.StartTime).

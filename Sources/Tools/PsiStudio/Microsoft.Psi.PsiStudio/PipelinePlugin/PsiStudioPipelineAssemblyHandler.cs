@@ -14,11 +14,12 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
     /// <summary>
     /// Class handling the load of pipeline assembly.
     /// </summary>
-    public class PsiStudioPipelineAssemblyHandler
+    public class PsiStudioPipelineAssemblyHandler : IDisposable
     {
         private object assemblyInstance;
         private MethodInfo showMethod;
         private MethodInfo closeMethod;
+        private MethodInfo disposeMethod;
         private MethodInfo getDatasetMethod;
         private MethodInfo runPipelineMethod;
         private MethodInfo stopPipelineMethod;
@@ -28,11 +29,12 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
         private MethodInfo getReplayableModeMethod;
         private MethodInfo onDatasetLoadedMethod;
 
-        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo closeMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo startTimeMethod, in MethodInfo getReplayableModeMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null,  in MethodInfo onDatasetLoadedMethod = null)
+        private PsiStudioPipelineAssemblyHandler(in object assemblyInstance, in string name, in MethodInfo showMethod, in MethodInfo closeMethod, in MethodInfo disposeMethod, in MethodInfo getDatasetMethod, in MethodInfo runPipelineMethod, in MethodInfo stopPipelineMethod, in MethodInfo startTimeMethod, in MethodInfo getReplayableModeMethod, in MethodInfo layoutMethod = null, in MethodInfo annotationMethod = null,  in MethodInfo onDatasetLoadedMethod = null)
         {
             this.assemblyInstance = assemblyInstance;
             this.showMethod = showMethod;
             this.closeMethod = closeMethod;
+            this.disposeMethod = disposeMethod;
             this.getDatasetMethod = getDatasetMethod;
             this.runPipelineMethod = runPipelineMethod;
             this.stopPipelineMethod = stopPipelineMethod;
@@ -107,6 +109,9 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
                 MethodInfo closeMethod = GetMethod(classDefinition, "Close");
 
                 // Make a late-bound call to an instance method of the object.
+                MethodInfo diposeMethod = GetMethod(classDefinition, "Dispose");
+
+                // Make a late-bound call to an instance method of the object.
                 MethodInfo runMethod = GetMethod(classDefinition, "RunPipeline");
 
                 // Make a late-bound call to an instance method of the object.
@@ -130,7 +135,7 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
                 // Make a late-bound call to an instance method of the object.
                 MethodInfo onDatasetLoaded = GetMethod(classDefinition, "OnDatasetLoaded", true);
 
-                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), showMethod, closeMethod, storeMethod, runMethod, stopMethod, timeMethod, replayableModeMethod, layoutMethod, annotationMethod, onDatasetLoaded);
+                return new PsiStudioPipelineAssemblyHandler(instance, Path.GetFileNameWithoutExtension(assemblyPath), showMethod, closeMethod, diposeMethod, storeMethod, runMethod, stopMethod, timeMethod, replayableModeMethod, layoutMethod, annotationMethod, onDatasetLoaded);
             }
             catch (Exception ex)
             {
@@ -149,9 +154,11 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
         public void Dispose()
         {
             this.StopPipeline();
+            this.SecureInvoke(ref this.disposeMethod, null);
             this.showMethod = null;
             this.assemblyInstance = null;
-            this.showMethod = null;
+            this.closeMethod = null;
+            this.disposeMethod = null;
             this.getDatasetMethod = null;
             this.runPipelineMethod = null;
             this.stopPipelineMethod = null;

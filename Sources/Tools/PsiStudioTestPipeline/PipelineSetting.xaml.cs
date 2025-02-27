@@ -148,5 +148,11 @@ namespace PsiStudioTestPipeline
         {
             return PipelineReplaybleMode.Not;
         }
+
+        public void Dispose()
+        {
+            pipeline?.Dispose();
+            this.Close();
+        }
     }
 }
