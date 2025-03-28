@@ -287,7 +287,6 @@ namespace Microsoft.Psi.PsiStudio
                         if (this.psiStudioPipelinePluginInstance.IsRunning)
                         {
                             this.psiStudioPipelinePluginInstance.StopPipeline();
-                            this.psiStudioPipelinePluginInstance = null;
                             VisualizationContext.Instance.PlayOrPause(false);
                             this.VisualizationContainer.Navigator.SetManualCursorMode();
                         }
@@ -305,7 +304,7 @@ namespace Microsoft.Psi.PsiStudio
                                 return;
                             }
 
-                            if (this.psiStudioPipelinePluginInstance.GetReplayableMode() > PipelinePlugin.PipelineReplaybleMode.Not)
+                            if (this.psiStudioPipelinePluginInstance.GetReplayableMode() < PipelinePlugin.PipelineReplaybleMode.Pipeline)
                             {
                                 this.OpenDataset(this.psiStudioPipelinePluginInstance.GetDataset());
                                 this.VisualizationContainer.Navigator.DataRange?.Set(this.psiStudioPipelinePluginInstance.GetStartTime(), this.VisualizationContainer.Navigator.DataRange.EndTime);

@@ -17,14 +17,14 @@ namespace Microsoft.Psi.PsiStudio.PipelinePlugin
         Not,
 
         /// <summary>
-        /// The pipeline is reading stores form the dataset.
-        /// </summary>
-        Pipeline,
-
-        /// <summary>
         /// The pipeline is not reading stores form the dataset but the application need to replay a session from a dataset.
         /// </summary>
         PsiStudio,
+
+        /// <summary>
+        /// The pipeline is reading stores form the dataset.
+        /// </summary>
+        Pipeline,
     }
 
     /// <summary>

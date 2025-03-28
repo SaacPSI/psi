@@ -160,8 +160,10 @@ namespace Microsoft.Psi.Interop.Transport
                     this.deallocator(message);
                 }
             }
-            catch
+            catch (EndOfStreamException)
             {
+                // Catch when the peer close the stream unproperly.
+                Trace.WriteLine($"Connection unproperly closed {this.address}:{this.port}.");
             }
             finally
             {

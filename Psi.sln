@@ -115,9 +115,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PsiStudio", "PsiStudio", "{0E72598E-2A93-4439-B732-8763CD99F2C3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Psi.PsiStudio", "Sources\Tools\PsiStudio\Microsoft.Psi.PsiStudio\Microsoft.Psi.PsiStudio.csproj", "{C72AED47-F5FF-4B7B-BD11-62149542FB22}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F569A534-5575-4A44-B4E4-622205264D96} = {F569A534-5575-4A44-B4E4-622205264D96}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Psi.PsiStudio", "Sources\Tools\PsiStudio\Test.Psi.PsiStudio\Test.Psi.PsiStudio.csproj", "{5600A9AF-934C-4225-B05D-F11DBC29E0FF}"
 EndProject
@@ -261,8 +258,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaApp", "Applications\Sigma\SigmaApp\SigmaApp.csproj", "{82378A12-3492-457D-AF76-CBF08CCE9832}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaComputeServer", "Applications\Sigma\SigmaComputeServer\SigmaComputeServer.csproj", "{365D836D-AD15-428C-96D1-6C4870525FEF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsiStudioTestPipeline", "Sources\Tools\PsiStudioTestPipeline\PsiStudioTestPipeline.csproj", "{F569A534-5575-4A44-B4E4-622205264D96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1838,26 +1833,6 @@ Global
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x64.Build.0 = Release|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x86.ActiveCfg = Release|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x86.Build.0 = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|ARM.Build.0 = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|x64.Build.0 = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Debug|x86.Build.0 = Debug|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|ARM.ActiveCfg = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|ARM.Build.0 = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|ARM64.Build.0 = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|x64.ActiveCfg = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|x64.Build.0 = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|x86.ActiveCfg = Release|Any CPU
-		{F569A534-5575-4A44-B4E4-622205264D96}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1970,7 +1945,6 @@ Global
 		{046DE977-8DFD-4847-A4D5-E65E3168E0CA} = {82274752-96AB-49DA-8B51-BA8356319308}
 		{82378A12-3492-457D-AF76-CBF08CCE9832} = {82274752-96AB-49DA-8B51-BA8356319308}
 		{365D836D-AD15-428C-96D1-6C4870525FEF} = {82274752-96AB-49DA-8B51-BA8356319308}
-		{F569A534-5575-4A44-B4E4-622205264D96} = {0E72598E-2A93-4439-B732-8763CD99F2C3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EAF15EE9-DCC5-411B-A9E5-7C2F3D132331}
