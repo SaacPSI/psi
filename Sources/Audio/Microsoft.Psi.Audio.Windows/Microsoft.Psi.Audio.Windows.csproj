@@ -5,6 +5,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>Microsoft.Psi.Audio</RootNamespace>
     <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
+    <PackageId>$(AssemblyName)</PackageId>
+    <Version>$(AssemblyVersion)-beta-SAAC</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

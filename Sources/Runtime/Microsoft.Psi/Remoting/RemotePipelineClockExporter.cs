@@ -100,7 +100,7 @@ namespace Microsoft.Psi.Remoting
                     }
                     else
                     {
-                        writer.Write(2); 
+                        writer.Write(2);
                         writer.Write(DateTime.UtcNow.Ticks);
                     }
 

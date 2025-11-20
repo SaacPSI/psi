@@ -21,8 +21,8 @@ namespace Microsoft.Psi.Data
     /// </remarks>
     public class Importer : Subpipeline, IDisposable
     {
-        private readonly Pipeline pipeline;
         private readonly IStreamReader streamReader;
+        private readonly Pipeline pipeline;
         private readonly Func<StreamImporter> getStreamImporter;
 
         /// <summary>
@@ -92,6 +92,11 @@ namespace Microsoft.Psi.Data
         /// Gets the interval between the opened times and closed times, across all streams.
         /// </summary>
         public TimeInterval StreamTimeInterval => this.streamReader.StreamTimeInterval;
+
+        /// <summary>
+        /// Gets the StreamReader for getting information about the stream.
+        /// </summary>
+        protected IStreamReader StreamReader => this.streamReader;
 
         /// <summary>
         /// Returns the metadata for a specified stream.

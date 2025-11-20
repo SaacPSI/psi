@@ -5,6 +5,7 @@
     <Description>Provides data structures and APIs for audio processing.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
+    <Version>$(AssemblyVersion)-beta-SAAC</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

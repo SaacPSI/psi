@@ -151,6 +151,17 @@ namespace Microsoft.Psi.Audio
         }
 
         /// <summary>
+        /// Static method to get the available audio capture devices with theirs channel count.
+        /// </summary>
+        /// <returns>
+        /// An array of available capture device names and channel count.
+        /// </returns>
+        public static (string, int)[] GetAvailableDevicesWithChannels()
+        {
+            return WasapiCapture.GetAvailableCaptureDevicesWithChannels();
+        }
+
+        /// <summary>
         /// Sets the audio level.
         /// </summary>
         /// <param name="level">The audio level.</param>

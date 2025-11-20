@@ -24,5 +24,15 @@ namespace Microsoft.Psi.Audio
             : base(pipeline, new WaveFileStreamReader(name, path, startTime, audioBufferSizeMs), false)
         {
         }
+
+        /// <summary>
+        /// Retreives the stream's wave channel umber.
+        /// </summary>
+        /// <returns>The channel count.</returns>
+        public int GetWaveFileChannelCount()
+        {
+            WaveFileStreamReader waveFileStreamReader = this.StreamReader as WaveFileStreamReader;
+            return waveFileStreamReader.ChannelCount;
+        }
     }
 }

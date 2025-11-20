@@ -107,6 +107,46 @@ namespace Microsoft.Psi.Audio
         }
 
         /// <summary>
+        /// Gets a list of available audio capture devices.with theirs channel count.
+        /// </summary>
+        /// <returns>
+        /// An array of available capture device names and channel count.
+        /// </returns>
+        public static (string, int)[] GetAvailableCaptureDevicesWithChannels()
+        {
+            // Get the collection of available capture devices
+            IMMDeviceCollection deviceCollection = DeviceUtil.GetAvailableDevices(EDataFlow.Capture);
+
+            (string, int)[] devices = null;
+            int deviceCount = deviceCollection.GetCount();
+
+            devices = new (string, int)[deviceCount];
+
+            // Iterate over the collection to get the device names
+            for (int i = 0; i < deviceCount; i++)
+            {
+                IMMDevice device = deviceCollection.Item(i);
+
+                // Try to get the volume control
+                object obj = device.Activate(new Guid(Guids.IAudioEndpointVolumeIIDString), ClsCtx.ALL, IntPtr.Zero);
+                var volume = (IAudioEndpointVolume)obj;
+
+                // Get the friendly name of the device and the channel count
+                int channelCount = 1;
+                volume.GetChannelCount(out channelCount);
+                devices[i] = (DeviceUtil.GetDeviceFriendlyName(device), channelCount);
+
+                // Done with the device so release it
+                Marshal.ReleaseComObject(device);
+            }
+
+            // Release the collection when done
+            Marshal.ReleaseComObject(deviceCollection);
+
+            return devices;
+        }
+
+        /// <summary>
         /// Disposes an instance of the <see cref="WasapiCapture"/> class.
         /// </summary>
         public void Dispose()

@@ -112,6 +112,11 @@ namespace Microsoft.Psi.Audio
         /// <inheritdoc/>
         public int? StreamCount => 1;
 
+        /// <summary>
+        /// Gets the number of channels in the audio stream.
+        /// </summary>
+        public int ChannelCount => this.waveFormat.Channels;
+
         /// <inheritdoc />
         public bool ContainsStream(string name)
         {
