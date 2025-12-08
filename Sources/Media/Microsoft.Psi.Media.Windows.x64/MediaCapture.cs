@@ -4,6 +4,7 @@
 namespace Microsoft.Psi.Media
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Text;
     using Microsoft.Psi;
@@ -131,6 +132,25 @@ namespace Microsoft.Psi.Media
         /// Gets the output stream of images.
         /// </summary>
         public Emitter<Shared<Image>> Out { get; private set; }
+
+        /// <summary>
+        /// Gets the list of available camera.
+        /// </summary>
+        /// <returns>The list of cameras names detected.</returns>
+        public static List<string> GetAvailableCameras()
+        {
+            MediaCaptureDevice.Initialize();
+            List<string> names = new List<string>();
+            foreach (var device in MediaCaptureDevice.AllDevices)
+            {
+                if (!device.fAttached)
+                {
+                    names.Add(device.FriendlyName);
+                }
+            }
+
+            return names;
+        }
 
         /// <summary>
         /// Returns information about each property exposed by the media capture device.

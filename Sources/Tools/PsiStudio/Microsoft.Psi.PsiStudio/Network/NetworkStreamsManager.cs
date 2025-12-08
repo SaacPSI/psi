@@ -253,15 +253,29 @@ namespace Microsoft.Psi.PsiStudio
                                 continue;
                             }
 
-                            if (VisualizationContext.Instance.PluginMap.SerializationsMappings.TryGetValue(Type.GetType(streamMetadata.TypeName), out Type format) == false)
+                            Type streamType = Type.GetType(streamMetadata.TypeName);
+                            Type format = null;
+                            if (streamType == null)
+                            {
+                                var mapCheck = VisualizationContext.Instance.PluginMap.SerializationsMappings.Where(type => type.Key.AssemblyQualifiedName == streamMetadata.TypeName).ToList();
+
+                                if (mapCheck.Count < 1)
+                                {
+                                    continue;
+                                }
+
+                                streamType = mapCheck.First().Key;
+                                format = mapCheck.First().Value;
+                            }
+                            else if (VisualizationContext.Instance.PluginMap.SerializationsMappings.TryGetValue(streamType, out format) == false)
                             {
                                 continue;
                             }
 
-                            var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
+                            var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([streamType]).
                                GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
                                Invoke([this.currentPort, format.GetMethod("GetFormat").Invoke(null, null), null]);
-                            IActivableStreamVisualizationObject networkedVisu = (IActivableStreamVisualizationObject)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([Type.GetType(streamMetadata.TypeName)]).
+                            IActivableStreamVisualizationObject networkedVisu = (IActivableStreamVisualizationObject)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([streamType]).
                                 GetConstructors()[0].Invoke([tcpSimpleWriter, source]);
                             this.networkStreams.Add(networkedVisu);
                             process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort, new Rendezvous.Stream(streamMetadata.Name, streamMetadata.TypeName)));
