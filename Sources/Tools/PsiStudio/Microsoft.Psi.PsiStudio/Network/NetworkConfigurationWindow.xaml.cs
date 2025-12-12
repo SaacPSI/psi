@@ -32,6 +32,7 @@ namespace Microsoft.Psi.Visualization.Windows
             this.RendezVousAddress.Text = this.NetworkSettings.RendezVousAddress;
             this.ExporterStartingPort.Text = this.NetworkSettings.ExporterStartingPort.ToString();
             this.ProcessNameOverriding.Text = this.NetworkSettings.ProcessNameOverriding;
+            this.CommandProcessName.Text = this.NetworkSettings.CommandProcessName;
             this.Owner = owner;
 
             this.DataContext = this;
@@ -76,6 +77,7 @@ namespace Microsoft.Psi.Visualization.Windows
 
             this.NetworkSettings.ExporterStartingPort = port;
             this.NetworkSettings.ProcessNameOverriding = this.ProcessNameOverriding.Text;
+            this.NetworkSettings.CommandProcessName = this.CommandProcessName.Text;
             this.DialogResult = true;
             this.Close();
         }

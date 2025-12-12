@@ -42,5 +42,10 @@ namespace Microsoft.Psi.PsiStudio
         /// Gets or sets the starting port for exporters.
         /// </summary>
         public int ExporterStartingPort { get; set; } = 15551;
+
+        /// <summary>
+        /// Gets or sets the name of the process of the incoming command of replay for PsiStudio, if empty source will not be used.
+        /// </summary>
+        public string CommandProcessName { get; set; } = string.Empty;
     }
 }

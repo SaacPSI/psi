@@ -30,6 +30,7 @@ namespace Microsoft.Psi.PsiStudio
 
         private readonly Navigator navigator;
         private TcpSimpleWriter<PsiStudioNetworkInfo> psiStudioWriter;
+        private TcpSimpleSource<PsiStudioNetworkInfo> psiStudioSource;
         private RendezvousRelay rendezVous;
         private string lastProcessName;
         private string activeSessionName;
@@ -98,6 +99,7 @@ namespace Microsoft.Psi.PsiStudio
             this.Clean();
             this.StopRendezVous();
             this.psiStudioWriter?.Dispose();
+            this.psiStudioSource?.Dispose();
         }
 
         private bool StartRendezVous()
@@ -157,9 +159,9 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             this.Activate(e.NewValue == CursorMode.Playback);
-            PsiStudioNetworkInfo.PsiStudioNetworkEvent evt = e.NewValue == CursorMode.Playback ? PsiStudioNetworkInfo.PsiStudioNetworkEvent.Playing : PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stoping;
+            PsiStudioNetworkInfo.PsiStudioNetworkEvent evt = e.NewValue == CursorMode.Playback ? PsiStudioNetworkInfo.PsiStudioNetworkEvent.Playing : PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stopping;
             TimeInterval interval;
-            if (evt == PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stoping)
+            if (evt == PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stopping)
             {
                 interval = new TimeInterval(this.navigator.DataRange.AsTimeInterval.Left, this.navigator.Cursor);
             }
@@ -169,6 +171,21 @@ namespace Microsoft.Psi.PsiStudio
             }
 
             this.psiStudioWriter.Receive(new PsiStudioNetworkInfo(evt, interval, this.activeSessionName), new Envelope(this.navigator.Cursor, DateTime.UtcNow, 0, 0));
+        }
+
+        private void PlaybackRequestFromNetwork(PsiStudioNetworkInfo info, DateTime time)
+        {
+            switch (info.Event)
+            {
+                case PsiStudioNetworkInfo.PsiStudioNetworkEvent.Playing:
+                    this.navigator.SetPlaybackCursorMode(info.Interval.Left, info.Interval.Right);
+                    VisualizationContext.Instance.PlayOrPause(true);
+                    break;
+                case PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stopping:
+                    VisualizationContext.Instance.PlayOrPause(false);
+                    this.navigator.SetManualCursorMode();
+                    break;
+            }
         }
 
         private void GeneratePsiStudioProcess()
@@ -182,6 +199,26 @@ namespace Microsoft.Psi.PsiStudio
             this.psiStudioWriter = new TcpSimpleWriter<PsiStudioNetworkInfo>(this.Settings.ExporterStartingPort, PsiFormatPsiStudioNetworkInfo.GetFormat(), PsiStudioProcess);
             process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.Settings.ExporterStartingPort, new Rendezvous.Stream(PsiStudioProcess, typeof(PsiStudioNetworkInfo))));
             this.rendezVous?.Rendezvous.TryAddProcess(process);
+            if (this.Settings.CommandProcessName.Length > 0)
+            {
+                this.rendezVous?.Rendezvous.ProcessAdded += this.RendezvousProcessAdded;
+            }
+        }
+
+        private void RendezvousProcessAdded(object sender, Rendezvous.Process e)
+        {
+            if (e.Name == this.Settings.CommandProcessName && this.psiStudioSource == null)
+            {
+                Rendezvous.TcpSourceEndpoint source = e.Endpoints.First() as Rendezvous.TcpSourceEndpoint;
+
+                // Might add a typename check.
+                if (source != null)
+                {
+                    this.psiStudioSource = new TcpSimpleSource<PsiStudioNetworkInfo>(source.Host, source.Port, PsiFormatPsiStudioNetworkInfo.GetFormat());
+                    this.psiStudioSource.OnMessageRecieved = this.PlaybackRequestFromNetwork;
+                    this.psiStudioSource.Start((time) => { });
+                }
+            }
         }
 
         private void Clean()

@@ -8,7 +8,7 @@
         ShowInTaskbar="False"
         Title="Psi Studio Network Settings"
         Width="350"
-        Height="320"
+        Height="380"
         WindowStartupLocation="CenterOwner" 
         BorderBrush="DodgerBlue"
         BorderThickness="1"
@@ -45,7 +45,7 @@
             ShowSearchBox="False"
             ShowTitle="False"/>
 
-        <Grid Grid.IsSharedSizeScope="True" Grid.Row="0" Height="210" VerticalAlignment="Top">
+        <Grid Grid.IsSharedSizeScope="True" Grid.Row="0" Height="auto" VerticalAlignment="Top">
             <Grid.Resources>
                 <Style TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
                     <Setter Property="HorizontalAlignment" Value="Right" />
@@ -78,6 +78,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -97,8 +99,10 @@
             <TextBox Grid.Row="4" Grid.Column="1" Name="RendezVousAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
             <Label Grid.Row="5" Grid.Column="0">Exporter Starting Port</Label>
             <TextBox Grid.Row="5" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="6" Grid.Column="0">Process name</Label>
+            <Label Grid.Row="6" Grid.Column="0">Process ?ame</Label>
             <TextBox Grid.Row="6" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="7" Grid.Column="0">Command Process Name</Label>
+            <TextBox Grid.Row="7" Grid.Column="1" Name="CommandProcessName" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
         </Grid>
         
         <StackPanel Name="ButtonsStackPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">
