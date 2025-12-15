@@ -14,6 +14,11 @@ namespace Microsoft.Psi.PsiStudio
         public bool IsActive { get; set; } = false;
 
         /// <summary>
+        /// Gets or sets a value indicating whether gets or sets audio streams are broadcasted.
+        /// </summary>
+        public bool IsAudio { get; set; } = false;
+
+        /// <summary>
         /// Gets or sets the name of the process, if empty the rendez takes the session name as process name.
         /// </summary>
         public string ProcessNameOverriding { get; set; }
@@ -46,6 +51,6 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets the name of the process of the incoming command of replay for PsiStudio, if empty source will not be used.
         /// </summary>
-        public string CommandProcessName { get; set; } = string.Empty;
+        public string CommandProcessName { get; set; } = "PsiStudioCommand";
     }
 }

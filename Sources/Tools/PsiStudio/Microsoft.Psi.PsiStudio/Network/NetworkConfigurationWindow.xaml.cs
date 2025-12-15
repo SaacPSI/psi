@@ -26,6 +26,7 @@ namespace Microsoft.Psi.Visualization.Windows
 
             this.NetworkSettings = args ?? new PsiStudioNetworkSettings();
             this.IsNetworkActive.IsChecked = this.NetworkSettings.IsActive;
+            this.IsAudioActive.IsChecked = this.NetworkSettings.IsAudio;
             this.IsUsingTCPWriters.IsChecked = this.NetworkSettings.UseTcpWriter;
             this.EndpointAddress.Text = this.NetworkSettings.EndpointAddress;
             this.RendezVousPort.Text = this.NetworkSettings.RendezVousPort.ToString();
@@ -46,6 +47,7 @@ namespace Microsoft.Psi.Visualization.Windows
         private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
             this.NetworkSettings.IsActive = (bool)this.IsNetworkActive.IsChecked;
+            this.NetworkSettings.IsAudio = (bool)this.IsAudioActive.IsChecked;
             this.NetworkSettings.UseTcpWriter = (bool)this.IsUsingTCPWriters.IsChecked;
             this.NetworkSettings.EndpointAddress = this.EndpointAddress.Text;
             int port;

@@ -4,6 +4,7 @@
 namespace Microsoft.Psi.PsiStudio
 {
     using System;
+    using System.Linq;
     using Microsoft.Psi.Interop.Transport;
     using Microsoft.Psi.Visualization.Data;
     using Microsoft.Psi.Visualization.VisualizationObjects;
@@ -27,7 +28,7 @@ namespace Microsoft.Psi.PsiStudio
             this.tcpSimpleWriter = writer;
             this.StreamSource = streamSource;
             this.Name = streamSource.StreamName;
-            int.TryParse(this.StreamSource.StreamMetadata.StorePath.Split('.')[2], out this.sequenceId);
+            int.TryParse(this.StreamSource.StreamMetadata.StorePath.Split('.').Last(), out this.sequenceId);
 
             // TODO check RelativeTimeInterval & TimeInterval.
             this.SubscriberId = DataManager.Instance.RegisterStreamValueSubscriber<TData>(

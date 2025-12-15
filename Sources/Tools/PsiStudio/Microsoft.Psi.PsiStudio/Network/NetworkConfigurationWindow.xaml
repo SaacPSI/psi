@@ -8,7 +8,7 @@
         ShowInTaskbar="False"
         Title="Psi Studio Network Settings"
         Width="350"
-        Height="380"
+        Height="400"
         WindowStartupLocation="CenterOwner" 
         BorderBrush="DodgerBlue"
         BorderThickness="1"
@@ -80,6 +80,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
@@ -89,20 +90,22 @@
 
             <Label Grid.Row="0" Grid.Column="0">Is Active</Label>
             <CheckBox Grid.Row="0" Grid.Column="1" Name="IsNetworkActive"></CheckBox>
-            <Label Grid.Row="1" Grid.Column="0">Is Using TCPWriters</Label>
-            <CheckBox Grid.Row="1" Grid.Column="1" Name="IsUsingTCPWriters"></CheckBox>
-            <Label Grid.Row="2" Grid.Column="0">Endpoint Address</Label>
-            <TextBox Grid.Row="2" Grid.Column="1" Name="EndpointAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="3" Grid.Column="0">RendezVous Port</Label>
-            <TextBox Grid.Row="3" Grid.Column="1" Name="RendezVousPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="4" Grid.Column="0">RendezVous ServerAddress</Label>
-            <TextBox Grid.Row="4" Grid.Column="1" Name="RendezVousAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="5" Grid.Column="0">Exporter Starting Port</Label>
-            <TextBox Grid.Row="5" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="6" Grid.Column="0">Process ?ame</Label>
-            <TextBox Grid.Row="6" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
-            <Label Grid.Row="7" Grid.Column="0">Command Process Name</Label>
-            <TextBox Grid.Row="7" Grid.Column="1" Name="CommandProcessName" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="1" Grid.Column="0">Broadcasting Audio</Label>
+            <CheckBox Grid.Row="1" Grid.Column="1" Name="IsAudioActive"></CheckBox>
+            <Label Grid.Row="2" Grid.Column="0">Is Using TCPWriters</Label>
+            <CheckBox Grid.Row="2" Grid.Column="1" Name="IsUsingTCPWriters"></CheckBox>
+            <Label Grid.Row="3" Grid.Column="0">Endpoint Address</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Name="EndpointAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="4" Grid.Column="0">RendezVous Port</Label>
+            <TextBox Grid.Row="4" Grid.Column="1" Name="RendezVousPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="5" Grid.Column="0">RendezVous Server Address</Label>
+            <TextBox Grid.Row="5" Grid.Column="1" Name="RendezVousAddress" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="6" Grid.Column="0">Exporter Starting Port</Label>
+            <TextBox Grid.Row="6" Grid.Column="1" Name="ExporterStartingPort" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="7" Grid.Column="0">Process Name</Label>
+            <TextBox Grid.Row="7" Grid.Column="1" Name="ProcessNameOverriding" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
+            <Label Grid.Row="8" Grid.Column="0">Command Process Name</Label>
+            <TextBox Grid.Row="8" Grid.Column="1" Name="CommandProcessName" Margin="5,10,4,5" Foreground="{StaticResource ForegroundBrush}"/>
         </Grid>
         
         <StackPanel Name="ButtonsStackPanel" Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,5,0,0">

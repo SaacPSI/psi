@@ -91,6 +91,7 @@ namespace Microsoft.Psi.Visualization.Navigation
             this.viewRange = new NavigatorRange(now.AddSeconds(-60), now);
             this.cursor = now.AddSeconds(-60);
             this.zoomToSelectionPadding = 0.1;
+            this.PlayNewAudioStream = null;
 
             this.selectionRange.RangeChanged += this.OnSelectionRangeChanged;
             this.viewRange.PropertyChanged += this.OnViewRangePropertyChanged;
@@ -389,6 +390,11 @@ namespace Microsoft.Psi.Visualization.Navigation
                 this.Set(nameof(this.RepeatPlayback), ref this.repeatPlayback, value);
             }
         }
+
+        /// <summary>
+        /// Gets or sets a delegate to register audio stream.
+        /// </summary>
+        public Action<Pipeline, IProducer<AudioBuffer>, StreamSource> PlayNewAudioStream { get; set; }
 
         /// <summary>
         /// Initializes a navigator with the properties of an existing navigator.
@@ -892,6 +898,11 @@ namespace Microsoft.Psi.Visualization.Navigation
                         // Create the audio player
                         var audioPlayer = new AudioPlayer(this.audioPlaybackPipeline, new AudioPlayerConfiguration() { Format = audio.AudioFormat });
                         stream.PipeTo(audioPlayer.In);
+
+                        if (this.PlayNewAudioStream != null)
+                        {
+                            this.PlayNewAudioStream(this.audioPlaybackPipeline, stream, streamSource);
+                        }
                     }
                 }
 

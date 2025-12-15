@@ -13,11 +13,13 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         /// <param name="evt">State of PsiStudio.</param>
         /// <param name="interval">Current Interval of playback.</param>
+        /// <param name="playSpeed">Current speed of playback.</param>
         /// <param name="sessionName">Name of the surrent session.</param>
-        public PsiStudioNetworkInfo(PsiStudioNetworkEvent evt, TimeInterval interval = null, string sessionName = "")
+        public PsiStudioNetworkInfo(PsiStudioNetworkEvent evt, TimeInterval interval = null, double playSpeed = 1.0, string sessionName = "")
         {
             this.Event = evt;
             this.SessionName = sessionName;
+            this.PlaySpeed = playSpeed;
             this.Interval = interval ?? TimeInterval.Infinite;
         }
 
@@ -35,6 +37,11 @@ namespace Microsoft.Psi.PsiStudio
             /// PsiStudio is stoping in playback no more data incoming.
             /// </summary>
             Stopping,
+
+            /// <summary>
+            /// Changing speed of the playback.
+            /// </summary>
+            SpeedPlayback,
         }
 
         /// <summary>
@@ -51,5 +58,10 @@ namespace Microsoft.Psi.PsiStudio
         /// Gets the current timeInterval for the playback.
         /// </summary>
         public TimeInterval Interval { get; private set; }
+
+        /// <summary>
+        /// Gets the current playspeed of the playback.
+        /// </summary>
+        public double PlaySpeed { get; private set; } = 1.0;
     }
 }

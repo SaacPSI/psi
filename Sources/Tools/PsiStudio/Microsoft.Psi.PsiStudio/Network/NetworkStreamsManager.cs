@@ -8,6 +8,7 @@ namespace Microsoft.Psi.PsiStudio
     using System.Linq;
     using System.Threading;
     using System.Windows;
+    using Microsoft.Psi.Audio;
     using Microsoft.Psi.Interop.Rendezvous;
     using Microsoft.Psi.Interop.Serialization;
     using Microsoft.Psi.Interop.Transport;
@@ -28,6 +29,7 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         public const string PsiStudioProcess = "PsiStudio";
 
+        private readonly string audioTypeName = typeof(AudioBuffer).ToString();
         private readonly Navigator navigator;
         private TcpSimpleWriter<PsiStudioNetworkInfo> psiStudioWriter;
         private TcpSimpleSource<PsiStudioNetworkInfo> psiStudioSource;
@@ -36,6 +38,7 @@ namespace Microsoft.Psi.PsiStudio
         private string activeSessionName;
         private int currentPort;
         private List<IActivableStreamVisualizationObject> networkStreams;
+        private Rendezvous.Process audioProcess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NetworkStreamsManager"/> class.
@@ -46,6 +49,7 @@ namespace Microsoft.Psi.PsiStudio
             this.Settings = new PsiStudioNetworkSettings();
             this.currentPort = this.Settings.ExporterStartingPort + 1;
             this.networkStreams = new List<IActivableStreamVisualizationObject>();
+            this.audioProcess = null;
 
             // Listen for events that occur when the DatasetViewModel change
             VisualizationContext.Instance.PropertyChanged += this.DatasetViewModelChanged;
@@ -54,7 +58,8 @@ namespace Microsoft.Psi.PsiStudio
             VisualizationContext.Instance.DatasetViewModel.PropertyChanged += this.CurrentSessionChanged;
 
             this.navigator = navigator;
-            navigator.CursorModeChanged += this.NavigatorCursorModeChanged;
+            this.navigator.CursorModeChanged += this.NavigatorCursorModeChanged;
+            this.navigator.PropertyChanged += this.NavigatorPropertyChanged;
         }
 
         /// <summary>
@@ -74,9 +79,35 @@ namespace Microsoft.Psi.PsiStudio
             {
                 this.GeneratePsiStudioProcess();
                 this.UpdateStreams();
+
+                if (this.Settings.IsAudio)
+                {
+                    this.navigator.PlayNewAudioStream += this.OnAudioStreamAdded;
+                }
+                else
+                {
+                    this.navigator.PlayNewAudioStream -= this.OnAudioStreamAdded;
+                }
             }
 
             this.currentPort = this.Settings.ExporterStartingPort + 1;
+        }
+
+        /// <summary>
+        /// Add to audio stream a TCPWriter.
+        /// </summary>
+        /// <param name="pipeline">The audio pipeline from the navigator.</param>
+        /// <param name="audioStream">The audio stream.</param>
+        /// <param name="streamMetadata">The metadata of the audio stream.</param>
+        public void OnAudioStreamAdded(Pipeline pipeline, IProducer<AudioBuffer> audioStream, StreamSource streamMetadata)
+        {
+            TcpWriter<AudioBuffer> exporter = new TcpWriter<AudioBuffer>(pipeline, this.currentPort, Format.PsiFormatAudioBuffer.GetFormat());
+            audioStream.PipeTo(exporter);
+            pipeline.PipelineRun += this.AudioPipelineRun;
+            pipeline.PipelineCompleted += this.AudioPipelineCompleted;
+            this.audioProcess = this.audioProcess ?? new Rendezvous.Process($"{this.activeSessionName}-AudioProcess");
+            this.audioProcess.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort, new Rendezvous.Stream(streamMetadata.StreamName, this.audioTypeName)));
+            this.currentPort++;
         }
 
         /// <summary>
@@ -170,7 +201,7 @@ namespace Microsoft.Psi.PsiStudio
                 interval = this.navigator.DataRange.AsTimeInterval;
             }
 
-            this.psiStudioWriter.Receive(new PsiStudioNetworkInfo(evt, interval, this.activeSessionName), new Envelope(this.navigator.Cursor, DateTime.UtcNow, 0, 0));
+            this.psiStudioWriter.Receive(new PsiStudioNetworkInfo(evt, interval, this.navigator.PlaySpeed, this.activeSessionName), new Envelope(this.navigator.Cursor, DateTime.UtcNow, 0, 0));
         }
 
         private void PlaybackRequestFromNetwork(PsiStudioNetworkInfo info, DateTime time)
@@ -178,12 +209,24 @@ namespace Microsoft.Psi.PsiStudio
             switch (info.Event)
             {
                 case PsiStudioNetworkInfo.PsiStudioNetworkEvent.Playing:
-                    this.navigator.SetPlaybackCursorMode(info.Interval.Left, info.Interval.Right);
-                    VisualizationContext.Instance.PlayOrPause(true);
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        this.navigator.PlaySpeed = info.PlaySpeed;
+                        this.navigator.SetPlaybackCursorMode(info.Interval.Left < this.navigator.ViewRange.StartTime ? this.navigator.ViewRange.StartTime : info.Interval.Left, info.Interval.Right > this.navigator.ViewRange.EndTime ? this.navigator.ViewRange.EndTime : info.Interval.Right );
+                    }));
                     break;
                 case PsiStudioNetworkInfo.PsiStudioNetworkEvent.Stopping:
-                    VisualizationContext.Instance.PlayOrPause(false);
-                    this.navigator.SetManualCursorMode();
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        VisualizationContext.Instance.PlayOrPause(false);
+                        this.navigator.SetManualCursorMode();
+                    }));
+                    break;
+                case PsiStudioNetworkInfo.PsiStudioNetworkEvent.SpeedPlayback:
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        this.navigator.PlaySpeed = info.PlaySpeed;
+                    }));
                     break;
             }
         }
@@ -304,7 +347,7 @@ namespace Microsoft.Psi.PsiStudio
                                 streamType = mapCheck.First().Key;
                                 format = mapCheck.First().Value;
                             }
-                            else if (VisualizationContext.Instance.PluginMap.SerializationsMappings.TryGetValue(streamType, out format) == false)
+                            else if (streamType == typeof(AudioBuffer) || VisualizationContext.Instance.PluginMap.SerializationsMappings.TryGetValue(streamType, out format) == false)
                             {
                                 continue;
                             }
@@ -326,6 +369,38 @@ namespace Microsoft.Psi.PsiStudio
                         this.lastProcessName = process.Name;
                     }
                 }
+            }
+        }
+
+        private void AudioPipelineCompleted(object sender, PipelineCompletedEventArgs e)
+        {
+            Pipeline pipeline = sender as Pipeline;
+            this.rendezVous?.Rendezvous.TryRemoveProcess(this.audioProcess);
+            pipeline.PipelineRun -= this.AudioPipelineRun;
+            pipeline.PipelineCompleted -= this.AudioPipelineCompleted;
+            this.audioProcess = null;
+        }
+
+        private void AudioPipelineRun(object sender, PipelineRunEventArgs e)
+        {
+            if (this.audioProcess.Endpoints.Count() > 0)
+            {
+                this.rendezVous?.Rendezvous.TryAddProcess(this.audioProcess);
+            }
+        }
+
+        private void NavigatorPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Navigator.PlaySpeed):
+                    if (!this.Settings.IsActive)
+                    {
+                        return;
+                    }
+
+                    this.psiStudioWriter.Receive(new PsiStudioNetworkInfo(PsiStudioNetworkInfo.PsiStudioNetworkEvent.SpeedPlayback, TimeInterval.Empty, this.navigator.PlaySpeed, this.activeSessionName), new Envelope(this.navigator.Cursor, DateTime.UtcNow, 0, 0));
+                    break;
             }
         }
     }
