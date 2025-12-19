@@ -39,6 +39,20 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
         public override List<VisualizationPanelType> CompatiblePanelTypes => new List<VisualizationPanelType>() { VisualizationPanelType.Canvas, VisualizationPanelType.XY, VisualizationPanelType.XYZ };
 
         /// <inheritdoc/>
+        public override List<ContextMenuItemInfo> ContextMenuItemsInfo()
+        {
+            var contextMenuItems = base.ContextMenuItemsInfo();
+            contextMenuItems.Add(
+               new ContextMenuItemInfo(
+                   null,
+                   $"Load External Viewer",
+                   VisualizationContext.Instance.LoadExternalViewer,
+                   isEnabled: true,
+                   commandParameter: this));
+            return contextMenuItems;
+        }
+
+        /// <inheritdoc/>
         protected override DataTemplate CreateDefaultViewTemplate()
         {
             return XamlHelper.CreateTemplate(this.GetType(), typeof(InstantVisualizationPlaceholderPanelView));

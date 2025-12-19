@@ -10,6 +10,7 @@ namespace Microsoft.Psi.Visualization
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Threading;
+    using GalaSoft.MvvmLight.Command;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Persistence;
     using Microsoft.Psi.Visualization.Adapters;
@@ -29,6 +30,7 @@ namespace Microsoft.Psi.Visualization
 
         private VisualizationContainer visualizationContainer;
         private DatasetViewModel datasetViewModel = new (new Dataset());
+        private RelayCommand<object> loadExternalViewer;
 
         static VisualizationContext()
         {
@@ -91,6 +93,12 @@ namespace Microsoft.Psi.Visualization
         /// Gets the  image to display on the Play/Pause button.
         /// </summary>
         public string PlayPauseButtonToolTip => this.VisualizationContainer.Navigator.IsCursorModePlayback ? @"Stop" : @"Play";
+
+        /// <summary>
+        /// Gets the external viewer command.
+        /// </summary>
+        public RelayCommand<object> LoadExternalViewer
+        => this.loadExternalViewer ??= new RelayCommand<object>((panel) => { this.OnLoadExternalViewer(panel);  });
 
         /// <inheritdoc />
         public void Dispose()
@@ -684,6 +692,25 @@ namespace Microsoft.Psi.Visualization
                 if ((this.DatasetViewModel.CurrentSessionViewModel?.ContainsLivePartitions == false) && (this.VisualizationContainer.Navigator.CursorMode == CursorMode.Live))
                 {
                     this.VisualizationContainer.Navigator.SetManualCursorMode();
+                }
+            }
+        }
+
+        private void OnLoadExternalViewer(object parameter)
+        {
+            if (parameter is InstantVisualizationPlaceholderPanel placeholderPanel)
+            {
+                // Show the external viewer selection window
+                var selectExternalViewerWindow = new SelectExternalViewerWindow(Application.Current.MainWindow);
+                if (selectExternalViewerWindow.ShowDialog() == true)
+                {
+                    // Create the new panel
+                    var visualizationPanel = new ExternalApplicationVisualizationPanel(selectExternalViewerWindow.SelectedExecutablePath);
+                    var instantVisualizationContainer = placeholderPanel.ParentPanel as InstantVisualizationContainer;
+                    instantVisualizationContainer.ReplaceChildVisualizationPanel(placeholderPanel, visualizationPanel);
+
+                    // Select the visualization panel in the tree
+                    visualizationPanel.IsTreeNodeSelected = true;
                 }
             }
         }

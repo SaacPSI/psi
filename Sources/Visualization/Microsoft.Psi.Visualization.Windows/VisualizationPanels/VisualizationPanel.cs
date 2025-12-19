@@ -382,14 +382,14 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
                     "Session Name",
                     this.Navigator.CopyToClipboardCommand,
                     isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
-                    commandParameter: VisualizationContext.Instance.DatasetViewModel.CurrentSessionViewModel.Name.ToString()));
+                    commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString()));
             copyToClipboardCommands.SubItems.Add(
                 new ContextMenuItemInfo(
                     null,
                     "Session Name & Cursor Time",
                     this.Navigator.CopyToClipboardCommand,
                     isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
-                    commandParameter: VisualizationContext.Instance.DatasetViewModel.CurrentSessionViewModel.Name.ToString() + "@" + this.Navigator.Cursor.ToString("M/d/yyyy HH:mm:ss.ffff")));
+                    commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString() + "@" + this.Navigator.Cursor.ToString("M/d/yyyy HH:mm:ss.ffff")));
 
             commands.Add(copyToClipboardCommands);
 

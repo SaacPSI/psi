@@ -174,84 +174,6 @@
     <None Remove="Icons\zoom-to-session.png" />
     <None Remove="Icons\zoom-to-stream.png" />
     <None Remove="Icons\zoom.png" />
-    <None Remove="stylecop.json" />
-    <None Remove="PropertyGridEditors\ItemPickerEditor.xaml" />
-    <None Remove="Themes\Brushes.xaml" />
-    <None Remove="Themes\Buttons.xaml" />
-    <None Remove="Themes\CollectionControl.xaml" />
-    <None Remove="Themes\ColorPicker.xaml" />
-    <None Remove="Themes\Common.xaml" />
-    <None Remove="Themes\DateTimeUpDown.xaml" />
-    <None Remove="Themes\Glyphs.xaml" />
-    <None Remove="Themes\NumericUpDown.xaml" />
-    <None Remove="Themes\PropertyGrid.xaml" />
-    <None Remove="Themes\PsiStudioDark.xaml" />
-    <None Remove="Themes\TimeSpanUpDown.xaml" />
-    <None Remove="Themes\WatermarkTextBox.xaml" />
-    <None Remove="Views\CanvasVisualizationPanelView.xaml" />
-    <None Remove="Views\InstantVisualizationContainerView.xaml" />
-    <None Remove="Views\InstantVisualizationPlaceholderPanelView.xaml" />
-    <None Remove="Views\NavigatorView.xaml" />
-    <None Remove="Views\TimelineSegmentView.xaml" />
-    <None Remove="Views\TimelineView.xaml" />
-    <None Remove="Views\TimelineVisualizationPanelView.xaml" />
-    <None Remove="Views\VisualizationContainerView.xaml" />
-    <None Remove="Views\Visuals2D\AudioVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\DepthImageVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\DiagnosticsVisualization\PipelineDiagnosticsVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\IFormattableVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\ImageVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\LabeledPointIntervalVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\LabeledPointListVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\LabeledRectangleListVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\Line2DIntervalVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\Line2DListVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\MessageVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\BoolSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\BoolVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\DecimalSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\DoubleSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\DoubleVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\DecimalVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\FloatSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\FloatVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\IntSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\IntVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\LongSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\LongVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableBoolSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableBoolVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableDecimalSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableDoubleSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableDoubleVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableFloatSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableIntSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableIntVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableDecimalVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableFloatVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableLongSeriesVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\NumericPlot\NullableLongVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\Object2DDetectionResultsVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\SpeechRecognitionVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\StringWithDurationVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\TextVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\TimeIntervalAnnotationVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\TimeIntervalHistoryVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals2D\TimeIntervalVisualizationObjectView.xaml" />
-    <None Remove="Views\Visuals3D\SpriteVisual.xaml" />
-    <None Remove="Views\Visuals3D\XYPanelVisual.xaml" />
-    <None Remove="Views\XYVisualizationPanelView.xaml" />
-    <None Remove="Views\XYZVisualizationPanelView.xaml" />
-    <None Remove="Windows\ConfirmLayoutWindow.xaml" />
-    <None Remove="Windows\ConfirmOperationWindow.xaml" />
-    <None Remove="Windows\CreateAnnotationStreamWindow.xaml" />
-    <None Remove="Windows\ExportPsiPartitionWindow.xaml" />
-    <None Remove="Windows\GetParameterWindow.xaml" />
-    <None Remove="Windows\LayoutNameWindow.xaml" />
-    <None Remove="Windows\MessageBoxWindow.xaml" />
-    <None Remove="Windows\ProgressWindow.xaml" />
-    <None Remove="Windows\RunBatchProcessingTaskWindow.xaml" />
-    <None Remove="Windows\ScriptWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
@@ -358,6 +280,7 @@
     <Page Include="Views\CanvasVisualizationPanelView.xaml" />
     <Page Include="Views\XYVisualizationPanelView.xaml" />
     <Page Include="Views\XYZVisualizationPanelView.xaml" />
+	<Page Include="Views\ExternalApplicationPanelView.xaml" />
     <Page Include="Windows\ConfirmLayoutWindow.xaml" />
     <Page Include="Windows\CreateAnnotationStreamWindow.xaml" />
     <Page Include="Windows\GetParameterWindow.xaml" />
@@ -367,6 +290,7 @@
     <Page Include="Windows\ConfirmOperationWindow.xaml" />
     <Page Include="Windows\RunBatchProcessingTaskWindow.xaml" />
     <Page Include="Windows\ScriptWindow.xaml" />
+    <Page Include="Windows\SelectExternalViewerWindow.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\2d.png" />
@@ -520,5 +444,10 @@
     <Resource Include="Icons\zoom-to-session.png" />
     <Resource Include="Icons\zoom-to-stream.png" />
     <Resource Include="Icons\zoom.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Windows\SelectExternalViewerWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 </Project>
