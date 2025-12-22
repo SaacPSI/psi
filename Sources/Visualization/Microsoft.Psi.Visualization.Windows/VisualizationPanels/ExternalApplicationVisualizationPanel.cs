@@ -240,6 +240,20 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
         public override List<VisualizationPanelType> CompatiblePanelTypes => new List<VisualizationPanelType>() { VisualizationPanelType.XYZ, VisualizationPanelType.XY, VisualizationPanelType.Canvas };
 
         /// <inheritdoc/>
+        public override List<ContextMenuItemInfo> ContextMenuItemsInfo()
+        {
+            var contextMenuItems = base.ContextMenuItemsInfo();
+            contextMenuItems.Add(
+               new ContextMenuItemInfo(
+                   null,
+                   $"Load External Viewer",
+                   VisualizationContext.Instance.LoadExternalViewer,
+                   isEnabled: true,
+                   commandParameter: this));
+            return contextMenuItems;
+        }
+
+        /// <inheritdoc/>
         public override void Clear()
         {
             base.Clear();

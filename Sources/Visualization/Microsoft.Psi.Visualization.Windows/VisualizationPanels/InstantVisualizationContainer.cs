@@ -97,7 +97,13 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
         /// <returns>The complete relay command.</returns>
         public PsiCommand InsertCellCommand(bool insertOnLeft)
         {
-            var currentPanelIndex = this.Panels.IndexOf(this.Panels.First(p => p.IsCurrentPanel));
+            var where = this.Panels.Where(p => p.IsCurrentPanel);
+            if (where.Count() == 0)
+            {
+                return new (() => { }, false);
+            }
+
+            var currentPanelIndex = this.Panels.IndexOf(where.First());
             return new (
                 () => this.IncreaseCellCount(insertOnLeft ? currentPanelIndex : currentPanelIndex + 1),
                 this.Panels.Count < MaxCells);

@@ -376,20 +376,23 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
                     this.Navigator.CopyToClipboardCommand,
                     isEnabled: true,
                     commandParameter: this.Navigator.Cursor.Ticks.ToString()));
-            copyToClipboardCommands.SubItems.Add(
-                new ContextMenuItemInfo(
-                    null,
-                    "Session Name",
-                    this.Navigator.CopyToClipboardCommand,
-                    isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
-                    commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString()));
-            copyToClipboardCommands.SubItems.Add(
-                new ContextMenuItemInfo(
-                    null,
-                    "Session Name & Cursor Time",
-                    this.Navigator.CopyToClipboardCommand,
-                    isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
-                    commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString() + "@" + this.Navigator.Cursor.ToString("M/d/yyyy HH:mm:ss.ffff")));
+            if (VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null)
+            {
+                copyToClipboardCommands.SubItems.Add(
+                    new ContextMenuItemInfo(
+                        null,
+                        "Session Name",
+                        this.Navigator.CopyToClipboardCommand,
+                        isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
+                        commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString()));
+                copyToClipboardCommands.SubItems.Add(
+                    new ContextMenuItemInfo(
+                        null,
+                        "Session Name & Cursor Time",
+                        this.Navigator.CopyToClipboardCommand,
+                        isEnabled: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel != null,
+                        commandParameter: VisualizationContext.Instance.DatasetViewModel?.CurrentSessionViewModel.Name.ToString() + "@" + this.Navigator.Cursor.ToString("M/d/yyyy HH:mm:ss.ffff")));
+            }
 
             commands.Add(copyToClipboardCommands);
 

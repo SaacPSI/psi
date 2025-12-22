@@ -9,6 +9,7 @@
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterOwner"
         WindowStyle="SingleBorderWindow"
+		Title="Select External Viewer"
         Background="{StaticResource WindowBackgroundBrush}">
 
     <Window.Resources>
