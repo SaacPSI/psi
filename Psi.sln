@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.2.32210.308
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sources", "Sources", "{A0856299-D28A-4513-B964-3FA5290FF160}"
 EndProject
@@ -258,6 +258,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaApp", "Applications\Sigma\SigmaApp\SigmaApp.csproj", "{82378A12-3492-457D-AF76-CBF08CCE9832}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SigmaComputeServer", "Applications\Sigma\SigmaComputeServer\SigmaComputeServer.csproj", "{365D836D-AD15-428C-96D1-6C4870525FEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Applications\Test\Test.csproj", "{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1833,6 +1835,26 @@ Global
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x64.Build.0 = Release|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x86.ActiveCfg = Release|Any CPU
 		{365D836D-AD15-428C-96D1-6C4870525FEF}.Release|x86.Build.0 = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|ARM.Build.0 = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|x64.Build.0 = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Debug|x86.Build.0 = Debug|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|ARM.Build.0 = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|ARM64.Build.0 = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|x64.ActiveCfg = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|x64.Build.0 = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|x86.ActiveCfg = Release|Any CPU
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1945,6 +1967,7 @@ Global
 		{046DE977-8DFD-4847-A4D5-E65E3168E0CA} = {82274752-96AB-49DA-8B51-BA8356319308}
 		{82378A12-3492-457D-AF76-CBF08CCE9832} = {82274752-96AB-49DA-8B51-BA8356319308}
 		{365D836D-AD15-428C-96D1-6C4870525FEF} = {82274752-96AB-49DA-8B51-BA8356319308}
+		{3EAAB8D6-8417-6049-D04F-09A6BF8FC72D} = {16ED9B47-D7DA-4522-AA26-43021A3D3BA3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EAF15EE9-DCC5-411B-A9E5-7C2F3D132331}
