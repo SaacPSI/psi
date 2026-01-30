@@ -90,7 +90,7 @@ namespace Microsoft.Psi.Interop.Rendezvous
         /// <param name="knownSerializers">Custom known serializers.</param>
         /// <returns><see cref="RemoteImporter"/>.</returns>
         public static RemoteImporter ToRemoteImporter(this Rendezvous.RemoteExporterEndpoint endpoint, Pipeline pipeline, string storePath, KnownSerializers knownSerializers)
-            => new (pipeline, storePath, endpoint.Host, endpoint.Port, knownSerializers);
+            => new (pipeline, storePath, endpoint.Host, endpoint.Port, knownSerializers, true);
 
         /// <summary>
         /// Create a <see cref="RemoteImporter"/> from a <see cref="Rendezvous.RemoteExporterEndpoint"/>.
