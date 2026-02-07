@@ -6,6 +6,7 @@ namespace Microsoft.Psi.Media
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Text;
     using Microsoft.Psi;
     using Microsoft.Psi.Components;
@@ -150,6 +151,28 @@ namespace Microsoft.Psi.Media
             }
 
             return names;
+        }
+
+        /// <summary>
+        /// Gets the list of available camera.
+        /// </summary>
+        /// <param name="cameraName">Name of the camera to get format from.</param>
+        /// <returns>The list of CaptureFormat for the name given.</returns>
+        public static List<CaptureFormat> GetAvailableFormats(string cameraName)
+        {
+            MediaCaptureDevice.Initialize();
+            foreach (var device in MediaCaptureDevice.AllDevices)
+            {
+                if (device.FriendlyName == cameraName)
+                {
+                    device.Attach(false);
+                    var formats = device.Formats.ToList();
+                    device.Shutdown();
+                    return formats.ToList();
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
