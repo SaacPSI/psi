@@ -2,11 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <PackageId>Microsoft.Psi.Runtime</PackageId>
 	  <Description>Provides the core APIs and components for Platform for Situated Intelligence.</Description>
 	  <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
 	  <Version>$(AssemblyVersion)-beta-SAAC</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OS)'=='Unix'">

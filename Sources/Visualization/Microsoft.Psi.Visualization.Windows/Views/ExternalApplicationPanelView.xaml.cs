@@ -70,7 +70,7 @@ namespace Microsoft.Psi.Visualization.Views
             this.Panel.PropertyChanged += this.OnParentPanelPropertyChanged;
 
             // Embed the external process window as a child of the current window
-            if (this.process.MainWindowHandle != IntPtr.Zero)
+            if (!this.process.HasExited && this.process.MainWindowHandle != IntPtr.Zero)
             {
                 IntPtr parentHandle = new System.Windows.Interop.WindowInteropHelper(Window.GetWindow(Application.Current.MainWindow)).Handle;
                 NativeMethods.SetParent(this.process.MainWindowHandle, parentHandle);
@@ -109,7 +109,7 @@ namespace Microsoft.Psi.Visualization.Views
 
         private void OnViewLoaded(object sender, RoutedEventArgs e)
         {
-            if (this.process != null && this.process.MainWindowHandle != IntPtr.Zero && this.Panel?.EnableWindowSizing == true)
+            if (this.process != null && !this.process.HasExited && this.process.MainWindowHandle != IntPtr.Zero && this.Panel?.EnableWindowSizing == true)
             {
                 this.ResizeProcessWindow();
             }

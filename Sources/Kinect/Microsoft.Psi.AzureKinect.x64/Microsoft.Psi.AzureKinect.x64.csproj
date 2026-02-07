@@ -4,7 +4,6 @@
     <Platforms>x64</Platforms>
     <RootNamespace>Microsoft.Psi.AzureKinect</RootNamespace>
     <Description>Provides APIs and components for using Microsoft Azure Kinect sensor.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NuspecFile>Microsoft.Psi.AzureKinect.x64.nuspec</NuspecFile>
     <NuspecProperties>configuration=$(Configuration);version=$(Version)</NuspecProperties>
     <CodeAnalysisRuleSet>../../../Build/Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
@@ -20,6 +19,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <DocumentationFile>bin\x64\Release\netstandard2.0\Microsoft.Psi.AzureKinect.x64.xml</DocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="stylecop.json" />

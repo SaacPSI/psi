@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Provides APIs and components for interoperation with other data formats.</Description>
 	<PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
 	  <Version>$(AssemblyVersion)-beta-SAAC</Version>
@@ -20,6 +19,7 @@
     <CodeAnalysisRuleSet>../../../Build/Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

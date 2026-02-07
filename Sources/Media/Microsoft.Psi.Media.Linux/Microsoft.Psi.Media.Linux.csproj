@@ -6,10 +6,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RootNamespace>Microsoft.Psi.Media</RootNamespace>
     <Description>Provides Linux-specific APIs and components for audio-visual capture.</Description>
- 	<PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
+    <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,6 +24,7 @@
     <WarningsAsErrors />
     <DocumentationFile>bin\Release\netstandard2.0\Microsoft.Psi.Media.Linux.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\..\Build\Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
