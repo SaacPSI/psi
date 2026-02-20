@@ -120,11 +120,23 @@ namespace Microsoft.Psi.Interop.Transport
                 this.frameBuffer = new byte[frameLength];
             }
 
-            // read the entire frame into the frame buffer
-            int bytesRead = binaryReader.Read(this.frameBuffer, 0, frameLength);
-            while (bytesRead < frameLength)
+            try
             {
-                bytesRead += binaryReader.Read(this.frameBuffer, bytesRead, frameLength - bytesRead);
+                // read the entire frame into the frame buffer
+                int bytesRead = binaryReader.Read(this.frameBuffer, 0, frameLength);
+                while (bytesRead < frameLength)
+                {
+                    bytesRead += binaryReader.Read(this.frameBuffer, bytesRead, frameLength - bytesRead);
+                }
+            }
+            catch (Exception)
+            {
+                // Catch when the peer close the stream unproperly.
+                Trace.WriteLine($"Connection unproperly closed {this.address}:{this.port}.");
+                this.client.Close();
+
+                // completion time is last posted message timestamp
+                this.completed?.Invoke(this.endTime);
             }
 
             // deserialize the frame bytes into (T, DateTime)
