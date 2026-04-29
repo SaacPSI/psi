@@ -3,6 +3,8 @@
 
 namespace Microsoft.Psi.PsiStudio
 {
+    using Microsoft.Psi.Remoting;
+
     /// <summary>
     /// Implements temporary network settings for Psi Studio.
     /// </summary>
@@ -24,9 +26,14 @@ namespace Microsoft.Psi.PsiStudio
         public string ProcessNameOverriding { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether gets or sets if the exporter will be TCPWriter or RemoteExporter.
+        /// Gets or sets a value indicating whether gets or sets if the exporter will be simple wirter or RemoteExporter.
         /// </summary>
-        public bool UseTcpWriter { get; set; } = true;
+        public bool UseRemoteExporters { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether gets or sets if the type of connection used.
+        /// </summary>
+        public TransportKind TransportType { get; set; } = TransportKind.Tcp;
 
         /// <summary>
         /// Gets or sets address to use for endpoint.

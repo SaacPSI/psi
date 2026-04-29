@@ -3,12 +3,12 @@
 
 namespace Microsoft.Psi.Visualization.Windows
 {
-    using System.Collections;
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Windows;
-    using System.Windows.Controls;
-    using Microsoft.Psi.Common;
     using Microsoft.Psi.PsiStudio;
+    using Microsoft.Psi.Remoting;
 
     /// <summary>
     /// Interaction logic for NetworkConfigurationWindow.xaml.
@@ -27,7 +27,9 @@ namespace Microsoft.Psi.Visualization.Windows
             this.NetworkSettings = args ?? new PsiStudioNetworkSettings();
             this.IsNetworkActive.IsChecked = this.NetworkSettings.IsActive;
             this.IsAudioActive.IsChecked = this.NetworkSettings.IsAudio;
-            this.IsUsingTCPWriters.IsChecked = this.NetworkSettings.UseTcpWriter;
+            this.IsUsingRemoteExporters.IsChecked = this.NetworkSettings.UseRemoteExporters;
+            this.UpdateTransportKind(this.NetworkSettings.UseRemoteExporters);
+            this.TransportKindComboBox.SelectedItem = this.NetworkSettings.TransportType;
             this.EndpointAddress.Text = this.NetworkSettings.EndpointAddress;
             this.RendezVousPort.Text = this.NetworkSettings.RendezVousPort.ToString();
             this.RendezVousAddress.Text = this.NetworkSettings.RendezVousAddress;
@@ -48,7 +50,8 @@ namespace Microsoft.Psi.Visualization.Windows
         {
             this.NetworkSettings.IsActive = (bool)this.IsNetworkActive.IsChecked;
             this.NetworkSettings.IsAudio = (bool)this.IsAudioActive.IsChecked;
-            this.NetworkSettings.UseTcpWriter = (bool)this.IsUsingTCPWriters.IsChecked;
+            this.NetworkSettings.UseRemoteExporters = (bool)this.IsUsingRemoteExporters.IsChecked;
+            this.NetworkSettings.TransportType = (TransportKind)this.TransportKindComboBox.SelectedItem;
             this.NetworkSettings.EndpointAddress = this.EndpointAddress.Text;
             int port;
             if (!int.TryParse(this.RendezVousPort.Text, out port))
@@ -82,6 +85,26 @@ namespace Microsoft.Psi.Visualization.Windows
             this.NetworkSettings.CommandProcessName = this.CommandProcessName.Text;
             this.DialogResult = true;
             this.Close();
+        }
+
+        private void RemoteExporterIsChecked(object sender, RoutedEventArgs e)
+        {
+            this.UpdateTransportKind((bool)this.IsUsingRemoteExporters.IsChecked);
+        }
+
+        private void UpdateTransportKind(bool isChecked)
+        {
+            List<TransportKind> transportKinds = Enum.GetValues(typeof(TransportKind)).Cast<TransportKind>().ToList();
+            if (isChecked)
+            {
+                transportKinds.Remove(TransportKind.UdpBroadcast);
+            }
+            else
+            {
+                transportKinds.Remove(TransportKind.NamedPipes);
+            }
+
+            this.TransportKindComboBox.ItemsSource = transportKinds;
         }
     }
 }

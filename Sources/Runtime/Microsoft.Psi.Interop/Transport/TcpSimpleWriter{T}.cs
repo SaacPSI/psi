@@ -14,7 +14,7 @@ namespace Microsoft.Psi.Interop.Transport
     /// Component that serializes and writes messages to a remote server over TCP.
     /// </summary>
     /// <typeparam name="T">The type of the messages.</typeparam>
-    public class TcpSimpleWriter<T> : IDisposable
+    public class TcpSimpleWriter<T> : ISimpleWriter<T>
     {
         private readonly IFormatSerializer serializer;
         private readonly string name;

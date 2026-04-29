@@ -352,13 +352,24 @@ namespace Microsoft.Psi.PsiStudio
                                 continue;
                             }
 
-                            var tcpSimpleWriter = typeof(TcpSimpleWriter<>).MakeGenericType([streamType]).
-                               GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
-                               Invoke([this.currentPort, format.GetMethod("GetFormat").Invoke(null, null), null]);
+                            var simpleWriter = this.GenerateSimpleWriter(streamType, format);
+
                             IActivableStreamVisualizationObject networkedVisu = (IActivableStreamVisualizationObject)typeof(NetworkedStreamValueVisualisationObject<>).MakeGenericType([streamType]).
-                                GetConstructors()[0].Invoke([tcpSimpleWriter, source]);
+                                GetConstructors()[0].Invoke([simpleWriter, source]);
+
                             this.networkStreams.Add(networkedVisu);
-                            process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort, new Rendezvous.Stream(streamMetadata.Name, streamMetadata.TypeName)));
+                            switch (this.Settings.TransportType)
+                            {
+                                case Remoting.TransportKind.UdpBroadcast:
+                                case Remoting.TransportKind.Udp:
+                                    process.AddEndpoint(new Rendezvous.UdpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort, new Rendezvous.Stream(streamMetadata.Name, streamMetadata.TypeName)));
+                                    break;
+                                default:
+                                case Remoting.TransportKind.Tcp:
+                                    process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.currentPort, new Rendezvous.Stream(streamMetadata.Name, streamMetadata.TypeName)));
+                                    break;
+                            }
+
                             this.currentPort++;
                         }
                     }
@@ -369,6 +380,23 @@ namespace Microsoft.Psi.PsiStudio
                         this.lastProcessName = process.Name;
                     }
                 }
+            }
+        }
+
+        private object GenerateSimpleWriter(Type stream, Type serializer)
+        {
+            switch (this.Settings.TransportType)
+            {
+                case Remoting.TransportKind.UdpBroadcast:
+                case Remoting.TransportKind.Udp:
+                    return typeof(UdpSimpleWriter<>).MakeGenericType([stream]).
+                               GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(bool), typeof(string)]).
+                               Invoke([this.currentPort, serializer.GetMethod("GetFormat").Invoke(null, null), this.Settings.TransportType == Remoting.TransportKind.UdpBroadcast, null]);
+                default:
+                case Remoting.TransportKind.Tcp:
+                    return typeof(TcpSimpleWriter<>).MakeGenericType([stream]).
+                               GetConstructor([typeof(int), typeof(IFormatSerializer), typeof(string)]).
+                               Invoke([this.currentPort, serializer.GetMethod("GetFormat").Invoke(null, null), null]);
             }
         }
 

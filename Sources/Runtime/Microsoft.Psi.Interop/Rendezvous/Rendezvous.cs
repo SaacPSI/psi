@@ -248,6 +248,56 @@ namespace Microsoft.Psi.Interop.Rendezvous
         }
 
         /// <summary>
+        /// Represents a simple UDP source endpoint providing a single remoted data stream.
+        /// </summary>
+        public class UdpSourceEndpoint : Endpoint
+        {
+            /// <summary>
+            /// Initializes a new instance of the <see cref="UdpSourceEndpoint"/> class.
+            /// </summary>
+            /// <param name="host">Host name of the sender (informational — receivers bind on IPAddress.Any).</param>
+            /// <param name="port">UDP port on which receivers should listen.</param>
+            /// <param name="stream">Endpoint stream.</param>
+            public UdpSourceEndpoint(string host, int port, Stream stream = null)
+                : base(stream is null ? Enumerable.Empty<Stream>() : new[] { stream })
+            {
+                if (string.IsNullOrEmpty(host))
+                {
+                    throw new ArgumentException("Host must be not null or empty.");
+                }
+
+                this.Host = host;
+                this.Port = port;
+            }
+
+            /// <summary>
+            /// Gets the sender host name (informational — receivers bind on IPAddress.Any).
+            /// </summary>
+            public string Host { get; private set; }
+
+            /// <summary>
+            /// Gets the UDP port on which receivers should listen.
+            /// </summary>
+            public int Port { get; private set; }
+
+            /// <summary>
+            /// Gets the stream (UDP endpoints have only one).
+            /// </summary>
+            public Stream Stream => this.Streams.FirstOrDefault();
+
+            /// <inheritdoc/>
+            public override void AddStream(Stream stream)
+            {
+                if (this.Streams.Count() > 0)
+                {
+                    throw new InvalidOperationException($"Cannot add more than one stream to a single {nameof(UdpSourceEndpoint)}");
+                }
+
+                base.AddStream(stream);
+            }
+        }
+
+        /// <summary>
         /// Represents a NetMQ source endpoint providing remoted data streams.
         /// </summary>
         public class NetMQSourceEndpoint : Endpoint

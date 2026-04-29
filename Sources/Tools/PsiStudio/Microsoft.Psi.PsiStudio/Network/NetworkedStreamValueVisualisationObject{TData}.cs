@@ -15,7 +15,7 @@ namespace Microsoft.Psi.PsiStudio
     /// <typeparam name="TData">The type of stream values to visualize.</typeparam>
     public class NetworkedStreamValueVisualisationObject<TData> : IActivableStreamVisualizationObject
     {
-        private TcpSimpleWriter<TData> tcpSimpleWriter;
+        private ISimpleWriter<TData> simpleWriter;
         private int sequenceId;
 
         /// <summary>
@@ -23,9 +23,9 @@ namespace Microsoft.Psi.PsiStudio
         /// </summary>
         /// <param name="writer">Writer to send data over Tcp.</param>
         /// <param name="streamSource">StreamSource to bound with.</param>
-        public NetworkedStreamValueVisualisationObject(TcpSimpleWriter<TData> writer, StreamSource streamSource)
+        public NetworkedStreamValueVisualisationObject(ISimpleWriter<TData> writer, StreamSource streamSource)
         {
-            this.tcpSimpleWriter = writer;
+            this.simpleWriter = writer;
             this.StreamSource = streamSource;
             this.Name = streamSource.StreamName;
             int.TryParse(this.StreamSource.StreamMetadata.StorePath.Split('.').Last(), out this.sequenceId);
@@ -66,7 +66,7 @@ namespace Microsoft.Psi.PsiStudio
             {
                 DataManager.Instance.UnregisterStreamValueSubscriber<TData>(this.SubscriberId);
                 this.SubscriberId = Guid.Empty;
-                this.tcpSimpleWriter.Dispose();
+                this.simpleWriter.Dispose();
             }
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.Psi.PsiStudio
             if (dataAvailable && this.IsActive)
             {
                 // TODO check sourceid & sequenceid.
-                this.tcpSimpleWriter.Receive(value, new Envelope(originatingTime, creationTime, this.StreamSource.StreamMetadata.Id, this.sequenceId));
+                this.simpleWriter.Receive(value, new Envelope(originatingTime, creationTime, this.StreamSource.StreamMetadata.Id, this.sequenceId));
             }
         }
     }
