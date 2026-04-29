@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides data structures and APIs for audio-visual media processing.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>Microsoft.Psi.Media</RootNamespace>
 	  <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
   </PropertyGroup>
@@ -14,6 +13,7 @@
     <WarningsAsErrors />
     <DocumentationFile>bin\Release\netstandard2.0\Microsoft.Psi.Media.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

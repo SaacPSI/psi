@@ -242,9 +242,9 @@ namespace Microsoft.Psi.PsiStudio
             this.psiStudioWriter = new TcpSimpleWriter<PsiStudioNetworkInfo>(this.Settings.ExporterStartingPort, PsiFormatPsiStudioNetworkInfo.GetFormat(), PsiStudioProcess);
             process.AddEndpoint(new Rendezvous.TcpSourceEndpoint(this.Settings.EndpointAddress, this.Settings.ExporterStartingPort, new Rendezvous.Stream(PsiStudioProcess, typeof(PsiStudioNetworkInfo))));
             this.rendezVous?.Rendezvous.TryAddProcess(process);
-            if (this.Settings.CommandProcessName.Length > 0)
+            if (this.Settings.CommandProcessName.Length > 0 && this.rendezVous != null)
             {
-                this.rendezVous?.Rendezvous.ProcessAdded += this.RendezvousProcessAdded;
+                this.rendezVous.Rendezvous.ProcessAdded += this.RendezvousProcessAdded;
             }
         }
 

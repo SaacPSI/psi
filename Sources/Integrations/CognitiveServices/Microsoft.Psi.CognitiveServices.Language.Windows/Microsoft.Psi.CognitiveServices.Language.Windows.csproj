@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Provides components for using Microsoft's Cognitive Services Language API.</Description>
     <RootNamespace>Microsoft.Psi.CognitiveServices.Language</RootNamespace>
     <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
@@ -11,6 +10,7 @@
     <CodeAnalysisRuleSet>..\..\..\..\Build\Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\net472\Microsoft.Psi.CognitiveServices.Language.Windows.xml</DocumentationFile>

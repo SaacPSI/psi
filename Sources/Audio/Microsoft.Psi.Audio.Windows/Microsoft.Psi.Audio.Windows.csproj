@@ -2,12 +2,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Provides Windows-specific APIs and components for audio capture, processing and playback.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>Microsoft.Psi.Audio</RootNamespace>
     <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
     <PackageId>$(AssemblyName)</PackageId>
     <Version>$(AssemblyVersion)-beta-SAAC</Version>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>bin\Release\netstandard2.0\Microsoft.Psi.Audio.Windows.xml</DocumentationFile>

@@ -1,12 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>Microsoft.Psi.Media</RootNamespace>
     <Description>Provides Windows-specific APIs and components for audio-visual capture and processing.</Description>
 	  <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
 	  <Version>$(AssemblyVersion)-beta-SAAC</Version>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\net472\Microsoft.Psi.Media.Windows.x64.xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\..\..\Build\Microsoft.Psi.ruleset</CodeAnalysisRuleSet>

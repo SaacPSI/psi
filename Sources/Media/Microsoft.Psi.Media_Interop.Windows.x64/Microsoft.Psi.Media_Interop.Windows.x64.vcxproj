@@ -91,7 +91,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\14.44.35207\atlmfc\include;$(WindowsSDK_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BrowseInformation>true</BrowseInformation>
       <GenerateXMLDocumentationFiles>true</GenerateXMLDocumentationFiles>

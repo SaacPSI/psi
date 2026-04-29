@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>Provides components for using Microsoft's Cognitive Services Vision API.</Description>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <ApplicationIcon />
@@ -14,6 +13,7 @@
     <CodeAnalysisRuleSet>..\..\..\..\Build\Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netstandard2.0\Microsoft.Psi.CognitiveServices.Vision.xml</DocumentationFile>

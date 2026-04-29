@@ -4,7 +4,6 @@
 		<Description>Provides data structures and components for processing inputs and rendering in mixed-reality using StereoKit.</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <CodeAnalysisRuleSet>../../../Build/Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
 	</PropertyGroup>
 
@@ -20,6 +19,7 @@
 		<WarningsAsErrors />
 		<DocumentationFile>bin\Release\netstandard2.0\Microsoft.Psi.MixedReality.xml</DocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

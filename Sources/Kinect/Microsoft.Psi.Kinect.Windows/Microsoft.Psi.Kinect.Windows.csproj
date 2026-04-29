@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <Description>Provides APIs and components for using Microsoft Kinect sensor.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>Microsoft.Psi.Kinect</RootNamespace>
     <PackageOutputPath>$(SolutionDir)\Build\PsiPackages</PackageOutputPath>
   </PropertyGroup>
@@ -13,6 +12,7 @@
     <CodeAnalysisRuleSet>..\..\..\Build\Microsoft.Psi.ruleset</CodeAnalysisRuleSet>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
