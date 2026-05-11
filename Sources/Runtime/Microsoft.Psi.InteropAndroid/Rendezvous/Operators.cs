@@ -46,6 +46,37 @@ namespace Microsoft.Psi.Interop.Rendezvous
             => new (pipeline, endpoint.Host, endpoint.Port, deserializer, deallocator, useSourceOriginatingTimes, name);
 
         /// <summary>
+        /// Create a rendezvous endpoint from a <see cref="UdpWriter{T}"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of data stream.</typeparam>
+        /// <param name="writer"><see cref="UdpWriter{T}"/> from which to create endpoint.</param>
+        /// <param name="address">Address with which to create endpoint.</param>
+        /// <param name="streamName">The name of the rendezvous stream.</param>
+        /// <returns>Rendezvous endpoint.</returns>
+        public static Rendezvous.Endpoint ToRendezvousEndpoint<T>(this UdpWriter<T> writer, string address, string streamName)
+            => new Rendezvous.UdpSourceEndpoint(address, writer.Port, new Rendezvous.Stream(streamName, typeof(T)));
+
+        /// <summary>
+        /// Create a <see cref="UdpSource{T}"/> from a <see cref="Rendezvous.UdpSourceEndpoint"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of data stream.</typeparam>
+        /// <param name="endpoint"><see cref="Rendezvous.UdpSourceEndpoint"/> from which to create.</param>
+        /// <param name="pipeline">The pipeline to add the component to.</param>
+        /// <param name="deserializer">The deserializer to use to deserialize messages.</param>
+        /// <param name="deallocator">An optional deallocator for the data.</param>
+        /// <param name="useSourceOriginatingTimes">An optional parameter indicating whether to use originating times received from the source over the network or to re-timestamp with the current pipeline time upon receiving.</param>
+        /// <param name="name">An optional name for the UDP source component.</param>
+        /// <returns><see cref="UdpSource{T}"/>.</returns>
+        public static UdpSource<T> ToUdpSource<T>(
+            this Rendezvous.UdpSourceEndpoint endpoint,
+            Pipeline pipeline,
+            IFormatDeserializer<T> deserializer,
+            Action<T> deallocator = null,
+            bool useSourceOriginatingTimes = true,
+            string name = nameof(UdpSource<T>))
+            => new (pipeline, endpoint.Port, deserializer, deallocator, useSourceOriginatingTimes, name);
+
+        /// <summary>
         /// Create a rendezvous endpoint from a <see cref="RemoteClockExporter"/>.
         /// </summary>
         /// <param name="exporter"><see cref="RemoteClockExporter"/> from which to create endpoint.</param>
@@ -142,6 +173,33 @@ namespace Microsoft.Psi.Interop.Rendezvous
             var tcpWriter = new TcpWriter<T>(source.Out.Pipeline, port, serializer);
             source.PipeTo(tcpWriter, deliveryPolicy);
             rendezvousProcess.AddEndpoint(tcpWriter.ToRendezvousEndpoint(address, streamName));
+        }
+
+        /// <summary>
+        /// Writes a stream to a specified rendezvous process via UDP.
+        /// </summary>
+        /// <typeparam name="T">The type of data in the stream.</typeparam>
+        /// <param name="source">The source stream to write.</param>
+        /// <param name="streamName">The name under which to write the stream to the rendezvous process.</param>
+        /// <param name="rendezvousProcess">The rendezvous process.</param>
+        /// <param name="address">The address of this sender (used in the endpoint).</param>
+        /// <param name="port">The destination UDP port.</param>
+        /// <param name="isBroadcasting">Flag indicating whether the writer should broadcast messages.</param>
+        /// <param name="serializer">The serializer to use when writing the stream.</param>
+        /// <param name="deliveryPolicy">An optional delivery policy.</param>
+        public static void WriteToRendezvousProcess<T>(
+            this IProducer<T> source,
+            string streamName,
+            Rendezvous.Process rendezvousProcess,
+            string address,
+            int port,
+            bool isBroadcasting,
+            IFormatSerializer<T> serializer,
+            DeliveryPolicy deliveryPolicy = null)
+        {
+            var udpWriter = new UdpWriter<T>(source.Out.Pipeline, port, serializer, isBroadcasting);
+            source.PipeTo(udpWriter, deliveryPolicy);
+            rendezvousProcess.AddEndpoint(udpWriter.ToRendezvousEndpoint(address, streamName));
         }
     }
 }

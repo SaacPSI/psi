@@ -75,6 +75,12 @@ namespace Microsoft.Psi.Interop.Rendezvous
                     writer.Write(remotePipelineClockExporterEndpoint.Host);
                     writer.Write(remotePipelineClockExporterEndpoint.Port);
                 }
+                else if (endpoint is Rendezvous.UdpSourceEndpoint udpSourceEndpoint)
+                {
+                    writer.Write((byte)5); // UdpSourceEndpoint
+                    writer.Write(udpSourceEndpoint.Host);
+                    writer.Write(udpSourceEndpoint.Port);
+                }
                 else
                 {
                     throw new ArgumentException($"Unknown type of Endpoint ({endpoint.GetType().Name}).");
@@ -202,6 +208,12 @@ namespace Microsoft.Psi.Interop.Rendezvous
                         port = reader.ReadInt32();
                         endpoint = new Rendezvous.RemotePipelineClockExporterEndpoint(host, port);
                         break;
+                    case 5: // UdpEndpoint
+                        host = reader.ReadString();
+                        port = reader.ReadInt32();
+                        endpoint = new Rendezvous.UdpSourceEndpoint(host, port);
+                        break;
+
                     default:
                         throw new Exception("Unknown type of Endpoint.");
                 }
