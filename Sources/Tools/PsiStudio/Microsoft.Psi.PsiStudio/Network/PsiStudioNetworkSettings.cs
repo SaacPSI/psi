@@ -23,7 +23,7 @@ namespace Microsoft.Psi.PsiStudio
         /// <summary>
         /// Gets or sets the name of the process, if empty the rendez takes the session name as process name.
         /// </summary>
-        public string ProcessNameOverriding { get; set; }
+        public string ProcessNameOverriding { get; set; } = "PsiStudio";
 
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets if the exporter will be simple wirter or RemoteExporter.

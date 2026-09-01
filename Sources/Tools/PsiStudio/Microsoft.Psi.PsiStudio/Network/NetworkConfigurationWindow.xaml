@@ -93,8 +93,8 @@
             <CheckBox Grid.Row="0" Grid.Column="1" Name="IsNetworkActive"></CheckBox>
             <Label Grid.Row="1" Grid.Column="0">Broadcasting Audio</Label>
             <CheckBox Grid.Row="1" Grid.Column="1" Name="IsAudioActive"></CheckBox>
-            <Label Grid.Row="2" Grid.Column="0">Is Using Remote Exporters</Label>
-            <CheckBox Grid.Row="2" Grid.Column="1" Name="IsUsingRemoteExporters" Checked="RemoteExporterIsChecked" IsEnabled="False"></CheckBox>
+            <!--<Label Grid.Row="2" Grid.Column="0">Is Using Remote Exporters</Label>
+            <CheckBox Grid.Row="2" Grid.Column="1" Name="IsUsingRemoteExporters" Checked="RemoteExporterIsChecked" IsEnabled="False"></CheckBox>-->
             <Label Grid.Row="3" Grid.Column="0">Transport Kind</Label>
             <ComboBox Grid.Row="3" Grid.Column="1" Name="TransportKindComboBox"></ComboBox>
             <Label Grid.Row="4" Grid.Column="0">Endpoint Address</Label>

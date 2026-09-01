@@ -27,7 +27,8 @@ namespace Microsoft.Psi.Visualization.Windows
             this.NetworkSettings = args ?? new PsiStudioNetworkSettings();
             this.IsNetworkActive.IsChecked = this.NetworkSettings.IsActive;
             this.IsAudioActive.IsChecked = this.NetworkSettings.IsAudio;
-            this.IsUsingRemoteExporters.IsChecked = this.NetworkSettings.UseRemoteExporters;
+
+            // this.IsUsingRemoteExporters.IsChecked = this.NetworkSettings.UseRemoteExporters;
             this.UpdateTransportKind(this.NetworkSettings.UseRemoteExporters);
             this.TransportKindComboBox.SelectedItem = this.NetworkSettings.TransportType;
             this.EndpointAddress.Text = this.NetworkSettings.EndpointAddress;
@@ -50,7 +51,8 @@ namespace Microsoft.Psi.Visualization.Windows
         {
             this.NetworkSettings.IsActive = (bool)this.IsNetworkActive.IsChecked;
             this.NetworkSettings.IsAudio = (bool)this.IsAudioActive.IsChecked;
-            this.NetworkSettings.UseRemoteExporters = (bool)this.IsUsingRemoteExporters.IsChecked;
+
+            // this.NetworkSettings.UseRemoteExporters = (bool)this.IsUsingRemoteExporters.IsChecked;
             this.NetworkSettings.TransportType = (TransportKind)this.TransportKindComboBox.SelectedItem;
             this.NetworkSettings.EndpointAddress = this.EndpointAddress.Text;
             int port;
@@ -89,7 +91,7 @@ namespace Microsoft.Psi.Visualization.Windows
 
         private void RemoteExporterIsChecked(object sender, RoutedEventArgs e)
         {
-            this.UpdateTransportKind((bool)this.IsUsingRemoteExporters.IsChecked);
+            // this.UpdateTransportKind((bool)this.IsUsingRemoteExporters.IsChecked);
         }
 
         private void UpdateTransportKind(bool isChecked)

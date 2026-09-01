@@ -72,8 +72,8 @@ namespace Microsoft.Psi.Visualization.Windows
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
             // Set filter for file extension and default file extension
-            dlg.DefaultExt = ".dll";
-            dlg.Filter = "Assembly (.dll)|*.dll";
+            dlg.DefaultExt = ".dll;*.exe";
+            dlg.Filter = "Assembly (.dll)|*.dll|Executable (.exe)|*.exe";
 
             // Display OpenFileDialog by calling ShowDialog method
             bool? result = dlg.ShowDialog();
