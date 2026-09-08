@@ -85,6 +85,8 @@ namespace Microsoft.Psi.PsiStudio
         private bool currentLayoutUpdating = false;
         private PipelinePlugin.PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
         private NetworkStreamsManager networkManager = null;
+        private Windows.AnnotationSearchWindow annotationSearchWindow;
+        private RelayCommand openAnnotationSearchCommand;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -828,6 +830,15 @@ namespace Microsoft.Psi.PsiStudio
         [IgnoreDataMember]
         public RelayCommand CreateAnnotationStreamCommand
             => this.createAnnotationStreamCommand ??= new RelayCommand(this.CreateAnnotationStream);
+
+        /// <summary>
+        /// Gets the command to open the annotation search window.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand OpenAnnotationSearchCommand
+            => this.openAnnotationSearchCommand ??= new RelayCommand(
+                this.OpenAnnotationSearch);
 
         /// <summary>
         /// Gets the edit settings command.
@@ -1855,6 +1866,20 @@ namespace Microsoft.Psi.PsiStudio
             if (File.Exists(logFilePath))
             {
                 Process.Start("notepad.exe", logFilePath);
+            }
+        }
+
+        private void OpenAnnotationSearch()
+        {
+            if (this.annotationSearchWindow == null || !this.annotationSearchWindow.IsVisible)
+            {
+                this.annotationSearchWindow = new Windows.AnnotationSearchWindow(
+                    Application.Current?.MainWindow as MainWindow);
+                this.annotationSearchWindow.Show();
+            }
+            else
+            {
+                this.annotationSearchWindow.Focus();
             }
         }
     }

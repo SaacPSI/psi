@@ -60,6 +60,16 @@ namespace Microsoft.Psi.PsiStudio
 
             // Listen for items being added to the property grid.
             this.PropertyGrid.PreparePropertyItem += this.OnPropertyGridPreparePropertyItem;
+
+            // Add keyboard shortcut for annotation search (Ctrl+Shift+F)
+            if (viewModel?.OpenAnnotationSearchCommand != null)
+            {
+                var searchBinding = new KeyBinding(
+                    viewModel.OpenAnnotationSearchCommand,
+                    Key.F,
+                    ModifierKeys.Control | ModifierKeys.Shift);
+                this.InputBindings.Add(searchBinding);
+            }
         }
 
         /// <inheritdoc/>

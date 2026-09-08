@@ -26,6 +26,7 @@
     <None Remove="MainWindow.xaml" />
     <None Remove="stylecop.json" />
     <None Remove="Windows\AdditionalAssembliesWindow.xaml" />
+    <None Remove="Windows\AnnotationSearchWindow.xaml" />
     <None Remove="Windows\HelpWindow.xaml" />
     <None Remove="Windows\LayoutNameWindow.xaml" />
     <None Remove="Windows\LoadingDatasetWindow.xaml" />
@@ -42,6 +43,9 @@
     <Page Include="MainWindow.xaml" />
     <Page Include="Network\NetworkConfigurationWindow.xaml" />
     <Page Include="PipelinePlugin\PiplinePluginsWindow.xaml" />
+    <Page Include="Windows\AnnotationSearchWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\HelpWindow.xaml" />
     <Page Include="Windows\PsiStudioSettingsWindow.xaml" />
     <Page Include="Windows\AdditionalAssembliesWindow.xaml" />
