@@ -51,7 +51,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("test");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test_track_1", result.Track);
@@ -72,7 +72,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("data");
             var cursorTime = new DateTime(2024, 1, 1, 10, 30, 0);
 
-            var result = engine.FindPrevious(cursorTime, filter);
+            var result = engine.FindPrevious(cursorTime, filter, false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test_track_0", result.Track);
@@ -93,7 +93,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("nonexistent");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNull(result);
         }
@@ -112,7 +112,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("nonexistent");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindPrevious(cursorTime, filter);
+            var result = engine.FindPrevious(cursorTime, filter, false);
 
             Assert.IsNull(result);
         }
@@ -149,7 +149,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("TEST");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("test_track_0", result.Track);
@@ -208,7 +208,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("test");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNull(result);
         }
@@ -245,7 +245,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("test");
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNotNull(result);
 
@@ -268,7 +268,7 @@ namespace Test.Psi.PsiStudio.Search
             var filter = new AnnotationSearchFilter("test", attributeNames);
             var cursorTime = new DateTime(2024, 1, 1, 10, 0, 0);
 
-            var result = engine.FindNext(cursorTime, filter);
+            var result = engine.FindNext(cursorTime, filter, false);
 
             Assert.IsNotNull(result);
         }
@@ -286,7 +286,7 @@ namespace Test.Psi.PsiStudio.Search
             engine.LoadAnnotations(annotations);
 
             var filter = new AnnotationSearchFilter(new string[] { });
-            engine.FindNext(DateTime.UtcNow, filter);
+            engine.FindNext(DateTime.UtcNow, filter, false);
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace Test.Psi.PsiStudio.Search
         public void FindNext_NullFilter_ThrowsException()
         {
             var engine = new AnnotationSearchEngine();
-            engine.FindNext(DateTime.UtcNow, null);
+            engine.FindNext(DateTime.UtcNow, null, false);
         }
 
         /// <summary>
