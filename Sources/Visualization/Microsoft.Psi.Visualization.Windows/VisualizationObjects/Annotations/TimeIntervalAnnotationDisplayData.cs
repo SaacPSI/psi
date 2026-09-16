@@ -141,7 +141,7 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
             var editorAttribute = new EditorAttribute(typeof(AnnotationValueEditor), typeof(AnnotationValueEditor));
             foreach (var attributeSchema in this.AnnotationSchema.AttributeSchemas)
             {
-                propertyDescriptors.Add(new AnnotationPropertyDescriptor(
+                propertyDescriptors.Add(new TimeIntervalAnnotationPropertyDescriptor(
                     this,
                     attributeSchema.Name,
                     !this.parent.AllowEditAnnotationValue,

@@ -124,6 +124,7 @@
             </MenuItem>
             <MenuItem Header="_Tools">
                 <MenuItem Header="_Search Annotations" Command="{Binding OpenAnnotationSearchCommand}" Height="25" InputGestureText="Ctrl+Shift+F"/>
+                <MenuItem Header="_BatchProcessingTasks..." Command="{Binding OpenBatchProcessingTasksCommand}" Height="25" />
             </MenuItem>
         </Menu>
 

@@ -9,12 +9,15 @@ namespace Microsoft.Psi.PsiStudio
     using System.ComponentModel;
     using System.Data;
     using System.Diagnostics;
+    using System.Drawing;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
     using System.Windows;
+    using System.Windows.Annotations;
     using GalaSoft.MvvmLight.CommandWpf;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Data.Annotations;
@@ -27,12 +30,16 @@ namespace Microsoft.Psi.PsiStudio
     using Microsoft.Psi.Visualization.VisualizationPanels;
     using Microsoft.Psi.Visualization.Windows;
     using Microsoft.Win32;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Represents the view model for the main window of the psi studio application.
     /// </summary>
     public class MainWindowViewModel : ObservableObject, IDisposable
     {
+        private const string BatchProcessingTasksAnnotationSchemaName = "PsiStudio.BatchProcessingTasks";
+
         /// <summary>
         /// The path to the settings directiory.
         /// </summary>
@@ -81,6 +88,7 @@ namespace Microsoft.Psi.PsiStudio
         private readonly Dictionary<string, bool> userConsentObtained = new ();
         private List<LayoutInfo> availableLayouts = new ();
         private List<AnnotationSchema> annotationSchemas;
+        private AnnotationSchema tasksSchema;
         private LayoutInfo currentLayout = null;
         private bool currentLayoutUpdating = false;
         private PipelinePlugin.PsiStudioPipelineAssemblyHandler psiStudioPipelinePluginInstance = null;
@@ -190,6 +198,9 @@ namespace Microsoft.Psi.PsiStudio
 
             // Listen for events that occur when some part of a visualization object requests to have its properties displayed in the property browser.
             VisualizationContext.Instance.RequestDisplayObjectProperties += (sender, e) => this.SelectedPropertiesObject = e.Object;
+
+            // Listen for batch processing task requests originating from visualization objects.
+            VisualizationContext.Instance.RequestOpenBatchProcessingTasks += this.OnRequestOpenBatchProcessingTasks;
 
             // Listen for events that occur when a store/stream becomes dirty or clean
             DataManager.Instance.DataStoreStatusChanged += this.DataStoreStatusChanged;
@@ -1050,36 +1061,72 @@ namespace Microsoft.Psi.PsiStudio
                     storePath = createAnnotationStreamWindow.StorePath;
                 }
 
-                await ProgressWindow.RunWithProgressAsync(
-                    $"Creating annotations stream {createAnnotationStreamWindow.StreamName} ...",
-                    async progress =>
-                    {
-                        if (createAnnotationStreamWindow.UseExistingPartition)
-                        {
-                            // Add the empty annotations stream to the existing partition
-                            await Task.Run(() => PsiStore.AddStreamInPlace<TimeIntervalAnnotationSet, AnnotationSchema>(
-                                (storeName, storePath),
-                                streamName,
-                                annotationSchema,
-                                true,
-                                new Progress<double>(p => progress.Report(("Adding stream to existing store ...", p * 0.95)))));
-                        }
-                        else
-                        {
-                            // Create the new partition with the empty annotations stream
-                            await Task.Run(() => PsiStore.CreateWithStream<TimeIntervalAnnotationSet, AnnotationSchema>(
-                                storeName,
-                                storePath,
-                                streamName,
-                                annotationSchema,
-                                new Progress<double>(p => progress.Report(("Creating \\psi store ...", p * 0.95)))));
-                        }
+                if (annotationSchema.Name == this.tasksSchema.Name)
+                {
+                    await ProgressWindow.RunWithProgressAsync(
+                       $"Creating annotations stream {createAnnotationStreamWindow.StreamName} ...",
+                       async progress =>
+                       {
+                           if (createAnnotationStreamWindow.UseExistingPartition)
+                           {
+                               // Add the empty annotations stream to the existing partition
+                               await Task.Run(() => PsiStore.AddStreamInPlace<TaskAnnotationSet, AnnotationSchema>(
+                                   (storeName, storePath),
+                                   streamName,
+                                   annotationSchema,
+                                   true,
+                                   new Progress<double>(p => progress.Report(("Adding stream to existing store ...", p * 0.95)))));
+                           }
+                           else
+                           {
+                               // Create the new partition with the empty annotations stream
+                               await Task.Run(() => PsiStore.CreateWithStream<TaskAnnotationSet, AnnotationSchema>(
+                                   storeName,
+                                   storePath,
+                                   streamName,
+                                   annotationSchema,
+                                   new Progress<double>(p => progress.Report(("Creating \\psi store ...", p * 0.95)))));
+                           }
 
-                        // Add the partition to the session
-                        await currentSession.AddPartitionAsync(
-                            new PsiStoreStreamReader(storeName, storePath),
-                            progress: new Progress<(string Status, double Value)>(p => progress.Report((p.Status, 0.95 + p.Value * 0.05))));
-                    });
+                           // Add the partition to the session
+                           await currentSession.AddPartitionAsync(
+                               new PsiStoreStreamReader(storeName, storePath),
+                               progress: new Progress<(string Status, double Value)>(p => progress.Report((p.Status, 0.95 + p.Value * 0.05))));
+                       });
+                }
+                else
+                {
+                   await ProgressWindow.RunWithProgressAsync(
+                       $"Creating annotations stream {createAnnotationStreamWindow.StreamName} ...",
+                       async progress =>
+                       {
+                           if (createAnnotationStreamWindow.UseExistingPartition)
+                           {
+                               // Add the empty annotations stream to the existing partition
+                               await Task.Run(() => PsiStore.AddStreamInPlace<TimeIntervalAnnotationSet, AnnotationSchema>(
+                                   (storeName, storePath),
+                                   streamName,
+                                   annotationSchema,
+                                   true,
+                                   new Progress<double>(p => progress.Report(("Adding stream to existing store ...", p * 0.95)))));
+                           }
+                           else
+                           {
+                               // Create the new partition with the empty annotations stream
+                               await Task.Run(() => PsiStore.CreateWithStream<TimeIntervalAnnotationSet, AnnotationSchema>(
+                                   storeName,
+                                   storePath,
+                                   streamName,
+                                   annotationSchema,
+                                   new Progress<double>(p => progress.Report(("Creating \\psi store ...", p * 0.95)))));
+                           }
+
+                           // Add the partition to the session
+                           await currentSession.AddPartitionAsync(
+                               new PsiStoreStreamReader(storeName, storePath),
+                               progress: new Progress<(string Status, double Value)>(p => progress.Report((p.Status, 0.95 + p.Value * 0.05))));
+                       });
+                }
 
                 // Update the source bindings for all visualization objects in the current session
                 this.VisualizationContainer.UpdateStreamSources(currentSession);
@@ -1089,6 +1136,11 @@ namespace Microsoft.Psi.PsiStudio
         /// <inheritdoc/>
         public void Dispose()
         {
+            if (VisualizationContext.Instance != null)
+            {
+                VisualizationContext.Instance.RequestOpenBatchProcessingTasks -= this.OnRequestOpenBatchProcessingTasks;
+            }
+
             // Explicitly dispose the VisualizationContext to clean up resources before closing
             VisualizationContext.Instance?.Dispose();
 
@@ -1258,6 +1310,9 @@ namespace Microsoft.Psi.PsiStudio
                 // Load the available annotation schemas
                 this.LoadAnnotationSchemas();
 
+                // Register batch processing task annotation schema
+                this.BuildAndRegisterBatchTasksAnnotationSchema();
+
                 // Open the current layout
                 this.OpenCurrentLayout();
 
@@ -1311,6 +1366,52 @@ namespace Microsoft.Psi.PsiStudio
                         }
                     }
                 }
+            }
+        }
+
+        private void BuildAndRegisterBatchTasksAnnotationSchema()
+        {
+            try
+            {
+                var discoveredBatchTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks;
+                if (discoveredBatchTasks.Count == 0)
+                {
+                    return;
+                }
+
+                var batchTasksNameArray = new List<AnnotationValue<string>>();
+                var random = new Random();
+                var usedColors = new HashSet<int>();
+                foreach (var task in discoveredBatchTasks)
+                {
+                    Color fillColor;
+                    do
+                    {
+                        fillColor = Color.FromArgb(255, random.Next(40, 216), random.Next(40, 216), random.Next(40, 216));
+                    }
+                    while (!usedColors.Add(fillColor.ToArgb()));
+
+                    batchTasksNameArray.Add(new AnnotationValue<string>(task.Name, fillColor, Color.White));
+                }
+
+                var annotationSchema = new AnnotationSchema(
+                    BatchProcessingTasksAnnotationSchemaName,
+                    new AnnotationAttributeSchema(
+                        "Task",
+                        "Task name",
+                        new EnumerableAnnotationValueSchema<string>(batchTasksNameArray, batchTasksNameArray.First().Value)),
+                    new AnnotationAttributeSchema(
+                        "TaskParameters",
+                        "Batch processing tasks discovered at startup.",
+                        new StringAnnotationValueSchema(string.Empty, Color.SteelBlue, Color.White)));
+
+                this.annotationSchemas.RemoveAll(schema => schema.Name == BatchProcessingTasksAnnotationSchemaName);
+                this.annotationSchemas.Add(annotationSchema);
+                this.tasksSchema = annotationSchema;
+            }
+            catch (Exception exception)
+            {
+                Debug.WriteLine($"Failed to build batch processing tasks annotation schema: {exception}");
             }
         }
 
@@ -1881,6 +1982,40 @@ namespace Microsoft.Psi.PsiStudio
             {
                 this.annotationSearchWindow.Focus();
             }
+        }
+
+        private async void OnRequestOpenBatchProcessingTasks(object sender, RequestOpenBatchProcessingTasksEventArgs e)
+        {
+            var datasetViewModel = VisualizationContext.Instance.DatasetViewModel;
+            var sessionViewModel = datasetViewModel?.CurrentSessionViewModel;
+            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks.ToList();
+
+            if (!batchProcessingTasks.Any())
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "No Batch Processing Task", "No batch processing task is currently available.", "Close", null).ShowDialog();
+                return;
+            }
+
+            if (datasetViewModel == null)
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "No Dataset", "Please open a dataset before running a batch processing task.", "Close", null).ShowDialog();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(e.TaskAnnotation.Task))
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "Invalid Task", "No batch processing task name was provided by the selected annotation.", "Close", null).ShowDialog();
+                return;
+            }
+
+            var selectedTask = batchProcessingTasks.FirstOrDefault(task => string.Equals(task.Name, e.TaskAnnotation.Task, StringComparison.Ordinal));
+            if (selectedTask == null)
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "Task Not Found", $"Batch processing task '{e.TaskAnnotation.Task}' could not be found.", "Close", null).ShowDialog();
+                return;
+            }
+
+            await VisualizationContext.Instance.ConfigureSessionBatchProcessingTask(sessionViewModel, selectedTask, e);
         }
     }
 }

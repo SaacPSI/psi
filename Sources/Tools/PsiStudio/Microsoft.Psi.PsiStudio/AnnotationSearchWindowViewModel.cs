@@ -10,7 +10,6 @@ namespace Microsoft.Psi.PsiStudio.Windows
     using GalaSoft.MvvmLight;
     using GalaSoft.MvvmLight.CommandWpf;
     using Microsoft.Psi.PsiStudio.Search;
-    using Microsoft.Psi.Visualization;
 
     /// <summary>
     /// ViewModel for the annotation search window.
@@ -377,12 +376,7 @@ namespace Microsoft.Psi.PsiStudio.Windows
             if (result != null)
             {
                 this.CurrentResult = result;
-                VisualizationContext.Instance.VisualizationContainer.ZoomToRange(result.Interval);
-                if (this.SetAsSelection)
-                {
-                    VisualizationContext.Instance.VisualizationContainer.Navigator.SelectionRange.Set(result.Interval);
-                }
-
+                this.searchEngine.SetSelection(result.Annotation, this.SetAsSelection);
                 this.Status = $"Selected: {result.Track} at {result.Interval.Left}";
             }
         }

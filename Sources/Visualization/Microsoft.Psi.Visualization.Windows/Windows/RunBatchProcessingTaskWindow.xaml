@@ -110,6 +110,7 @@
                     <Setter Property="Width" Value="80" />
                 </Style>
             </StackPanel.Resources>
+            <Button Name="SaveButton" Click="SaveButtonClick" IsDefault="True" Margin="0,5,10,0" Visibility="{Binding ConfigVisibility}">Save</Button>
             <Button Name="RunButton" Click="RunButtonClick" IsDefault="True" Margin="0,5,10,0" Visibility="{Binding ConfigVisibility}">Run</Button>
             <Button Name="CancelButton" Click="CancelButtonClick" IsCancel="True" Margin="2,5,0,0">Cancel</Button>
         </StackPanel>

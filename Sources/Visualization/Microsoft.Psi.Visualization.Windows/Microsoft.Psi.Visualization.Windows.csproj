@@ -197,9 +197,11 @@
     <ProjectReference Include="..\..\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
     <ProjectReference Include="..\..\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
     <ProjectReference Include="..\..\Calibration\Microsoft.Psi.Calibration\Microsoft.Psi.Calibration.csproj" />
+    <ProjectReference Include="..\..\Data\Microsoft.Psi.BatchProcessing\Microsoft.Psi.BatchProcessing.csproj" />
     <ProjectReference Include="..\..\Data\Microsoft.Psi.Data\Microsoft.Psi.Data.csproj" />
     <ProjectReference Include="..\..\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
     <ProjectReference Include="..\..\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
+    <ProjectReference Include="..\..\Runtime\Microsoft.Psi.Interop\Microsoft.Psi.Interop.csproj" />
     <ProjectReference Include="..\..\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
     <ProjectReference Include="..\..\Speech\Microsoft.Psi.Speech\Microsoft.Psi.Speech.csproj" />
     <ProjectReference Include="..\Microsoft.Msagl.WpfGraphControl\Microsoft.Msagl.WpfGraphControl.csproj" />

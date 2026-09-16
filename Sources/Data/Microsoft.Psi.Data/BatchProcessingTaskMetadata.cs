@@ -5,6 +5,7 @@ namespace Microsoft.Psi.Data
 {
     using System;
     using System.IO;
+    using Microsoft.Psi.Data.Annotations;
 
     /// <summary>
     /// Represents metadata about a dynamically loaded batch processing task

@@ -6,7 +6,6 @@ namespace Microsoft.Psi.PsiStudio.Search
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Windows.Input;
     using Microsoft.Psi.Data.Annotations;
     using Microsoft.Psi.Visualization;
 
@@ -103,11 +102,7 @@ namespace Microsoft.Psi.PsiStudio.Search
                 if (matchScore > 0.0)
                 {
                     var distance = annotation.Interval.Left - cursorTime;
-                    VisualizationContext.Instance.VisualizationContainer.ZoomToRange(annotation.Interval);
-                    if (setAsSelection)
-                    {
-                        VisualizationContext.Instance.VisualizationContainer.Navigator.SelectionRange.Set(annotation.Interval);
-                    }
+                    this.SetSelection(annotation, setAsSelection);
 
                     return new AnnotationSearchResult(annotation, distance, matchScore, filter.AttributeNames);
                 }
@@ -152,12 +147,7 @@ namespace Microsoft.Psi.PsiStudio.Search
                 if (matchScore > 0.0)
                 {
                     var distance = annotation.Interval.Left - cursorTime;
-                    VisualizationContext.Instance.VisualizationContainer.ZoomToRange(annotation.Interval);
-                    if (setAsSelection)
-                    {
-                        VisualizationContext.Instance.VisualizationContainer.Navigator.SelectionRange.Set(annotation.Interval);
-                    }
-
+                    this.SetSelection(annotation, setAsSelection);
                     return new AnnotationSearchResult(annotation, distance, matchScore, filter.AttributeNames);
                 }
             }
@@ -197,6 +187,25 @@ namespace Microsoft.Psi.PsiStudio.Search
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// Sets the visualization selection to the specified annotation search result.
+        /// </summary>
+        /// <param name="result">The annotation search result to set as the selection.</param>
+        /// <param name="setAsSelection">Indicates whether to set the selection in the visualization.</param>
+        public void SetSelection(TimeIntervalAnnotation result, bool setAsSelection)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            VisualizationContext.Instance.VisualizationContainer.ZoomToRange(result.Interval);
+            if (setAsSelection)
+            {
+                VisualizationContext.Instance.VisualizationContainer.Navigator.SelectionRange.Set(result.Interval);
+            }
         }
 
         /// <summary>

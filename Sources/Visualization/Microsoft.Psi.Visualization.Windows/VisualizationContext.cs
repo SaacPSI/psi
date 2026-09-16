@@ -12,6 +12,7 @@ namespace Microsoft.Psi.Visualization
     using System.Windows.Threading;
     using GalaSoft.MvvmLight.Command;
     using Microsoft.Psi.Data;
+    using Microsoft.Psi.Data.Annotations;
     using Microsoft.Psi.Persistence;
     using Microsoft.Psi.Visualization.Adapters;
     using Microsoft.Psi.Visualization.Data;
@@ -50,6 +51,11 @@ namespace Microsoft.Psi.Visualization
         /// An event that fires when an object requests that its properties be displayed.
         /// </summary>
         public event EventHandler<RequestDisplayObjectPropertiesEventArgs> RequestDisplayObjectProperties;
+
+        /// <summary>
+        /// An event that fires when a visualization object requests opening batch processing tasks.
+        /// </summary>
+        public event EventHandler<RequestOpenBatchProcessingTasksEventArgs> RequestOpenBatchProcessingTasks;
 
         /// <summary>
         /// Gets the visualization context singleton.
@@ -99,6 +105,14 @@ namespace Microsoft.Psi.Visualization
         /// </summary>
         public RelayCommand<object> LoadExternalViewer
         => this.loadExternalViewer ??= new RelayCommand<object>((panel) => { this.OnLoadExternalViewer(panel);  });
+
+        /// <summary>
+        /// Requests opening the batch processing task configuration picker.
+        /// </summary>
+        /// <param name="taskAnnotation">The task annotation context.</param>
+        /// <param name="saveConfigurationToAnnotation">Action used to save serialized configuration JSON to the target annotation.</param>
+        public void OpenBatchProcessingTasks(TaskAnnotation taskAnnotation, Action<string> saveConfigurationToAnnotation = null)
+            => this.RequestOpenBatchProcessingTasks?.Invoke(this, new RequestOpenBatchProcessingTasksEventArgs(taskAnnotation, saveConfigurationToAnnotation));
 
         /// <inheritdoc />
         public void Dispose()
@@ -248,6 +262,39 @@ namespace Microsoft.Psi.Visualization
                 if (datasetViewModel.FileName != null)
                 {
                     await datasetViewModel.SaveAsAsync(datasetViewModel.FileName);
+                }
+
+                // Update bindings to the sources
+                this.VisualizationContainer.UpdateStreamSources(this.DatasetViewModel?.CurrentSessionViewModel);
+
+                // And re-read the stream values at cursor (to publish to stream value visualizers)
+                DataManager.Instance.ReadAndPublishStreamValue(this.VisualizationContainer.Navigator.Cursor);
+            }
+        }
+
+        /// <summary>
+        /// Configure a specified batch processing task over a session.
+        /// </summary>
+        /// <param name="sessionViewModel">The session view model.</param>
+        /// <param name="batchProcessingTaskMetadata">Batch task processing metadata.</param>
+        /// <param name="arguments">Arguments for the request to open batch processing tasks.</param>
+        /// <returns>A task that represents the asynchronous batch processing operation.</returns>
+        public async Task ConfigureSessionBatchProcessingTask(SessionViewModel sessionViewModel, BatchProcessingTaskMetadata batchProcessingTaskMetadata, RequestOpenBatchProcessingTasksEventArgs arguments)
+        {
+            // Initialize the progress reporting window
+            var viewModel = new RunBatchProcessingTaskWindowViewModel(this.VisualizationContainer, sessionViewModel, batchProcessingTaskMetadata, arguments);
+            var progressReportWindow = new RunBatchProcessingTaskWindow(Application.Current.MainWindow, viewModel, true);
+
+            // show the modal status window, which will be closed once the load dataset operation completes
+            if (progressReportWindow.ShowDialog() == true)
+            {
+                // update the session view model as a new derived partition might have been created
+                sessionViewModel.Update(sessionViewModel.Session);
+
+                // if the dataset has a known associated file, save it.
+                if (sessionViewModel.DatasetViewModel.FileName != null)
+                {
+                    await sessionViewModel.DatasetViewModel.SaveAsAsync(sessionViewModel.DatasetViewModel.FileName);
                 }
 
                 // Update bindings to the sources

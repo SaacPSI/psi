@@ -10,21 +10,25 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
     /// <summary>
     /// Represents a property descriptor for an annotation.
     /// </summary>
-    public class AnnotationPropertyDescriptor : PropertyDescriptor
+    /// <typeparam name="T">The datatype of the value.</typeparam>
+    public abstract class AnnotationPropertyDescriptor<T> : PropertyDescriptor
     {
-        private readonly TimeIntervalAnnotationDisplayData annotationDisplayData;
+        /// <summary>
+        /// The display data for the annotation that contains the property for this property descriptor.
+        /// </summary>
+        private readonly T annotationDisplayData;
         private readonly Type propertyType;
         private readonly bool isReadOnly;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AnnotationPropertyDescriptor"/> class.
+        /// Initializes a new instance of the <see cref="AnnotationPropertyDescriptor{T}"/> class.
         /// </summary>
         /// <param name="annotationDisplayData">The display data for the annotation that contains the property for this property descriptor.</param>
         /// <param name="propertyName">The name of the property in the annotation represented by this property descriptor.</param>
         /// <param name="isReadOnly">Specifies whether the property may be edited.</param>
         /// <param name="propertyType">The type of the property in this property descriptor.</param>
         /// <param name="propertyAttributes">A collection of attributes that apply to this property descriptor.</param>
-        public AnnotationPropertyDescriptor(TimeIntervalAnnotationDisplayData annotationDisplayData, string propertyName, bool isReadOnly, Type propertyType, Attribute[] propertyAttributes)
+        public AnnotationPropertyDescriptor(T annotationDisplayData, string propertyName, bool isReadOnly, Type propertyType, Attribute[] propertyAttributes)
             : base(propertyName, propertyAttributes)
         {
             this.annotationDisplayData = annotationDisplayData;
@@ -33,13 +37,18 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         }
 
         /// <inheritdoc/>
-        public override Type ComponentType => typeof(TimeIntervalAnnotationDisplayData);
+        public override Type ComponentType => typeof(T);
 
         /// <inheritdoc/>
         public override bool IsReadOnly => this.isReadOnly;
 
         /// <inheritdoc/>
         public override Type PropertyType => this.propertyType;
+
+        /// <summary>
+        /// Gets the display data for the annotation that contains the property for this property descriptor.
+        /// </summary>
+        protected T AnnotationDisplayData => this.annotationDisplayData;
 
         /// <inheritdoc/>
         public override bool CanResetValue(object component)
@@ -48,20 +57,8 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         }
 
         /// <inheritdoc/>
-        public override object GetValue(object component)
-        {
-            return this.annotationDisplayData.GetAttributeValue(this.Name);
-        }
-
-        /// <inheritdoc/>
         public override void ResetValue(object component)
         {
-        }
-
-        /// <inheritdoc/>
-        public override void SetValue(object component, object value)
-        {
-            this.annotationDisplayData.SetAttributeValue(this.Name, (IAnnotationValue)value);
         }
 
         /// <inheritdoc/>

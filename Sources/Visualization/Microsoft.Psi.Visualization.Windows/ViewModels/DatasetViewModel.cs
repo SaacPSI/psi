@@ -1105,16 +1105,24 @@ namespace Microsoft.Psi.Visualization.ViewModels
 
             // Add run batch processing task menu
             var runTasksMenuItem = MenuItemHelper.CreateMenuItem(string.Empty, "Run Batch Processing Task", null);
-            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks;
+            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks
+                .OrderBy(bpt => bpt.Namespace ?? string.Empty)
+                .ThenBy(bpt => bpt.Name)
+                .ToList();
             runTasksMenuItem.IsEnabled = batchProcessingTasks.Any();
-            foreach (var batchProcessingTaskNamespace in batchProcessingTasks.Select(bpt => bpt.Namespace).Distinct())
+            if (!batchProcessingTasks.Any())
+            {
+                runTasksMenuItem.Items.Add(MenuItemHelper.CreateMenuItem(null, "No batch processing task available", null));
+            }
+
+            foreach (var batchProcessingTaskNamespace in batchProcessingTasks.Select(bpt => bpt.Namespace ?? "General").Distinct())
             {
                 var namespaceMenuItem = MenuItemHelper.CreateMenuItem(
                     null,
                     batchProcessingTaskNamespace,
                     null);
 
-                foreach (var batchProcessingTask in batchProcessingTasks.Where(bpt => bpt.Namespace == batchProcessingTaskNamespace))
+                foreach (var batchProcessingTask in batchProcessingTasks.Where(bpt => (bpt.Namespace ?? "General") == batchProcessingTaskNamespace))
                 {
                     namespaceMenuItem.Items.Add(
                         MenuItemHelper.CreateMenuItem(

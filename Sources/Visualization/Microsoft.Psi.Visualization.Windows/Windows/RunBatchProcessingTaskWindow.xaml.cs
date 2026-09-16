@@ -20,12 +20,14 @@ namespace Microsoft.Psi.Visualization.Windows
         /// </summary>
         /// <param name="owner">The owner of this window.</param>
         /// <param name="viewModel">The view model for this window.</param>
-        public RunBatchProcessingTaskWindow(Window owner, RunBatchProcessingTaskWindowViewModel viewModel)
+        /// <param name="showSave">Flag to set visibility on save button.</param>
+        public RunBatchProcessingTaskWindow(Window owner, RunBatchProcessingTaskWindowViewModel viewModel, bool showSave = false)
         {
             this.InitializeComponent();
 
             this.Owner = owner;
             this.DataContext = viewModel;
+            this.SaveButton.Visibility = showSave ? Visibility.Visible : Visibility.Hidden;
         }
 
         private RunBatchProcessingTaskWindowViewModel ViewModel => this.DataContext as RunBatchProcessingTaskWindowViewModel;
@@ -34,6 +36,20 @@ namespace Microsoft.Psi.Visualization.Windows
         public void Dispose()
         {
             this.cancellationTokenSource?.Dispose();
+        }
+
+        private async void SaveButtonClick(object sender, RoutedEventArgs e)
+        {
+            if (this.ViewModel.Configuration.Validate(out string error))
+            {
+                this.ViewModel.Save();
+                this.cancellationTokenSource?.Cancel();
+                this.Close();
+            }
+            else
+            {
+                new MessageBoxWindow(this, "Invalid Configuration", error, cancelButtonText: null).ShowDialog();
+            }
         }
 
         private async void RunButtonClick(object sender, RoutedEventArgs e)

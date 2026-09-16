@@ -26,6 +26,7 @@
     <None Remove="MainWindow.xaml" />
     <None Remove="stylecop.json" />
     <None Remove="Windows\AdditionalAssembliesWindow.xaml" />
+    <None Remove="Windows\BatchProcessingTasksWindow.xaml" />
     <None Remove="Windows\AnnotationSearchWindow.xaml" />
     <None Remove="Windows\HelpWindow.xaml" />
     <None Remove="Windows\LayoutNameWindow.xaml" />
@@ -78,5 +79,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Windows\BatchProcessingTasksWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
   </ItemGroup>
 </Project>

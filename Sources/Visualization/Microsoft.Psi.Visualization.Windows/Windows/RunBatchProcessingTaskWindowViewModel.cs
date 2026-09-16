@@ -15,6 +15,7 @@ namespace Microsoft.Psi.Visualization.Windows
     using Microsoft.Psi.Visualization.Helpers;
     using Microsoft.Psi.Visualization.ViewModels;
     using Microsoft.Psi.Visualization.VisualizationObjects;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Implements a view model for the <see cref="RunBatchProcessingTaskWindow"/>.
@@ -45,6 +46,7 @@ namespace Microsoft.Psi.Visualization.Windows
         private RelayCommand saveConfigurationAsCommand;
         private RelayCommand resetConfigurationCommand;
         private RelayCommand deleteConfigurationCommand;
+        private Action<string> configurationSavedCallback = null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RunBatchProcessingTaskWindowViewModel"/> class.
@@ -83,6 +85,28 @@ namespace Microsoft.Psi.Visualization.Windows
             this.DataSize = TimeSpanHelper.FormatTimeSpanApproximate(sessionViewModel.OriginatingTimeInterval.Span);
             this.LoadAvailableConfigurations();
             this.CurrentConfiguration = batchProcessingTaskMetadata.MostRecentlyUsedConfiguration ?? DefaultConfiguration;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RunBatchProcessingTaskWindowViewModel"/> class.
+        /// </summary>
+        /// <param name="visualizationContainer">The visualization container.</param>
+        /// <param name="sessionViewModel">The dataset view model.</param>
+        /// <param name="batchProcessingTaskMetadata">The batch processing task metadata.</param>
+        /// <param name="arguments">The arguments for the request to open batch processing tasks.</param>
+        public RunBatchProcessingTaskWindowViewModel(VisualizationContainer visualizationContainer, SessionViewModel sessionViewModel, BatchProcessingTaskMetadata batchProcessingTaskMetadata, RequestOpenBatchProcessingTasksEventArgs arguments)
+        {
+            this.visualizationContainer = visualizationContainer;
+            this.sessionViewModel = sessionViewModel;
+            this.batchProcessingTaskMetadata = batchProcessingTaskMetadata;
+            this.Name = batchProcessingTaskMetadata.Name;
+            this.Description = batchProcessingTaskMetadata.Description;
+            this.Target = sessionViewModel.Name;
+            this.DataSize = TimeSpanHelper.FormatTimeSpanApproximate(arguments.TaskAnnotation.Interval.Span);
+            arguments.TaskAnnotation.AttributeValues.TryGetValue("TaskParameters", out var taskParameters);
+            this.configuration = taskParameters != null ? BatchProcessingTaskConfiguration.LoadContent(taskParameters.ValueAsString) : batchProcessingTaskMetadata.GetDefaultConfiguration();
+            this.currentConfiguration = arguments.TaskAnnotation.AttributeValues.TryGetValue("Task", out var taskname) ? taskname.ValueAsString : DefaultConfiguration;
+            this.configurationSavedCallback = arguments.SaveConfigurationToAnnotation;
         }
 
         /// <summary>
@@ -305,6 +329,31 @@ namespace Microsoft.Psi.Visualization.Windows
                 var batchProcessingTask = this.batchProcessingTaskMetadata.CreateBatchProcessingTask();
                 await this.sessionViewModel.Session.RunBatchProcessingTaskAsync(batchProcessingTask, this.Configuration, progress, cancellationToken);
             }
+        }
+
+        /// <summary>
+        /// Save the current configuration for the batch processing task.
+        /// </summary>
+        public void Save()
+        {
+            if (this.configurationSavedCallback != null)
+            {
+                var configurationJson = JsonConvert.SerializeObject(
+                    this.configuration,
+                    Formatting.None,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
+                    });
+
+                // Save the configuration to the target annotation
+                this.configurationSavedCallback(configurationJson);
+            }
+
+            this.SaveConfiguration();
         }
 
         /// <summary>
