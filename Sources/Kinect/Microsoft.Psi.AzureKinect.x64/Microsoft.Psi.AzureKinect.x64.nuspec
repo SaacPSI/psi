@@ -17,7 +17,7 @@
         <dependency id="Microsoft.Psi.Calibration" version="$version$" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Psi.DeviceManagement" version="$version$" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Psi.Imaging" version="$version$" exclude="Build,Analyzers" />
-        <dependency id="Microsoft.Psi.Runtime" version="$version$" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Psi.Runtime" version="0.19.100.1-beta-SAAC" exclude="Build,Analyzers" />
         <dependency id="MathNet.Numerics.Signed" version="4.9.1" exclude="Build,Analyzers" />
         <dependency id="MathNet.Spatial.Signed" version="0.6.0" exclude="Build,Analyzers" />
         <dependency id="Microsoft.Azure.Kinect.BodyTracking" version="1.1.1" exclude="Analyzers" />
