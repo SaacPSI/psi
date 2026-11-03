@@ -432,18 +432,43 @@ namespace Microsoft.Psi.Data
             batchProcessingTask.OnStartProcessingSession();
             try
             {
-                await this.CreateDerivedPsiStorePartitionAsync(
-                    (pipeline, sessionImporter, exporter, parameter) => batchProcessingTask.Run(pipeline, sessionImporter, exporter, configuration),
-                    parameter,
-                    configuration.OutputPartitionName,
-                    overwrite: true,
-                    outputStoreName: configuration.OutputStoreName,
-                    outputStorePath: configuration.OutputStorePath ?? this.Partitions.First().StorePath,
-                    replayDescriptor: configuration.ReplayAllRealTime ? ReplayDescriptor.ReplayAllRealTime : ReplayDescriptor.ReplayAll,
-                    deliveryPolicy: configuration.DeliveryPolicySpec,
-                    enableDiagnostics: configuration.EnableDiagnostics,
-                    progress: progress,
-                    cancellationToken: cancellationToken);
+                if (batchProcessingTask.IsDerivedPartitionNeeded())
+                {
+                    await this.CreateDerivedPsiStorePartitionAsync(
+                        (pipeline, sessionImporter, exporter, parameter) => batchProcessingTask.Run(pipeline, sessionImporter, exporter, configuration),
+                        parameter,
+                        configuration.OutputPartitionName,
+                        overwrite: true,
+                        outputStoreName: configuration.OutputStoreName,
+                        outputStorePath: configuration.OutputStorePath ?? this.Partitions.First().StorePath,
+                        replayDescriptor: configuration.ReplayAllRealTime ? ReplayDescriptor.ReplayAllRealTime : ReplayDescriptor.ReplayAll,
+                        deliveryPolicy: configuration.DeliveryPolicySpec,
+                        enableDiagnostics: configuration.EnableDiagnostics,
+                        progress: progress,
+                        cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    using var pipeline = Pipeline.Create(enableDiagnostics: configuration.EnableDiagnostics, deliveryPolicy: configuration.DeliveryPolicySpec);
+                    var importer = SessionImporter.Open(pipeline, this);
+
+                    batchProcessingTask.Run(pipeline, importer, null, configuration);
+
+                    // Setup the default replay strategy
+                    pipeline.RunAsync(configuration.ReplayAllRealTime ? ReplayDescriptor.ReplayAllRealTime : ReplayDescriptor.ReplayAll, new Progress<double>(p => progress?.Report((this.Name, p * 0.95))));
+
+                    var durationTicks = pipeline.ReplayDescriptor.End.Ticks - pipeline.ReplayDescriptor.Start.Ticks;
+                    while (!pipeline.WaitAll(100))
+                    {
+                        if (pipeline.GetCurrentTime().Ticks >= importer.MessageCreationTimeInterval.Right.Ticks)
+                        {
+                            break;
+                        }
+
+                        // periodically check for cancellation
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
+                }
             }
             catch (OperationCanceledException)
             {

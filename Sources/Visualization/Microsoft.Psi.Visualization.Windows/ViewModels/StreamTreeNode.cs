@@ -1250,6 +1250,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
             {
                 this.PopulateContextMenuWithVisualizers(contextMenu);
                 this.PopulateContextMenuWithModifyScript(contextMenu);
+                this.PopulateContextMenuWithBatchProcessing(contextMenu);
                 this.PopulateContextMenuWithDerivedStreamExpansions(contextMenu);
             }
 
@@ -1702,6 +1703,56 @@ namespace Microsoft.Psi.Visualization.ViewModels
             }
 
             contextMenu.Items.Add(showStreamInfoMenuItem);
+        }
+
+        /// <summary>
+        /// Populates a context menu with the commands for batch processing stream info.
+        /// </summary>
+        /// <param name="contextMenu">The context menu to populate.</param>
+        private void PopulateContextMenuWithBatchProcessing(ContextMenu contextMenu)
+        {
+            if (contextMenu.Items.Count > 0)
+            {
+                contextMenu.Items.Add(new Separator());
+            }
+
+            // Add run batch processing task menu
+            var runTasksMenuItem = MenuItemHelper.CreateMenuItem(string.Empty, "Run Batch Processing Task", null);
+            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks
+                .Where(bpt => (bpt.InputType == null) || (bpt.InputType == this.DataType))
+                .OrderBy(bpt => bpt.Namespace ?? string.Empty)
+                .ThenBy(bpt => bpt.Name)
+                .ToList();
+
+            runTasksMenuItem.IsEnabled = batchProcessingTasks.Any();
+            if (!batchProcessingTasks.Any())
+            {
+                runTasksMenuItem.Items.Add(MenuItemHelper.CreateMenuItem(null, "No batch processing task available", null));
+            }
+
+            foreach (var batchProcessingTaskNamespace in batchProcessingTasks.Select(bpt => bpt.Namespace ?? "General").Distinct())
+            {
+                var namespaceMenuItem = MenuItemHelper.CreateMenuItem(
+                    null,
+                    batchProcessingTaskNamespace,
+                    null);
+
+                foreach (var batchProcessingTask in batchProcessingTasks.Where(bpt => (bpt.Namespace ?? "General") == batchProcessingTaskNamespace))
+                {
+                    namespaceMenuItem.Items.Add(
+                        MenuItemHelper.CreateMenuItem(
+                            batchProcessingTask.IconSourcePath,
+                            batchProcessingTask.Name,
+                            new VisualizationCommand<BatchProcessingTaskMetadata>(async bpt => await VisualizationContext.Instance.RunStreamBatchProcessingTaskAsync(this, bpt)),
+                            tag: batchProcessingTask,
+                            isEnabled: true,
+                            commandParameter: batchProcessingTask));
+                }
+
+                runTasksMenuItem.Items.Add(namespaceMenuItem);
+            }
+
+            contextMenu.Items.Add(runTasksMenuItem);
         }
 
         /// <summary>

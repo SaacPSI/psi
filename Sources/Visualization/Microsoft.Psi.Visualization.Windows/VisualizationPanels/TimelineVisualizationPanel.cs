@@ -403,7 +403,7 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
             }
 
             // Walk up the visual tree until we either find the TimeIntervalAnnotationVisualizationObjectView
-            while (target != null && target is not TimeIntervalAnnotationVisualizationObjectView)
+            while (target != null && target is not TimeIntervalAnnotationVisualizationObjectView && target is not TaskAnnotationVisualizationObjectView)
             {
                 target = VisualTreeHelper.GetParent(target);
             }
@@ -413,6 +413,11 @@ namespace Microsoft.Psi.Visualization.VisualizationPanels
             {
                 this.timelineViewCanvases.Add(sourceElement as DependencyObject, timeIntervalAnnotationVisualizationObjectView.Canvas);
                 return timeIntervalAnnotationVisualizationObjectView.Canvas;
+            }
+            else if (target is TaskAnnotationVisualizationObjectView taskAnnotationVisualizationObjectView)
+            {
+                this.timelineViewCanvases.Add(sourceElement as DependencyObject, taskAnnotationVisualizationObjectView.Canvas);
+                return taskAnnotationVisualizationObjectView.Canvas;
             }
             else
             {

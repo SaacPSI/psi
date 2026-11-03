@@ -929,7 +929,7 @@ namespace Microsoft.Psi.Visualization.Navigation
             // Create the playback timer if one doesn't exist already
             this.playbackTimer ??= new DispatcherTimer(
                 TimeSpan.FromMilliseconds(this.playTimerTickIntervalMs),
-                DispatcherPriority.Background,
+                DispatcherPriority.Input,
                 new EventHandler(this.OnPlaybackTimerTick),
                 Dispatcher.CurrentDispatcher);
 

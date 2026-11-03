@@ -174,6 +174,7 @@
     <None Remove="Icons\zoom-to-session.png" />
     <None Remove="Icons\zoom-to-stream.png" />
     <None Remove="Icons\zoom.png" />
+    <None Remove="Views\Visuals2D\TaskAnnotationVisualizationObjectView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
@@ -243,6 +244,7 @@
     <Page Include="Views\Visuals2D\Line2DIntervalVisualizationObjectView.xaml" />
     <Page Include="Views\Visuals2D\LabeledPointIntervalVisualizationObjectView.xaml" />
     <Page Include="Views\Visuals2D\Line2DListVisualizationObjectView.xaml" />
+    <Page Include="Views\Visuals2D\TaskAnnotationVisualizationObjectView.xaml" />
     <Page Include="Views\Visuals2D\TextVisualizationObjectView.xaml" />
     <Page Include="Views\Visuals2D\NumericPlot\BoolSeriesVisualizationObjectView.xaml" />
     <Page Include="Views\Visuals2D\NumericPlot\BoolVisualizationObjectView.xaml" />

@@ -21,6 +21,7 @@ namespace Microsoft.Psi.PsiStudio
     using GalaSoft.MvvmLight.CommandWpf;
     using Microsoft.Psi.Data;
     using Microsoft.Psi.Data.Annotations;
+    using Microsoft.Psi.Persistence;
     using Microsoft.Psi.PsiStudio.Windows;
     using Microsoft.Psi.Visualization;
     using Microsoft.Psi.Visualization.Data;
@@ -95,6 +96,7 @@ namespace Microsoft.Psi.PsiStudio
         private NetworkStreamsManager networkManager = null;
         private Windows.AnnotationSearchWindow annotationSearchWindow;
         private RelayCommand openAnnotationSearchCommand;
+        private RelayCommand openBatchProcessingTasksCommand;
 
         /// <summary>
         /// The currently selected node in the Datasets tree view.
@@ -850,6 +852,15 @@ namespace Microsoft.Psi.PsiStudio
         public RelayCommand OpenAnnotationSearchCommand
             => this.openAnnotationSearchCommand ??= new RelayCommand(
                 this.OpenAnnotationSearch);
+
+        /// <summary>
+        /// Gets the command to open the batch processing tasks window.
+        /// </summary>
+        [Browsable(false)]
+        [IgnoreDataMember]
+        public RelayCommand OpenBatchProcessingTasksCommand
+            => this.openBatchProcessingTasksCommand ??= new RelayCommand(
+                this.OpenBatchProcessingTasks);
 
         /// <summary>
         /// Gets the edit settings command.
@@ -1984,6 +1995,77 @@ namespace Microsoft.Psi.PsiStudio
             }
         }
 
+        private void OpenBatchProcessingTasks()
+        {
+            var datasetViewModel = VisualizationContext.Instance.DatasetViewModel;
+            var sessionViewModel = datasetViewModel?.CurrentSessionViewModel;
+            if (sessionViewModel == null)
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "No Active Session", "Please open a dataset and select an active session.", "Close", null).ShowDialog();
+                return;
+            }
+
+            var taskAnnotationsByTrack = this.LoadTaskAnnotationsByTrack(sessionViewModel);
+            if (!taskAnnotationsByTrack.Any())
+            {
+                _ = new MessageBoxWindow(Application.Current.MainWindow, "No Task Tracks", "No task annotation tracks were found in the active session.", "Close", null).ShowDialog();
+                return;
+            }
+
+            var batchProcessingTasksWindow = new BatchProcessingTasksWindow(Application.Current.MainWindow, sessionViewModel, taskAnnotationsByTrack);
+            _ = batchProcessingTasksWindow.ShowDialog();
+        }
+
+        private Dictionary<string, List<TaskAnnotation>> LoadTaskAnnotationsByTrack(SessionViewModel sessionViewModel)
+        {
+            var taskAnnotationsByTrack = new Dictionary<string, List<TaskAnnotation>>(StringComparer.Ordinal);
+
+            foreach (var partition in sessionViewModel.Session.Partitions)
+            {
+                foreach (var stream in partition.AvailableStreams.Where(s => s.TypeName?.IndexOf(nameof(TaskAnnotationSet), StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    try
+                    {
+                        using var psiStoreReader = new PsiStoreStreamReader(stream.StoreName, stream.StorePath);
+                        psiStoreReader.OpenStream<TaskAnnotationSet>(stream.Name, (annotationSet, envelope) =>
+                        {
+                            if (annotationSet == null)
+                            {
+                                return;
+                            }
+
+                            foreach (var annotation in annotationSet.Annotations.Where(a => a != null))
+                            {
+                                var track = annotation.Track ?? string.Empty;
+                                if (!taskAnnotationsByTrack.TryGetValue(track, out var annotations))
+                                {
+                                    annotations = new List<TaskAnnotation>();
+                                    taskAnnotationsByTrack[track] = annotations;
+                                }
+
+                                annotations.Add(annotation);
+                            }
+                        });
+
+                        psiStoreReader.ReadAll(ReplayDescriptor.ReplayAll, default);
+                    }
+                    catch (Exception exception)
+                    {
+                        Debug.WriteLine($"Unable to load task annotations from stream '{stream.Name}' in partition '{partition.Name}': {exception}");
+                    }
+                }
+            }
+
+            foreach (var track in taskAnnotationsByTrack.Keys.ToList())
+            {
+                taskAnnotationsByTrack[track] = taskAnnotationsByTrack[track]
+                    .OrderBy(annotation => annotation.Interval.Left)
+                    .ToList();
+            }
+
+            return taskAnnotationsByTrack;
+        }
+
         private async void OnRequestOpenBatchProcessingTasks(object sender, RequestOpenBatchProcessingTasksEventArgs e)
         {
             var datasetViewModel = VisualizationContext.Instance.DatasetViewModel;
@@ -2013,6 +2095,11 @@ namespace Microsoft.Psi.PsiStudio
             {
                 _ = new MessageBoxWindow(Application.Current.MainWindow, "Task Not Found", $"Batch processing task '{e.TaskAnnotation.Task}' could not be found.", "Close", null).ShowDialog();
                 return;
+            }
+
+            if (e.TaskAnnotation.GetParameters() == string.Empty)
+            {
+                e.TaskAnnotation.SetParameters(selectedTask.GetDefaultConfiguration().Save(), Color.SteelBlue, Color.White);
             }
 
             await VisualizationContext.Instance.ConfigureSessionBatchProcessingTask(sessionViewModel, selectedTask, e);

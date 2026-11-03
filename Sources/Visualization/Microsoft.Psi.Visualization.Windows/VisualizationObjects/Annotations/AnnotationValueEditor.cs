@@ -69,6 +69,52 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
 
                 return editorControl;
             }
+            else if (propertyItem.Instance is TaskAnnotationDisplayData objectDataTask)
+            {
+                // Get the attribute schema
+                var attributeSchema = objectDataTask.AnnotationSchema.AttributeSchemas.FirstOrDefault(s => s.Name == propertyItem.DisplayName);
+
+                // If the schema is finite and not readonly, then display the possible values in a combobox, otherwise
+                // just display the current value in a readonly textbox.  Non-finite schemas are always displayed
+                // in a textbox since there are infinite vallues possible.
+                if (!propertyItem.IsReadOnly && attributeSchema.ValueSchema is IEnumerableAnnotationValueSchema finiteAnnotationValueSchema)
+                {
+                    // Create the combobox and load it with the schema values
+                    var comboBox = new ComboBox
+                    {
+                        ItemsSource = finiteAnnotationValueSchema.GetPossibleAnnotationValues(),
+                        SelectedItem = propertyItem.Value,
+                    };
+
+                    editorControl = comboBox;
+                    bindingProperty = ComboBox.SelectedItemProperty;
+                }
+                else
+                {
+                    // create the textbox and optionally make it readonly
+                    var textBox = new TextBox
+                    {
+                        IsReadOnly = propertyItem.IsReadOnly,
+                    };
+
+                    editorControl = textBox;
+                    bindingProperty = TextBox.TextProperty;
+                }
+
+                // Bind the editor control to the property item's value property.
+                var binding = new Binding(nameof(PropertyItem.Value))
+                {
+                    Source = propertyItem,
+                    ValidatesOnExceptions = true,
+                    ValidatesOnDataErrors = true,
+                    Mode = propertyItem.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay,
+                    UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                };
+
+                BindingOperations.SetBinding(editorControl, bindingProperty, binding);
+
+                return editorControl;
+            }
             else
             {
                 throw new ArgumentException($"{nameof(propertyItem)} argument must be a {nameof(TimeIntervalAnnotationDisplayData)}");

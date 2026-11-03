@@ -31,9 +31,11 @@ namespace Microsoft.Psi.BatchProcessing
             }
 
             var sourceStore = PsiStoreTaskHelper.ResolveSourceStore(sessionImporter, configuration.PartitionName);
-            var workingStore = PsiStoreTaskHelper.PrepareWorkingStore(sourceStore, configuration);
-            PsiStoreTaskHelper.RemoveStreamFromStore(workingStore, configuration.StreamName);
+            PsiStoreTaskHelper.RemoveStreamFromStore(sourceStore, configuration.StreamName, configuration.OutputStorePath, configuration.OutputStoreName);
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -58,6 +60,9 @@ namespace Microsoft.Psi.BatchProcessing
             var messages = sourceImporter.OpenDynamicStream(configuration.StreamName);
             messages.PipeTo(new FileWriter<dynamic>(pipeline, outputFile, PsiStoreTaskHelper.GetPersistentFormatSerializer(configuration.Format)));
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -90,6 +95,9 @@ namespace Microsoft.Psi.BatchProcessing
             var messages = sourceImporter.OpenDynamicStream(configuration.StreamName);
             messages.PipeTo(new NetMQWriter<dynamic>(pipeline, configuration.Topic, configuration.Address, PsiStoreTaskHelper.GetFormatSerializer(configuration.Format)));
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -112,6 +120,9 @@ namespace Microsoft.Psi.BatchProcessing
             var inputStores = storeNames.Select(name => (name, sourceStore.Path));
             PsiStore.Concatenate(inputStores, (outputName, outputPath), false);
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -125,11 +136,13 @@ namespace Microsoft.Psi.BatchProcessing
         {
             var sourceStore = PsiStoreTaskHelper.ResolveSourceStore(sessionImporter, configuration.PartitionName);
             var inputStore = configuration.RunOnDatasetCopy ? PsiStoreTaskHelper.PrepareWorkingStore(sourceStore, configuration) : sourceStore;
-            var outputName = string.IsNullOrWhiteSpace(configuration.GeneratedOutputStoreName) ? $"{inputStore.Name}-Cropped" : configuration.GeneratedOutputStoreName;
-            var outputPath = string.IsNullOrWhiteSpace(configuration.GeneratedOutputStorePath) ? inputStore.Path : configuration.GeneratedOutputStorePath;
-            var length = configuration.UseLength ? RelativeTimeInterval.Future(configuration.Length) : RelativeTimeInterval.LeftBounded(TimeSpan.Zero);
-            PsiStore.Crop(inputStore, (outputName, outputPath), configuration.Start, length, false);
+            var outputName = string.IsNullOrWhiteSpace(configuration.OutputStoreName) ? $"{inputStore.Name}-Cropped" : configuration.OutputStoreName;
+            var outputPath = string.IsNullOrWhiteSpace(configuration.OutputStorePath) ? inputStore.Path : configuration.OutputStorePath;
+            PsiStore.Crop(inputStore, (outputName, outputPath), configuration.CropInterval, false, null, (log) => Console.Write(log));
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -160,6 +173,9 @@ namespace Microsoft.Psi.BatchProcessing
 
             PsiStore.Process(IsImageStream, EncodeImageStreams, inputStore, (outputName, outputPath), false);
         }
+
+        /// <inheritdoc/>
+        public override bool IsDerivedPartitionNeeded() => false;
     }
 
     /// <summary>
@@ -205,8 +221,8 @@ namespace Microsoft.Psi.BatchProcessing
                 return sourceStore;
             }
 
-            var copyPath = string.IsNullOrWhiteSpace(configuration.CopyStorePath) ? sourceStore.Path : configuration.CopyStorePath;
-            var copyName = string.IsNullOrWhiteSpace(configuration.CopyStoreName) ? $"{sourceStore.Name}-BatchCopy" : configuration.CopyStoreName;
+            var copyPath = string.IsNullOrWhiteSpace(configuration.OutputStorePath) ? sourceStore.Path : configuration.OutputStorePath;
+            var copyName = string.IsNullOrWhiteSpace(configuration.OutputStoreName) ? $"{sourceStore.Name}-BatchCopy" : configuration.OutputStoreName;
 
             if (PsiStore.Exists(copyName, copyPath))
             {
@@ -222,28 +238,11 @@ namespace Microsoft.Psi.BatchProcessing
         /// </summary>
         /// <param name="store">The target store.</param>
         /// <param name="streamName">The stream name to remove.</param>
-        public static void RemoveStreamFromStore((string Name, string Path) store, string streamName)
+        /// <param name="copyStorePath">The path to the copy store.</param>
+        /// <param name="copyStoreName">The name of the copy store.</param>
+        public static void RemoveStreamFromStore((string Name, string Path) store, string streamName, string copyStorePath, string copyStoreName)
         {
-            var tempFolderPath = Path.Combine(store.Path, $"Copy-{Guid.NewGuid()}");
-            PsiStore.Copy(store, (store.Name, tempFolderPath), null, metadata => metadata.Name != streamName, false);
-
-            var safeCopyPath = Path.Combine(store.Path, $"Original-{Guid.NewGuid()}");
-            Directory.CreateDirectory(safeCopyPath);
-
-            foreach (var file in Directory.EnumerateFiles(store.Path))
-            {
-                var fileInfo = new FileInfo(file);
-                File.Move(file, Path.Combine(safeCopyPath, fileInfo.Name));
-            }
-
-            foreach (var file in Directory.EnumerateFiles(tempFolderPath))
-            {
-                var fileInfo = new FileInfo(file);
-                File.Move(file, Path.Combine(store.Path, fileInfo.Name));
-            }
-
-            Directory.Delete(tempFolderPath, true);
-            Directory.Delete(safeCopyPath, true);
+            PsiStore.Copy(store, (copyStoreName, copyStorePath), null, metadata => metadata.Name != streamName, false);
         }
 
         /// <summary>

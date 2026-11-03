@@ -4,12 +4,23 @@
 namespace Microsoft.Psi.Data.Annotations
 {
     using System.Collections.Generic;
+    using System.Drawing;
 
     /// <summary>
     /// Represents a task annotation.
     /// </summary>
     public class TaskAnnotation : TimeIntervalAnnotation
     {
+        /// <summary>
+        /// Task name keys for attributeValues dictionnary.
+        /// </summary>
+        public const string TaskAttributeName = "Task";
+
+        /// <summary>
+        /// Task parameters keys for attributeValues dictionnary.
+        /// </summary>
+        public const string TaskParametersAttributeName = "TaskParameters";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskAnnotation"/> class.
         /// </summary>
@@ -36,6 +47,17 @@ namespace Microsoft.Psi.Data.Annotations
         {
             this.Task = task;
             this.File = file;
+            if (this.Task == string.Empty)
+            {
+                if (this.AttributeValues.TryGetValue(TaskAttributeName, out IAnnotationValue taskname))
+                {
+                    this.Task = taskname.ValueAsString;
+                }
+                else
+                {
+                    throw new System.Exception("Creating TaskAnnotation from TimeIntervalAnnotation without the correct attributeValue.");
+                }
+            }
         }
 
         /// <summary>
@@ -47,5 +69,37 @@ namespace Microsoft.Psi.Data.Annotations
         /// Gets or sets the file of the this annotation.
         /// </summary>
         public string File { get; set; }
+
+        /// <summary>
+        /// Gets the task parameters of the this annotation.
+        /// </summary>
+        /// <returns>The task parameters of the this annotation.</returns>
+        public string GetParameters()
+        {
+            if (this.AttributeValues.TryGetValue(TaskParametersAttributeName, out IAnnotationValue parameters))
+            {
+                return parameters.ValueAsString;
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Sets the task parameters of the this annotation.
+        /// </summary>
+        /// <param name="parameters">The task parameters to set.</param>
+        /// <param name="fillColor">The fill color of the parameters.</param>
+        /// <param name="textColor">The text color of the parameters.</param>
+        /// <returns>True if the parameters were set successfully, false otherwise.</returns>
+        public bool SetParameters(string parameters, Color fillColor, Color textColor)
+        {
+            if (this.AttributeValues.ContainsKey(TaskParametersAttributeName))
+            {
+                this.AttributeValues[TaskParametersAttributeName] = new AnnotationValue<string>(parameters, fillColor, textColor);
+                return true;
+            }
+
+            return false;
+        }
     }
 }

@@ -3,6 +3,10 @@
 
 namespace Microsoft.Psi.Data
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Defines an abstract base class for batch processing tasks.
     /// </summary>
@@ -20,6 +24,32 @@ namespace Microsoft.Psi.Data
         public virtual TBatchProcessingTaskConfiguration GetDefaultConfiguration() => new ();
 
         /// <summary>
+        /// Gets the configuration for the batch processing task.
+        /// </summary>
+        /// <param name="attributes">The attributes to use for the configuration.</param>
+        /// <returns>The configuration.</returns>
+        public virtual TBatchProcessingTaskConfiguration GetConfiguration(Dictionary<string, object> attributes)
+        {
+            var configuration = this.GetDefaultConfiguration();
+            foreach (var attribute in attributes)
+            {
+                var property = configuration.GetType().GetProperty(attribute.Key);
+                if (property != null && property.CanWrite && property.PropertyType.GetInterfaces().Contains(typeof(IConvertible)))
+                {
+                    try
+                    {
+                        property.SetValue(configuration, Convert.ChangeType(attribute.Value, property.PropertyType));
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+
+            return configuration;
+        }
+
+        /// <summary>
         /// Runs a batch processing task.
         /// </summary>
         /// <param name="pipeline">The pipeline used to run the task.</param>
@@ -27,6 +57,9 @@ namespace Microsoft.Psi.Data
         /// <param name="exporter">The exporter to write resulting streams to.</param>
         /// <param name="configuration">The configuration for the batch processing task.</param>
         public abstract void Run(Pipeline pipeline, SessionImporter sessionImporter, Exporter exporter, TBatchProcessingTaskConfiguration configuration);
+
+        /// <inheritdoc/>
+        public virtual bool IsDerivedPartitionNeeded() => true;
 
         /// <inheritdoc/>
         public virtual void OnStartProcessingDataset()
@@ -70,6 +103,9 @@ namespace Microsoft.Psi.Data
 
         /// <inheritdoc/>
         BatchProcessingTaskConfiguration IBatchProcessingTask.GetDefaultConfiguration() => this.GetDefaultConfiguration();
+
+        /// <inheritdoc/>
+        BatchProcessingTaskConfiguration IBatchProcessingTask.GetConfiguration(Dictionary<string, object> attributes) => this.GetConfiguration(attributes);
 
         /// <inheritdoc/>
         void IBatchProcessingTask.Run(Pipeline pipeline, SessionImporter sessionImporter, Exporter exporter, BatchProcessingTaskConfiguration configuration) =>

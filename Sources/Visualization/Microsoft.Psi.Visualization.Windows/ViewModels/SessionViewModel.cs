@@ -557,6 +557,13 @@ namespace Microsoft.Psi.Visualization.ViewModels
         public override string ToString() => $"Session: {this.Name}";
 
         /// <summary>
+        /// Gets the streams in the session.
+        /// </summary>
+        /// <returns>The streams.</returns>
+        public IEnumerable<IStreamMetadata> GetStreams()
+            => this.Session.Partitions.SelectMany(p => p.AvailableStreams);
+
+        /// <summary>
         /// Checks all partitions in the session to determine whether they have an active writer attached and updates their IsLivePartition property.
         /// </summary>
         internal void UpdateLivePartitionStatuses()
@@ -690,7 +697,7 @@ namespace Microsoft.Psi.Visualization.ViewModels
 
             // Add run batch processing task menu
             var runTasksMenuItem = MenuItemHelper.CreateMenuItem(string.Empty, "Run Batch Processing Task", null);
-            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks;
+            var batchProcessingTasks = VisualizationContext.Instance.PluginMap.BatchProcessingTasks.Where(bpt => bpt.InputType == null);
             runTasksMenuItem.IsEnabled = batchProcessingTasks.Any();
             foreach (var batchProcessingTaskNamespace in batchProcessingTasks.Select(bpt => bpt.Namespace).Distinct())
             {

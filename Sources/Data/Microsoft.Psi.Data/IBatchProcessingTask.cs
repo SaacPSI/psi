@@ -3,6 +3,8 @@
 
 namespace Microsoft.Psi.Data
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Defines a batch processing task.
     /// </summary>
@@ -15,6 +17,13 @@ namespace Microsoft.Psi.Data
         public BatchProcessingTaskConfiguration GetDefaultConfiguration();
 
         /// <summary>
+        /// Gets the configuration.
+        /// </summary>
+        /// <param name="configuration">The configuration for the task.</param>
+        /// <returns>The a configuration.</returns>
+        public BatchProcessingTaskConfiguration GetConfiguration(Dictionary<string, object> configuration);
+
+        /// <summary>
         /// Runs the batch processing task with a specified configuration.
         /// </summary>
         /// <param name="pipeline">The pipeline to run the task.</param>
@@ -22,6 +31,12 @@ namespace Microsoft.Psi.Data
         /// <param name="exporter">The exporter to use.</param>
         /// <param name="configuration">The configuration for the task.</param>
         public void Run(Pipeline pipeline, SessionImporter sessionImporter, Exporter exporter, BatchProcessingTaskConfiguration configuration);
+
+        /// <summary>
+        /// Indicate if a derived partition is need for the task.
+        /// </summary>
+        /// <returns>If a derived partition is needed.</returns>
+        public bool IsDerivedPartitionNeeded();
 
         /// <summary>
         /// Performs any initialization operations when starting to process a dataset.

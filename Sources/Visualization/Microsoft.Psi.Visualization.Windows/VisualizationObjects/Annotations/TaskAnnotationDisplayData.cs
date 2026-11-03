@@ -15,6 +15,7 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
     /// </summary>
     public class TaskAnnotationDisplayData : ObservableObject, ICustomTypeDescriptor
     {
+        private readonly string taskAttribute = "Task";
         private readonly TaskAnnotationVisualizationObject parent;
         private readonly Message<TaskAnnotationSet> annotationSetMessage;
         private bool isSelected = false;
@@ -176,6 +177,11 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         {
             // Update the value in the annotation
             this.annotationSetMessage.Data[this.Track].AttributeValues[attribute] = annotationValue;
+
+            if (attribute.Equals(this.taskAttribute))
+            {
+                this.annotationSetMessage.Data[this.Track].Task = annotationValue.ValueAsString;
+            }
 
             // Call on the parent visualization object to update the annotations
             this.parent.UpdateAnnotationSetMessage(this.annotationSetMessage);

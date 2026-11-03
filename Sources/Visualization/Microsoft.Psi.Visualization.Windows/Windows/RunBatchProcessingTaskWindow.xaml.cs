@@ -7,6 +7,7 @@ namespace Microsoft.Psi.Visualization.Windows
     using System.Threading;
     using System.Windows;
     using Microsoft.Psi.Data;
+    using Microsoft.Psi.Visualization.ViewModels;
 
     /// <summary>
     /// Interaction logic for RunBatchProcessingTaskWindow.xaml.

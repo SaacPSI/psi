@@ -41,6 +41,11 @@ namespace Microsoft.Psi.Data
         public string IconSourcePath { get; set; } = null;
 
         /// <summary>
+        /// Gets or sets the type of the input, null if any.
+        /// </summary>
+        public Type InputType { get; set; } = null;
+
+        /// <summary>
         /// Gets or sets a value indicating whether to use the <see cref="ReplayDescriptor.ReplayAllRealTime"/> descriptor when executing this batch task.
         /// </summary>
         public bool ReplayAllRealTime { get; set; } = false;

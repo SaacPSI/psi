@@ -4,8 +4,9 @@
 namespace Microsoft.Psi.Data
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
-    using Microsoft.Psi.Data.Annotations;
+    using System.Linq;
 
     /// <summary>
     /// Represents metadata about a dynamically loaded batch processing task
@@ -46,6 +47,11 @@ namespace Microsoft.Psi.Data
         public string IconSourcePath => this.batchProcessingTaskAttribute.IconSourcePath;
 
         /// <summary>
+        /// Gets the type of the input, null if any.
+        /// </summary>
+        public Type InputType => this.batchProcessingTaskAttribute.InputType;
+
+        /// <summary>
         /// Gets the folder under which configurations for this batch processing task should be stored.
         /// </summary>
         public string ConfigurationsPath => this.batchProcessingTaskConfigurationsPath;
@@ -61,6 +67,14 @@ namespace Microsoft.Psi.Data
         public string MostRecentlyUsedConfiguration { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the batch processing task is compatible with the specified input type.
+        /// </summary>
+        /// <param name="streamDataType">The type of the input stream.</param>
+        /// <returns>true if the batch processing task is compatible with the specified input type; otherwise, false.</returns>
+        public bool IsCompatibleWith(Type streamDataType)
+            => this.InputType != null && this.InputType.IsAssignableFrom(streamDataType);
+
+        /// <summary>
         /// Gets the default configuration for the batch processing task.
         /// </summary>
         /// <returns>The default configuration.</returns>
@@ -68,6 +82,17 @@ namespace Microsoft.Psi.Data
         {
             var batchProcessingTask = Activator.CreateInstance(this.batchProcessingTaskType) as IBatchProcessingTask;
             return batchProcessingTask.GetDefaultConfiguration();
+        }
+
+        /// <summary>
+        /// Gets the default configuration for the batch processing task.
+        /// </summary>
+        /// <param name="attributes">Dictionnary of attributes to set in the configuration.</param>
+        /// <returns>The default configuration.</returns>
+        public BatchProcessingTaskConfiguration GetDefaultConfigurationWithAttributes(Dictionary<string, object> attributes)
+        {
+            var batchProcessingTask = Activator.CreateInstance(this.batchProcessingTaskType) as IBatchProcessingTask;
+            return batchProcessingTask.GetConfiguration(attributes);
         }
 
         /// <summary>

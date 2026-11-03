@@ -34,7 +34,6 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
     public class TaskAnnotationVisualizationObject : StreamIntervalVisualizationObject<TaskAnnotationSet>
     {
         private const string BatchProcessingTasksAnnotationSchemaName = "PsiStudio.BatchProcessingTasks";
-        private const string BatchProcessingTaskParametersAttributeName = "TaskParameters";
         private const string ErrorStreamNotBound = "The visualization object is not currently bound to a stream.";
         private const string ErrorEditingDisabled = "Annotation add/delete is currently disabled in the visualization object properties.";
         private const string ErrorSelectionMarkersUnset = "Both the start and end selection markers must be set.\r\n\r\nYou can set the start and end selection markers with SHIFT + Left mouse button and SHIFT + Right mouse button.";
@@ -290,7 +289,7 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         /// <inheritdoc />
         [Browsable(false)]
         [IgnoreDataMember]
-        public override DataTemplate DefaultViewTemplate => XamlHelper.CreateTemplate(this.GetType(), typeof(TimeIntervalAnnotationVisualizationObjectView));
+        public override DataTemplate DefaultViewTemplate => XamlHelper.CreateTemplate(this.GetType(), typeof(TaskAnnotationVisualizationObjectView));
 
         /// <summary>
         /// Gets the timeline visualization panel.
@@ -1698,25 +1697,25 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
                 annotation.AttributeValues = new Dictionary<string, IAnnotationValue>();
             }
 
-            if (!annotation.AttributeValues.TryGetValue(BatchProcessingTaskParametersAttributeName, out var existingValue))
+            if (!annotation.AttributeValues.TryGetValue(TaskAnnotation.TaskParametersAttributeName, out var existingValue))
             {
-                var taskParametersSchema = this.AnnotationSchema?.GetAttributeSchema(BatchProcessingTaskParametersAttributeName);
+                var taskParametersSchema = this.AnnotationSchema?.GetAttributeSchema(TaskAnnotation.TaskParametersAttributeName);
                 if (taskParametersSchema == null)
                 {
                     _ = new MessageBoxWindow(
                         Application.Current.MainWindow,
                         "Batch Processing Annotation Error",
-                        $"The '{BatchProcessingTaskParametersAttributeName}' attribute is missing from the annotation schema.",
+                        $"The '{TaskAnnotation.TaskParametersAttributeName}' attribute is missing from the annotation schema.",
                         "Close",
                         null).ShowDialog();
                     return;
                 }
 
-                annotation.AttributeValues[BatchProcessingTaskParametersAttributeName] = taskParametersSchema.ValueSchema.CreateAnnotationValue(configurationJson);
+                annotation.AttributeValues[TaskAnnotation.TaskParametersAttributeName] = taskParametersSchema.ValueSchema.CreateAnnotationValue(configurationJson);
             }
             else
             {
-                annotation.AttributeValues[BatchProcessingTaskParametersAttributeName] = new AnnotationValue<string>(configurationJson, existingValue.FillColor, existingValue.TextColor);
+                annotation.AttributeValues[TaskAnnotation.TaskParametersAttributeName] = new AnnotationValue<string>(configurationJson, existingValue.FillColor, existingValue.TextColor);
             }
 
             var annotationSetMessage = this.FindTaskAnnotationSetMessageContaining(annotation);

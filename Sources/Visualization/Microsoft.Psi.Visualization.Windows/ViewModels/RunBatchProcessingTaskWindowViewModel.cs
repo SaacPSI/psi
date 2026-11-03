@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-namespace Microsoft.Psi.Visualization.Windows
+namespace Microsoft.Psi.Visualization.ViewModels
 {
     using System;
     using System.Collections.Generic;
@@ -11,10 +11,12 @@ namespace Microsoft.Psi.Visualization.Windows
     using System.Threading.Tasks;
     using System.Windows;
     using GalaSoft.MvvmLight.CommandWpf;
+    using Microsoft.Psi;
     using Microsoft.Psi.Data;
+    using Microsoft.Psi.Visualization;
     using Microsoft.Psi.Visualization.Helpers;
-    using Microsoft.Psi.Visualization.ViewModels;
     using Microsoft.Psi.Visualization.VisualizationObjects;
+    using Microsoft.Psi.Visualization.Windows;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -103,9 +105,12 @@ namespace Microsoft.Psi.Visualization.Windows
             this.Description = batchProcessingTaskMetadata.Description;
             this.Target = sessionViewModel.Name;
             this.DataSize = TimeSpanHelper.FormatTimeSpanApproximate(arguments.TaskAnnotation.Interval.Span);
-            arguments.TaskAnnotation.AttributeValues.TryGetValue("TaskParameters", out var taskParameters);
-            this.configuration = taskParameters != null ? BatchProcessingTaskConfiguration.LoadContent(taskParameters.ValueAsString) : batchProcessingTaskMetadata.GetDefaultConfiguration();
-            this.currentConfiguration = arguments.TaskAnnotation.AttributeValues.TryGetValue("Task", out var taskname) ? taskname.ValueAsString : DefaultConfiguration;
+            var compatibleStreamList = sessionViewModel.GetStreams().Where(s => batchProcessingTaskMetadata.IsCompatibleWith(Type.GetType(s.TypeName, false, true))).ToList();
+            Dictionary<string, object> configuration = this.ProcessJsonConfiguration(arguments.TaskAnnotation.GetParameters());
+            configuration.Add("CurrentDataset", sessionViewModel.DatasetViewModel.Dataset);
+            configuration.Add("StreamList", compatibleStreamList.ConvertAll(s => s.Name));
+            this.LoadTemporaryConfiguration(configuration);
+            this.currentConfiguration = arguments.TaskAnnotation.Task;
             this.configurationSavedCallback = arguments.SaveConfigurationToAnnotation;
         }
 
@@ -354,6 +359,29 @@ namespace Microsoft.Psi.Visualization.Windows
             }
 
             this.SaveConfiguration();
+        }
+
+        /// <summary>
+        /// Loads a temporary configuration for the batch processing task from a JSON string.
+        /// </summary>
+        /// <param name="configurationJson">The JSON string containing the configuration.</param>
+        /// <returns>A dictionary representing the configuration.</returns>
+        public Dictionary<string, object> ProcessJsonConfiguration(string configurationJson)
+        {
+            Dictionary<string, object> configuration = JsonConvert.DeserializeObject<Dictionary<string, object>>(configurationJson);
+            this.LoadTemporaryConfiguration(configuration);
+            return configuration;
+        }
+
+        /// <summary>
+        /// Loads the default configuration and set a stream name.
+        /// </summary>
+        /// <param name="configuration">The configuration to load.</param>
+        public void LoadTemporaryConfiguration(Dictionary<string, object> configuration)
+        {
+            this.CurrentConfiguration = DefaultConfiguration;
+            this.ResetConfiguration();
+            this.Configuration = this.batchProcessingTaskMetadata.GetDefaultConfigurationWithAttributes(configuration);
         }
 
         /// <summary>

@@ -15,13 +15,14 @@ namespace Microsoft.Psi.Audio
     /// </summary>
     [BatchProcessingTask(
         "Export Audio to Wav File",
-        Description = "This task exports an audio stream to a wav file.")]
+        Description = "This task exports an audio stream to a wav file.",
+        InputType = typeof(AudioBuffer))]
     public class ExportAudioToWavFileTask : BatchProcessingTask<ExportAudioToWavFileTaskConfiguration>
     {
         /// <inheritdoc/>
         public override void Run(Pipeline pipeline, SessionImporter sessionImporter, Exporter exporter, ExportAudioToWavFileTaskConfiguration configuration)
         {
-            var audio = sessionImporter.OpenStream<AudioBuffer>(configuration.AudioStreamName);
+            var audio = sessionImporter.OpenStream<AudioBuffer>(configuration.StreamName);
             var partition = sessionImporter.PartitionImporters.Values.First();
             var wavFileWriter = new WaveFileWriter(pipeline, Path.Combine(partition.StorePath, configuration.WavOutputFilename));
 
@@ -66,10 +67,10 @@ namespace Microsoft.Psi.Audio
         [DataMember]
         [DisplayName("Audio Stream Name")]
         [Description("The name of the audio stream.")]
-        public string AudioStreamName
+        public string StreamName
         {
             get => this.audioStreamName;
-            set { this.Set(nameof(this.AudioStreamName), ref this.audioStreamName, value); }
+            set { this.Set(nameof(this.StreamName), ref this.audioStreamName, value); }
         }
 
         /// <summary>

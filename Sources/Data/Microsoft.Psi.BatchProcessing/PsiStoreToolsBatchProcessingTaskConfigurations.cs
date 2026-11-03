@@ -39,8 +39,7 @@ namespace Microsoft.Psi.BatchProcessing
     {
         private string partitionName = string.Empty;
         private bool runOnDatasetCopy = true;
-        private string copyStoreName = string.Empty;
-        private string copyStorePath = string.Empty;
+        private Dataset currentDataset = null;
 
         /// <summary>
         /// Gets or sets the source partition name.
@@ -67,27 +66,13 @@ namespace Microsoft.Psi.BatchProcessing
         }
 
         /// <summary>
-        /// Gets or sets the copy store name.
+        /// Gets or sets the current dataset in case of reload.
         /// </summary>
-        [DataMember]
-        [DisplayName("Copy Store Name")]
-        [Description("Optional copy store name. If empty, a default name is generated.")]
-        public string CopyStoreName
+        [IgnoreDataMember]
+        public Dataset CurrentDataset
         {
-            get => this.copyStoreName;
-            set => this.Set(nameof(this.CopyStoreName), ref this.copyStoreName, value);
-        }
-
-        /// <summary>
-        /// Gets or sets the copy store path.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Copy Store Path")]
-        [Description("Optional copy store path. If empty, the source store path is used.")]
-        public string CopyStorePath
-        {
-            get => this.copyStorePath;
-            set => this.Set(nameof(this.CopyStorePath), ref this.copyStorePath, value);
+            get => this.currentDataset;
+            set => this.Set(nameof(this.currentDataset), ref this.currentDataset, value);
         }
     }
 
@@ -303,11 +288,8 @@ namespace Microsoft.Psi.BatchProcessing
     /// </summary>
     public class CropStoreTaskConfiguration : PsiStoreToolTaskConfiguration
     {
-        private TimeSpan start = TimeSpan.Zero;
+        private TimeInterval interval = TimeInterval.Empty;
         private TimeSpan length = TimeSpan.Zero;
-        private bool useLength = false;
-        private string outputStoreName = "Cropped";
-        private string outputStorePath = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CropStoreTaskConfiguration"/> class.
@@ -319,63 +301,13 @@ namespace Microsoft.Psi.BatchProcessing
         }
 
         /// <summary>
-        /// Gets or sets the crop start offset.
+        /// Gets or sets the crop interval.
         /// </summary>
         [DataMember]
-        [DisplayName("Start")]
-        [Description("Crop start offset relative to beginning of store.")]
-        public TimeSpan Start
+        public TimeInterval CropInterval
         {
-            get => this.start;
-            set => this.Set(nameof(this.Start), ref this.start, value);
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to use a fixed crop length.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Use Length")]
-        [Description("If false, crop continues until end of store.")]
-        public bool UseLength
-        {
-            get => this.useLength;
-            set => this.Set(nameof(this.UseLength), ref this.useLength, value);
-        }
-
-        /// <summary>
-        /// Gets or sets the crop length.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Length")]
-        [Description("Length of interval to keep, used when Use Length is true.")]
-        public TimeSpan Length
-        {
-            get => this.length;
-            set => this.Set(nameof(this.Length), ref this.length, value);
-        }
-
-        /// <summary>
-        /// Gets or sets output store name.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Output Store Name")]
-        [Description("Name of the cropped store.")]
-        public string GeneratedOutputStoreName
-        {
-            get => this.outputStoreName;
-            set => this.Set(nameof(this.GeneratedOutputStoreName), ref this.outputStoreName, value);
-        }
-
-        /// <summary>
-        /// Gets or sets output store path.
-        /// </summary>
-        [DataMember]
-        [DisplayName("Output Store Path")]
-        [Description("Path of the cropped store.")]
-        public string GeneratedOutputStorePath
-        {
-            get => this.outputStorePath;
-            set => this.Set(nameof(this.GeneratedOutputStorePath), ref this.outputStorePath, value);
+            get => this.interval;
+            set => this.Set(nameof(this.CropInterval), ref this.interval, value);
         }
     }
 

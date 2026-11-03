@@ -27,6 +27,7 @@ namespace Microsoft.Psi.Visualization
         {
             "Microsoft.Psi.dll",
             "Microsoft.Psi.Audio.dll",
+            "Microsoft.Psi.BatchProcessing.dll",
             "Microsoft.Psi.Data.dll",
             "Microsoft.Psi.Visualization.Windows.dll",
         };

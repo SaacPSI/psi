@@ -4,6 +4,7 @@
 namespace Microsoft.Psi.Visualization
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
@@ -327,6 +328,47 @@ namespace Microsoft.Psi.Visualization
                 if (sessionViewModel.DatasetViewModel.FileName != null)
                 {
                     await sessionViewModel.DatasetViewModel.SaveAsAsync(sessionViewModel.DatasetViewModel.FileName);
+                }
+
+                // Update bindings to the sources
+                this.VisualizationContainer.UpdateStreamSources(this.DatasetViewModel?.CurrentSessionViewModel);
+
+                // And re-read the stream values at cursor (to publish to stream value visualizers)
+                DataManager.Instance.ReadAndPublishStreamValue(this.VisualizationContainer.Navigator.Cursor);
+            }
+        }
+
+        /// <summary>
+        /// Asychronously runs a specified batch processing task over a dataset.
+        /// </summary>
+        /// <param name="streamModel">The stream tree node.</param>
+        /// <param name="batchProcessingTaskMetadata">Batch task processing metadata.</param>
+        /// <returns>A task that represents the asynchronous batch processing operation.</returns>
+        public async Task RunStreamBatchProcessingTaskAsync(StreamTreeNode streamModel, BatchProcessingTaskMetadata batchProcessingTaskMetadata)
+        {
+            // Initialize the progress reporting window
+            var viewModel = new RunBatchProcessingTaskWindowViewModel(this.VisualizationContainer, streamModel.DatasetViewModel, batchProcessingTaskMetadata);
+            Dictionary<string, object> configuration = new Dictionary<string, object>();
+            configuration.Add("StreamName", streamModel.SourceStreamName);
+            configuration.Add("OutputStorePath", $"{streamModel.PartitionViewModel.StorePath}_New");
+            configuration.Add("OutputStoreName", $"{streamModel.PartitionViewModel.StoreName}_New");
+            configuration.Add("OutputPartitionName", $"{streamModel.PartitionViewModel.Name}_New");
+            configuration.Add("PartitionName", streamModel.PartitionViewModel.Name);
+            configuration.Add("CurrentDataset", streamModel.DatasetViewModel.Dataset);
+
+            viewModel.LoadTemporaryConfiguration(configuration);
+            var progressReportWindow = new RunBatchProcessingTaskWindow(Application.Current.MainWindow, viewModel);
+
+            // show the modal status window, which will be closed once the load dataset operation completes
+            if (progressReportWindow.ShowDialog() == true)
+            {
+                // update the dataset view model as a new derived partition might have been created.
+                streamModel.DatasetViewModel.Update(streamModel.DatasetViewModel.Dataset);
+
+                // if the dataset has a known associated file, save it.
+                if (streamModel.DatasetViewModel.FileName != null)
+                {
+                    await streamModel.DatasetViewModel.SaveAsAsync(streamModel.DatasetViewModel.FileName);
                 }
 
                 // Update bindings to the sources

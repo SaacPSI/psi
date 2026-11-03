@@ -54,8 +54,6 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
     [VisualizationPanelType(VisualizationPanelType.Timeline)]
     public class TimeIntervalAnnotationVisualizationObject : StreamIntervalVisualizationObject<TimeIntervalAnnotationSet>
     {
-        private const string BatchProcessingTasksAnnotationSchemaName = "PsiStudio.BatchProcessingTasks";
-        private const string BatchProcessingTaskParametersAttributeName = "TaskParameters";
         private const string ErrorStreamNotBound = "The visualization object is not currently bound to a stream.";
         private const string ErrorEditingDisabled = "Annotation add/delete is currently disabled in the visualization object properties.";
         private const string ErrorSelectionMarkersUnset = "Both the start and end selection markers must be set.\r\n\r\nYou can set the start and end selection markers with SHIFT + Left mouse button and SHIFT + Right mouse button.";
@@ -320,17 +318,6 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         [IgnoreDataMember]
         public TimelineVisualizationPanel TimelineVisualizationPanel => this.Panel as TimelineVisualizationPanel;
 
-        /// <summary>
-        /// Gets the command to open the batch processing tasks window.
-        /// </summary>
-        /// <param name="cursor">The cursor time.</param>
-        /// <param name="track">The track name.</param>
-        /// <returns>The command to open the batch processing tasks window.</returns>
-        public ICommand GetOpenBatchProcessingTasksCommand(DateTime cursor, string track)
-            => this.AnnotationSchema?.Name == BatchProcessingTasksAnnotationSchemaName && VisualizationContext.Instance.PluginMap.BatchProcessingTasks.Any()
-                ? new PsiCommand(() => this.OpenBatchProcessingTasksFromSelectedAnnotation(cursor, track))
-                : null;
-
         /// <inheritdoc/>
         public override List<ContextMenuItemInfo> ContextMenuItemsInfo()
         {
@@ -426,16 +413,6 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
             if (showOnlyTracksWithEventsInViewCommand != null)
             {
                 items.Add(new ContextMenuItemInfo(null, $"Show Only Tracks with Events in View", showOnlyTracksWithEventsInViewCommand));
-            }
-
-            var annotation = this.Data?.Select(m => m.Data).GetTimeIntervalAnnotationAtTime(this.Navigator.Cursor, trackUnderCursor) as TaskAnnotation;
-            if (annotation != null)
-            {
-                var openBatchProcessingTasksCommand = this.GetOpenBatchProcessingTasksCommand(this.Navigator.Cursor, trackUnderCursor);
-                if (openBatchProcessingTasksCommand != null)
-                {
-                    items.Add(new ContextMenuItemInfo(null, "Batch Processing Tasks...", openBatchProcessingTasksCommand, isEnabled: annotation != null));
-                }
             }
 
             // Add a separator
@@ -588,7 +565,7 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
         /// <param name="track">The track name.</param>
         /// <returns>The command for setting the annotation time interval to the selection boundaries.</returns>
         public ICommand GetSetAnnotationTimeIntervalToSelectionCommand(DateTime cursorTime, string track)
-{
+        {
             if (this.Navigator.SelectionRange.StartTime == DateTime.MinValue || this.Navigator.SelectionRange.EndTime == DateTime.MaxValue)
             {
                 return null;
@@ -1688,65 +1665,6 @@ namespace Microsoft.Psi.Visualization.VisualizationObjects
 
             // An update the data
             this.UpdateDisplayData();
-        }
-
-        private void OpenBatchProcessingTasksFromSelectedAnnotation(DateTime cursor, string track)
-        {
-            var annotation = this.Data?.Select(m => m.Data).GetTimeIntervalAnnotationAtTime(cursor, track) as TaskAnnotation;
-            if (annotation != null)
-            {
-                VisualizationContext.Instance.OpenBatchProcessingTasks(
-                    taskAnnotation: annotation,
-                    saveConfigurationToAnnotation: configurationJson => this.SaveConfigurationToAnnotation(annotation, configurationJson));
-            }
-        }
-
-        private void SaveConfigurationToAnnotation(TimeIntervalAnnotation annotation, string configurationJson)
-        {
-            if (annotation == null || annotation as TaskAnnotation == null || string.IsNullOrWhiteSpace(configurationJson))
-            {
-                return;
-            }
-
-            if (annotation.AttributeValues == null)
-            {
-                annotation.AttributeValues = new Dictionary<string, IAnnotationValue>();
-            }
-
-            if (!annotation.AttributeValues.TryGetValue(BatchProcessingTaskParametersAttributeName, out var existingValue))
-            {
-                var taskParametersSchema = this.AnnotationSchema?.GetAttributeSchema(BatchProcessingTaskParametersAttributeName);
-                if (taskParametersSchema == null)
-                {
-                    _ = new MessageBoxWindow(
-                        Application.Current.MainWindow,
-                        "Batch Processing Annotation Error",
-                        $"The '{BatchProcessingTaskParametersAttributeName}' attribute is missing from the annotation schema.",
-                        "Close",
-                        null).ShowDialog();
-                    return;
-                }
-
-                annotation.AttributeValues[BatchProcessingTaskParametersAttributeName] = taskParametersSchema.ValueSchema.CreateAnnotationValue(configurationJson);
-            }
-            else
-            {
-                annotation.AttributeValues[BatchProcessingTaskParametersAttributeName] = new AnnotationValue<string>(configurationJson, existingValue.FillColor, existingValue.TextColor);
-            }
-
-            var annotationSetMessage = this.FindTimeIntervalAnnotationSetMessageContaining(annotation);
-            if (annotationSetMessage == default)
-            {
-                _ = new MessageBoxWindow(
-                    Application.Current.MainWindow,
-                    "Batch Processing Annotation Error",
-                    "Unable to locate the target annotation message in the current stream.",
-                    "Close",
-                    null).ShowDialog();
-                return;
-            }
-
-            this.UpdateAnnotationSetMessage(annotationSetMessage);
         }
     }
 }

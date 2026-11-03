@@ -26,8 +26,8 @@
     <None Remove="MainWindow.xaml" />
     <None Remove="stylecop.json" />
     <None Remove="Windows\AdditionalAssembliesWindow.xaml" />
-    <None Remove="Windows\BatchProcessingTasksWindow.xaml" />
     <None Remove="Windows\AnnotationSearchWindow.xaml" />
+    <None Remove="Windows\BatchProcessingTasksWindow.xaml" />
     <None Remove="Windows\HelpWindow.xaml" />
     <None Remove="Windows\LayoutNameWindow.xaml" />
     <None Remove="Windows\LoadingDatasetWindow.xaml" />
@@ -44,9 +44,8 @@
     <Page Include="MainWindow.xaml" />
     <Page Include="Network\NetworkConfigurationWindow.xaml" />
     <Page Include="PipelinePlugin\PiplinePluginsWindow.xaml" />
-    <Page Include="Windows\AnnotationSearchWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <Page Include="Windows\AnnotationSearchWindow.xaml" />
+    <Page Include="Windows\BatchProcessingTasksWindow.xaml"/>
     <Page Include="Windows\HelpWindow.xaml" />
     <Page Include="Windows\PsiStudioSettingsWindow.xaml" />
     <Page Include="Windows\AdditionalAssembliesWindow.xaml" />
@@ -55,6 +54,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Audio\Microsoft.Psi.Audio.Windows\Microsoft.Psi.Audio.Windows.csproj" />
     <ProjectReference Include="..\..\..\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
+    <ProjectReference Include="..\..\..\Data\Microsoft.Psi.BatchProcessing\Microsoft.Psi.BatchProcessing.csproj" />
     <ProjectReference Include="..\..\..\Data\Microsoft.Psi.Data\Microsoft.Psi.Data.csproj" />
     <ProjectReference Include="..\..\..\Imaging\Microsoft.Psi.Imaging.Windows\Microsoft.Psi.Imaging.Windows.csproj" />
     <ProjectReference Include="..\..\..\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
@@ -79,10 +79,5 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Windows\BatchProcessingTasksWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
   </ItemGroup>
 </Project>
