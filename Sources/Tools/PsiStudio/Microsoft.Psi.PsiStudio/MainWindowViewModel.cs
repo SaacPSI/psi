@@ -2005,20 +2005,20 @@ namespace Microsoft.Psi.PsiStudio
                 return;
             }
 
-            var taskAnnotationsByTrack = this.LoadTaskAnnotationsByTrack(sessionViewModel);
-            if (!taskAnnotationsByTrack.Any())
+            var taskAnnotationsByStream = this.LoadTaskAnnotationsBySteam(sessionViewModel);
+            if (!taskAnnotationsByStream.Any())
             {
                 _ = new MessageBoxWindow(Application.Current.MainWindow, "No Task Tracks", "No task annotation tracks were found in the active session.", "Close", null).ShowDialog();
                 return;
             }
 
-            var batchProcessingTasksWindow = new BatchProcessingTasksWindow(Application.Current.MainWindow, sessionViewModel, taskAnnotationsByTrack);
+            var batchProcessingTasksWindow = new BatchProcessingTasksWindow(Application.Current.MainWindow, sessionViewModel, taskAnnotationsByStream);
             _ = batchProcessingTasksWindow.ShowDialog();
         }
 
-        private Dictionary<string, List<TaskAnnotation>> LoadTaskAnnotationsByTrack(SessionViewModel sessionViewModel)
+        private Dictionary<string, List<TaskAnnotation>> LoadTaskAnnotationsBySteam(SessionViewModel sessionViewModel)
         {
-            var taskAnnotationsByTrack = new Dictionary<string, List<TaskAnnotation>>(StringComparer.Ordinal);
+            var taskAnnotationsByStream = new Dictionary<string, List<TaskAnnotation>>(StringComparer.Ordinal);
 
             foreach (var partition in sessionViewModel.Session.Partitions)
             {
@@ -2037,10 +2037,10 @@ namespace Microsoft.Psi.PsiStudio
                             foreach (var annotation in annotationSet.Annotations.Where(a => a != null))
                             {
                                 var track = annotation.Track ?? string.Empty;
-                                if (!taskAnnotationsByTrack.TryGetValue(track, out var annotations))
+                                if (!taskAnnotationsByStream.TryGetValue(track, out var annotations))
                                 {
                                     annotations = new List<TaskAnnotation>();
-                                    taskAnnotationsByTrack[track] = annotations;
+                                    taskAnnotationsByStream[stream.Name] = annotations;
                                 }
 
                                 annotations.Add(annotation);
@@ -2056,14 +2056,14 @@ namespace Microsoft.Psi.PsiStudio
                 }
             }
 
-            foreach (var track in taskAnnotationsByTrack.Keys.ToList())
+            foreach (var track in taskAnnotationsByStream.Keys.ToList())
             {
-                taskAnnotationsByTrack[track] = taskAnnotationsByTrack[track]
+                taskAnnotationsByStream[track] = taskAnnotationsByStream[track]
                     .OrderBy(annotation => annotation.Interval.Left)
                     .ToList();
             }
 
-            return taskAnnotationsByTrack;
+            return taskAnnotationsByStream;
         }
 
         private async void OnRequestOpenBatchProcessingTasks(object sender, RequestOpenBatchProcessingTasksEventArgs e)

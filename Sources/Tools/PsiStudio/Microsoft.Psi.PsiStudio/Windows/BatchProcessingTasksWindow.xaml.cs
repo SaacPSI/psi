@@ -28,7 +28,6 @@ namespace Microsoft.Psi.PsiStudio.Windows
     public partial class BatchProcessingTasksWindow : Window, INotifyPropertyChanged
     {
         private SessionViewModel sessionViewModel;
-        private TrackEntry selectedTrack;
         private string selectedTrackStatistics = "No track selected.";
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace Microsoft.Psi.PsiStudio.Windows
         public BatchProcessingTasksWindow()
         {
             this.InitializeComponent();
-            this.Tracks = new ObservableCollection<TrackEntry>();
+            this.Streams = new ObservableCollection<StreamEntry>();
             this.DataContext = this;
         }
 
@@ -46,50 +45,39 @@ namespace Microsoft.Psi.PsiStudio.Windows
         /// </summary>
         /// <param name="owner">Owner window.</param>
         /// <param name="sessionViewModel">Current session view model.</param>
-        /// <param name="taskAnnotationsByTrack">Task annotations grouped by track.</param>
-        public BatchProcessingTasksWindow(Window owner, SessionViewModel sessionViewModel, Dictionary<string, List<TaskAnnotation>> taskAnnotationsByTrack)
+        /// <param name="taskAnnotationsByStream">Task annotations grouped by stream.</param>
+        public BatchProcessingTasksWindow(Window owner, SessionViewModel sessionViewModel, Dictionary<string, List<TaskAnnotation>> taskAnnotationsByStream)
             : this()
         {
             this.Owner = owner;
             this.sessionViewModel = sessionViewModel;
-            this.Tracks.Clear();
-            foreach (var track in taskAnnotationsByTrack
+            this.Streams.Clear();
+            foreach (var track in taskAnnotationsByStream
                 .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
-                .Select(kvp => new TrackEntry(kvp.Key, kvp.Value.OrderBy(a => a.Interval.Left).ToList())))
+                .Select(kvp => new StreamEntry(kvp.Key, kvp.Value.OrderBy(a => a.Interval.Left).ToList())))
             {
-                this.Tracks.Add(track);
+                track.PropertyChanged += this.TrackPropertyChanged;
+                this.Streams.Add(track);
             }
 
-            this.SelectedTrack = this.Tracks.FirstOrDefault();
+            this.UpdateSelectedStreamsStatistics();
         }
 
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets the available task tracks.
+        /// Gets the available task streams.
         /// </summary>
-        public ObservableCollection<TrackEntry> Tracks { get; }
+        public ObservableCollection<StreamEntry> Streams { get; }
 
         /// <summary>
-        /// Gets or sets selected track.
+        /// Gets the tracks currently checked by the user.
         /// </summary>
-        public TrackEntry SelectedTrack
-        {
-            get => this.selectedTrack;
-            set
-            {
-                if (!ReferenceEquals(this.selectedTrack, value))
-                {
-                    this.selectedTrack = value;
-                    this.RaisePropertyChanged();
-                    this.UpdateSelectedTrackStatistics();
-                }
-            }
-        }
+        public List<StreamEntry> SelectedStreams => this.Streams.Where(t => t.IsSelected).ToList();
 
         /// <summary>
-        /// Gets statistics string for the selected track.
+        /// Gets statistics string for the selected streams.
         /// </summary>
         public string SelectedTrackStatistics
         {
@@ -106,9 +94,10 @@ namespace Microsoft.Psi.PsiStudio.Windows
 
         private async void RunButtonClick(object sender, RoutedEventArgs e)
         {
-            if (this.SelectedTrack == null)
+            var selectedStreams = this.SelectedStreams;
+            if (selectedStreams.Count == 0)
             {
-                _ = new MessageBoxWindow(this, "No Track Selected", "Please select a track before running tasks.", "Close", null).ShowDialog();
+                _ = new MessageBoxWindow(this, "No Track Selected", "Please select at least one track before running tasks.", "Close", null).ShowDialog();
                 return;
             }
 
@@ -128,38 +117,41 @@ namespace Microsoft.Psi.PsiStudio.Windows
                 int missingCount = 0;
                 int failedCount = 0;
 
-                foreach (var annotation in this.SelectedTrack.Annotations)
+                foreach (var track in selectedStreams)
                 {
-                    if (string.IsNullOrWhiteSpace(annotation.Task))
+                    foreach (var annotation in track.Annotations)
                     {
-                        missingCount++;
-                        continue;
-                    }
+                        if (string.IsNullOrWhiteSpace(annotation.Task))
+                        {
+                            missingCount++;
+                            continue;
+                        }
 
-                    var taskMetadata = allTasks.FirstOrDefault(task => string.Equals(task.Name, annotation.Task, StringComparison.Ordinal));
-                    if (taskMetadata == null)
-                    {
-                        missingCount++;
-                        continue;
-                    }
+                        var taskMetadata = allTasks.FirstOrDefault(task => string.Equals(task.Name, annotation.Task, StringComparison.Ordinal));
+                        if (taskMetadata == null)
+                        {
+                            missingCount++;
+                            continue;
+                        }
 
-                    try
-                    {
-                        var configuration = this.CreateConfiguration(taskMetadata, annotation);
-                        var batchProcessingTask = taskMetadata.CreateBatchProcessingTask();
-                        await this.sessionViewModel.Session.RunBatchProcessingTaskAsync(batchProcessingTask, configuration);
-                        successCount++;
-                    }
-                    catch (Exception ex)
-                    {
-                        failedCount++;
-                        Debug.WriteLine($"Failed to run batch task '{annotation.Task}' for track '{this.SelectedTrack.TrackName}': {ex}");
+                        try
+                        {
+                            var configuration = this.CreateConfiguration(taskMetadata, annotation);
+                            var batchProcessingTask = taskMetadata.CreateBatchProcessingTask();
+                            await this.sessionViewModel.Session.RunBatchProcessingTaskAsync(batchProcessingTask, configuration);
+                            successCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            failedCount++;
+                            Debug.WriteLine($"Failed to run batch task '{annotation.Task}' for track '{track.StreamName}': {ex}");
+                        }
                     }
                 }
 
                 await this.RefreshSessionAfterRunAsync();
 
-                var summary = $"Track: {this.SelectedTrack.TrackName}\n"
+                var summary = $"Streams: {string.Join(", ", selectedStreams.Select(t => t.StreamName))}\n"
                     + $"Executed: {successCount}\n"
                     + $"Missing Task: {missingCount}\n"
                     + $"Failed: {failedCount}";
@@ -174,16 +166,17 @@ namespace Microsoft.Psi.PsiStudio.Windows
 
         private void ExportToJsonButtonClick(object sender, RoutedEventArgs e)
         {
-            if (this.SelectedTrack == null)
+            var selectedTracks = this.SelectedStreams;
+            if (selectedTracks.Count == 0)
             {
-                _ = new MessageBoxWindow(this, "No Track Selected", "Please select a track to export.", "Close", null).ShowDialog();
+                _ = new MessageBoxWindow(this, "No Stream Selected", "Please select at least one stream to export.", "Close", null).ShowDialog();
                 return;
             }
 
             var saveFileDialog = new SaveFileDialog
             {
                 Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
-                FileName = $"{this.SelectedTrack.TrackName}.json",
+                FileName = $"TasksExport.json",
                 AddExtension = true,
                 DefaultExt = ".json",
             };
@@ -195,15 +188,15 @@ namespace Microsoft.Psi.PsiStudio.Windows
 
             try
             {
-                var payload = new
+                var payload = selectedTracks.Select(stream => new
                 {
-                    Track = this.SelectedTrack.TrackName,
+                    Track = stream.StreamName,
                     Statistics = new
                     {
-                        Count = this.SelectedTrack.Annotations.Count,
-                        DistinctTasks = this.SelectedTrack.Annotations.Select(a => a.Task).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct(StringComparer.Ordinal).Count(),
+                        Count = stream.Annotations.Count,
+                        DistinctTasks = stream.Annotations.Select(a => a.Task).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct(StringComparer.Ordinal).Count(),
                     },
-                    Annotations = this.SelectedTrack.Annotations.Select(annotation => new
+                    Annotations = stream.Annotations.Select(annotation => new
                     {
                         annotation.Track,
                         annotation.Task,
@@ -212,10 +205,10 @@ namespace Microsoft.Psi.PsiStudio.Windows
                         End = annotation.Interval.Right,
                         Parameters = annotation.GetParameters(),
                     }).ToList(),
-                };
+                }).ToList();
 
                 File.WriteAllText(saveFileDialog.FileName, JsonConvert.SerializeObject(payload, Formatting.Indented));
-                _ = new MessageBoxWindow(this, "Export Succeeded", $"Track exported to\n{saveFileDialog.FileName}", "Close", null).ShowDialog();
+                _ = new MessageBoxWindow(this, "Export Succeeded", $"Stream exported to\n{saveFileDialog.FileName}", "Close", null).ShowDialog();
             }
             catch (Exception ex)
             {
@@ -275,15 +268,36 @@ namespace Microsoft.Psi.PsiStudio.Windows
             DataManager.Instance.ReadAndPublishStreamValue(VisualizationContext.Instance.VisualizationContainer.Navigator.Cursor);
         }
 
-        private void UpdateSelectedTrackStatistics()
+        private void TrackPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (this.SelectedTrack == null || this.SelectedTrack.Annotations.Count == 0)
+            if (e.PropertyName == nameof(StreamEntry.IsSelected))
             {
-                this.SelectedTrackStatistics = "No data available for the selected track.";
+                this.RaisePropertyChanged(nameof(this.SelectedStreams));
+                this.UpdateSelectedStreamsStatistics();
+            }
+        }
+
+        private void UpdateSelectedStreamsStatistics()
+        {
+            var selectedTracks = this.SelectedStreams;
+            if (selectedTracks.Count == 0)
+            {
+                this.SelectedTrackStatistics = "No stream selected.";
                 return;
             }
 
-            var annotations = this.SelectedTrack.Annotations;
+            var sections = selectedTracks.Select(track => this.BuildTrackStatistics(track));
+            this.SelectedTrackStatistics = string.Join(Environment.NewLine + Environment.NewLine, sections);
+        }
+
+        private string BuildTrackStatistics(StreamEntry track)
+        {
+            var annotations = track.Annotations;
+            if (annotations.Count == 0)
+            {
+                return $"Stream: {track.StreamName}{Environment.NewLine}No data available for this stream.";
+            }
+
             var firstStart = annotations.Min(a => a.Interval.Left);
             var lastEnd = annotations.Max(a => a.Interval.Right);
             var totalDuration = new TimeSpan(annotations.Sum(a => Math.Max(0, (a.Interval.Right - a.Interval.Left).Ticks)));
@@ -294,8 +308,7 @@ namespace Microsoft.Psi.PsiStudio.Windows
                 .OrderBy(t => t, StringComparer.Ordinal)
                 .ToList();
 
-            this.SelectedTrackStatistics =
-                $"Track: {this.SelectedTrack.TrackName}{Environment.NewLine}"
+            return $"Stream: {track.StreamName}{Environment.NewLine}"
                 + $"Annotations: {annotations.Count}{Environment.NewLine}"
                 + $"Distinct tasks: {tasks.Count}{Environment.NewLine}"
                 + $"First start: {firstStart:O}{Environment.NewLine}"
@@ -309,30 +322,51 @@ namespace Microsoft.Psi.PsiStudio.Windows
             => this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         /// <summary>
-        /// Model for one track entry.
+        /// Model for one stream entry.
         /// </summary>
-        public class TrackEntry
+        public class StreamEntry : INotifyPropertyChanged
         {
+            private bool isSelected;
+
             /// <summary>
-            /// Initializes a new instance of the <see cref="TrackEntry"/> class.
+            /// Initializes a new instance of the <see cref="StreamEntry"/> class.
             /// </summary>
-            /// <param name="trackName">Track name.</param>
+            /// <param name="streamName">Stream name.</param>
             /// <param name="annotations">Track annotations.</param>
-            public TrackEntry(string trackName, List<TaskAnnotation> annotations)
+            public StreamEntry(string streamName, List<TaskAnnotation> annotations)
             {
-                this.TrackName = trackName;
+                this.StreamName = streamName;
                 this.Annotations = annotations;
             }
 
+            /// <inheritdoc/>
+            public event PropertyChangedEventHandler PropertyChanged;
+
             /// <summary>
-            /// Gets track name.
+            /// Gets stream name.
             /// </summary>
-            public string TrackName { get; }
+            public string StreamName { get; }
 
             /// <summary>
             /// Gets annotations.
             /// </summary>
             public List<TaskAnnotation> Annotations { get; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether the stream is selected.
+            /// </summary>
+            public bool IsSelected
+            {
+                get => this.isSelected;
+                set
+                {
+                    if (this.isSelected != value)
+                    {
+                        this.isSelected = value;
+                        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.IsSelected)));
+                    }
+                }
+            }
         }
     }
 }

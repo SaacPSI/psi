@@ -119,8 +119,7 @@ namespace Microsoft.Psi.Visualization.Views.Visuals2D
             // Update the track highlight
             this.UpdateTrackHighlight();
 
-            // Go through the display data and create new items and tracks where
-            // necessary
+            // Go through the display data and create new items and tracks where necessary
             for (int i = 0; i < this.StreamVisualizationObject.DisplayData.Count; i++)
             {
                 if (i >= this.itemViews.Count)

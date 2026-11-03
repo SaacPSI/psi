@@ -30,9 +30,15 @@
             <GroupBox Grid.Column="0" Header="Task tracks" Margin="0,0,0,8">
                 <ListBox
                     Margin="8"
-                    DisplayMemberPath="TrackName"
-                    ItemsSource="{Binding Tracks}"
-                    SelectedItem="{Binding SelectedTrack, Mode=TwoWay}" />
+                    ItemsSource="{Binding Streams}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                                Content="{Binding StreamName}"
+                                IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </GroupBox>
 
             <GroupBox Grid.Column="2" Header="Track statistics" Margin="0,0,0,8">
